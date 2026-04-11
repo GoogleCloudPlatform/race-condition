@@ -1,0 +1,33 @@
+{
+  "surfaceUpdate": {
+    "surfaceId": "main",
+    "components": [
+      {
+        "id": "header",
+        "component": {
+          "Text": { "text": { "literalString": "Book Your Table" }, "usageHint": "h1" }
+        }
+      },
+      {
+        "id": "date-picker",
+        "component": {
+          "DateTimeInput": {
+            "label": { "literalString": "Select Date" },
+            "value": { "path": "/reservation/date" },
+            "enableDate": true
+          }
+        }
+      },
+      {
+        "id": "submit-text",
+        "component": { "Text": { "text": { "literalString": "Confirm Reservation" } } }
+      },
+      {
+        "id": "submit-btn",
+        "component": {
+          "Button": { "child": "submit-text", "action": { "name": "confirm_booking" } }
+        }
+      }
+    ]
+  }
+}

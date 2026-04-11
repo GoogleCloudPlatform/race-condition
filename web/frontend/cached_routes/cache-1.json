@@ -1,0 +1,512 @@
+{
+  "name": "Strip Classic",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "marker-type": "start",
+        "name": "Start Line"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.17046845096787, 36.09532071818043]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "marker-type": "finish",
+        "name": "Finish Line"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.172851, 36.086141]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": null,
+        "route_type": "marathon",
+        "distance_mi": 27.3736,
+        "certified": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.17046845096787, 36.09532071818043],
+          [-115.170491, 36.096715]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hacienda Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.170491, 36.096715],
+          [-115.170235, 36.097159],
+          [-115.169538, 36.097291],
+          [-115.164683, 36.097196],
+          [-115.164149, 36.097346],
+          [-115.163831, 36.097847],
+          [-115.163868, 36.10089]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tropicana Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.163868, 36.10089],
+          [-115.14982, 36.101028],
+          [-115.14699, 36.10113],
+          [-115.145844, 36.100868],
+          [-115.136931, 36.100955]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Maryland Parkway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.136931, 36.100955],
+          [-115.137395, 36.107757],
+          [-115.137874, 36.114576],
+          [-115.137393, 36.122173],
+          [-115.136902, 36.129775]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Desert Inn Road"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.136902, 36.129775],
+          [-115.118554, 36.129837]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eastern Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.118554, 36.129837],
+          [-115.118616, 36.136838],
+          [-115.118708, 36.140575],
+          [-115.118798, 36.144289]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sahara Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.118798, 36.144289],
+          [-115.1099, 36.144303]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "McLeod Drive"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.1099, 36.144303],
+          [-115.109873, 36.140678],
+          [-115.109846, 36.137049],
+          [-115.10976, 36.129783],
+          [-115.109777, 36.127532],
+          [-115.109352, 36.126241],
+          [-115.108723, 36.125296],
+          [-115.109533, 36.124821],
+          [-115.109773, 36.124417],
+          [-115.109786, 36.123719],
+          [-115.109783, 36.122286],
+          [-115.109845, 36.11857],
+          [-115.109863, 36.115016]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Flamingo Road"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.109863, 36.115016],
+          [-115.119201, 36.114688]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eastern Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.119201, 36.114688],
+          [-115.119163, 36.110865],
+          [-115.119076, 36.107297],
+          [-115.118965, 36.099979],
+          [-115.118882, 36.092932],
+          [-115.118814, 36.086189],
+          [-115.118759, 36.078803],
+          [-115.118705, 36.071597]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sunset Road"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.118705, 36.071597],
+          [-115.123791, 36.071635],
+          [-115.125484, 36.071659],
+          [-115.127784, 36.071695],
+          [-115.134528, 36.071755],
+          [-115.141217, 36.071622],
+          [-115.146103, 36.07154],
+          [-115.154589, 36.07133],
+          [-115.163478, 36.071233],
+          [-115.172406, 36.071123],
+          [-115.176859, 36.070889],
+          [-115.180738, 36.070927],
+          [-115.190008, 36.071746]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Valley View Boulevard"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.190008, 36.071746],
+          [-115.189992, 36.075347],
+          [-115.189916, 36.082665],
+          [-115.189874, 36.086314],
+          [-115.189855, 36.093616],
+          [-115.189846, 36.100905],
+          [-115.189886, 36.105799],
+          [-115.189493, 36.107006],
+          [-115.188039, 36.108626],
+          [-115.188956, 36.109049],
+          [-115.189729, 36.10997],
+          [-115.189991, 36.110807],
+          [-115.190101, 36.115577],
+          [-115.190156, 36.122758],
+          [-115.190211, 36.12652],
+          [-115.190248, 36.130134],
+          [-115.190538, 36.137336],
+          [-115.190826, 36.144416]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sahara Avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.190826, 36.144416],
+          [-115.185501, 36.144355],
+          [-115.181971, 36.144355],
+          [-115.177591, 36.144306],
+          [-115.173165, 36.144276],
+          [-115.171172, 36.144215],
+          [-115.167619, 36.144059],
+          [-115.164819, 36.14396]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sammy Davis Junior Drive"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.164819, 36.14396],
+          [-115.169199, 36.137255],
+          [-115.173085, 36.131588],
+          [-115.174565, 36.129385],
+          [-115.17672, 36.125953]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Spring Mountain Road"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.17672, 36.125953],
+          [-115.173163, 36.125508],
+          [-115.169311, 36.125471]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Las Vegas Boulevard"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-115.169311, 36.125471],
+          [-115.171965, 36.12121],
+          [-115.172601, 36.119587],
+          [-115.17284, 36.11849],
+          [-115.172869, 36.114682],
+          [-115.172975, 36.108764],
+          [-115.172955, 36.100858],
+          [-115.172932, 36.097313],
+          [-115.172908, 36.093604],
+          [-115.172851, 36.086141]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.14346113151896, 36.10089125923458]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 1.864
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.13736385378316, 36.12262426179312]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 3.728
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.1185982582322, 36.1348346110251]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 5.592
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.1098095205472, 36.13396691041878]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 7.456
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.11910826514531, 36.11469125733908]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 9.32
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.1188301164619, 36.08778713680264]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 11.184
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.13204974294753, 36.07173295144971]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 13.048
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.16541805564744, 36.07120909698463]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 14.912
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.18995619410167, 36.07879473110538]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 16.776
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.18988577944118, 36.10577201462829]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 18.64
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.19031013922796, 36.13167719558545]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 20.504
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.17320296779826, 36.14427625735064]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 22.368
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.17660037262988, 36.126143515607545]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 24.232
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.17296631711869, 36.105331657021566]
+      },
+      "properties": {
+        "type": "water_station",
+        "mi": 26.096
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.13314910060863, 36.071742732211824]
+      },
+      "properties": {
+        "type": "medical_tent",
+        "location": "Halfway"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.172851, 36.086141]
+      },
+      "properties": {
+        "type": "medical_tent",
+        "location": "Finish Line"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.119201, 36.114688]
+      },
+      "properties": {
+        "type": "cheer_zone",
+        "location": "Flamingo Crossing"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.180738, 36.070927]
+      },
+      "properties": {
+        "type": "cheer_zone",
+        "location": "Sunset West"
+      }
+    }
+  ]
+}

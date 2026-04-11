@@ -1,0 +1,479 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use '../../../../../mixins' as *;
+
+:host {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family:
+    'JetBrains Mono',
+    'DM Mono',
+    'Fira Mono',
+    monospace;
+
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  padding: container-scaled-cqw(8);
+  gap: container-scaled-cqw(16);
+  pointer-events: all;
+
+  .agent-communication {
+    @include Card;
+    background: var(--neutral-black-20, rgba(0, 0, 0, 0.20));
+
+    padding: container-scaled-cqw(24);
+    margin-inline: container-scaled-cqw(24);
+
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &[hidden] {
+      display: none;
+    }
+
+    .agent-wrapper {
+      position: relative;
+
+      .agent {
+        z-index: 1;
+
+        border-radius: container-scaled-cqw(32);
+        border: container-scaled-cqw(2.5) solid #192024;
+        background: rgba(0, 0, 0, 0.01);
+        backdrop-filter: blur(8px);
+
+        color: var(--neutral-white-60, rgba(255, 255, 255, 0.60));
+        font-family: "Google Sans Mono";
+        font-size: container-scaled-cqw(18);
+        font-style: normal;
+        font-weight: 500;
+        line-height: 85%;
+        text-transform: uppercase;
+
+        padding: container-scaled-cqw(8) container-scaled-cqw(16);
+      }
+
+      .dot {
+
+        &:first-of-type {
+          right: auto;
+          left: 0;
+          transform: translate(-50%, -50%);
+        }
+
+        position: absolute;
+        background-color: #192025;
+        width: container-scaled-cqw(15);
+        height: container-scaled-cqw(15);
+        border-radius: 50%;
+        right: 0;
+        top: 50%;
+        transform: translate(50%, -50%);
+        z-index: -1;
+      }
+    }
+
+    .communication {
+      height: container-scaled-cqw(8);
+      margin-left: container-scaled-cqw(7);
+      width: calc(100% - container-scaled-cqw(30));
+      background-color: #192025;
+      position: relative;
+      z-index: -2;
+
+      .indicator {
+        position: relative;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.8) 50%,
+            rgba(255, 255, 255, 0) 100%);
+        filter: blur(2px);
+        animation: bounce-indicator 0.9s ease-in-out infinite alternate;
+
+        @keyframes bounce-indicator {
+          0% {
+            left: -60%;
+            right: unset;
+          }
+
+          100% {
+            left: 110%;
+            right: unset;
+          }
+        }
+      }
+    }
+
+    >.agent-wrapper:first-child+.communication {
+
+      .indicator {
+        animation-delay: -0.45s;
+      }
+    }
+
+  }
+}
+
+// ── Scroll container ─────────────────────────────────────────────────────────
+
+.log-scroll {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: container-scaled-cqw(6) container-scaled-cqw(24);
+  display: flex;
+  flex-direction: column;
+  gap: container-scaled-cqw(2);
+
+  &::-webkit-scrollbar {
+    width: container-scaled-cqw(4);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: container-scaled-cqw(2);
+  }
+}
+
+
+// ── Log entry ────────────────────────────────────────────────────────────────
+
+.log-entry {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  animation: fadeInEntry 0.12s ease-out;
+  border-radius: container-scaled-cqw(32);
+  border: container-scaled-cqw(2.5) solid var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+  overflow: hidden;
+
+  >.indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: container-scaled-cqw(7);
+    height: 100%;
+
+    &.text {
+      background: #8BFE82;
+    }
+
+    &.tool {
+      background: #1E88FD;
+    }
+
+    &.run {
+      background: #A18AFF;
+    }
+
+    &.error {
+      background: #f85149;
+    }
+  }
+
+  &.is-error {
+
+
+    .log-type-wrapper {
+      .log-type {
+        background: rgba(255, 75, 100, 0.20);
+        color: #FF4B64;
+
+      }
+    }
+  }
+}
+
+@keyframes fadeInEntry {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.log-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  gap: container-scaled-cqw(16);
+  padding: 0 container-scaled-cqw(48);
+
+
+  .label {
+    color: var(--neutral-white-40, rgba(255, 255, 255, 0.40));
+    text-align: center;
+    font-family: "Google Sans Mono";
+    font-size: container-scaled-cqw(14);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 85%;
+    text-transform: uppercase;
+
+    &.time {
+      min-width: container-scaled-cqw(75);
+    }
+
+    &.agent {
+      min-width: container-scaled-cqw(90);
+    }
+
+    &.type {
+      width: container-scaled-cqw(95);
+    }
+
+    &.message {
+      min-width: 0;
+      width: 44%;
+    }
+  }
+}
+
+// ── Log row (grid) ───────────────────────────────────────────────────────────
+
+.log-row {
+  position: relative;
+  cursor: pointer;
+
+  padding: container-scaled-cqw(8) container-scaled-cqw(24);
+  padding-left: container-scaled-cqw(18);
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  gap: container-scaled-cqw(16);
+
+
+
+  --_bg-color: red;
+  --_text-color: blue;
+  --_border-color: purple;
+
+  &.text {
+    --_bg-color: rgba(139, 254, 130, 0.10);
+    --_text-color: #8BFE82;
+    --_border-color: rgba(139, 254, 130, 0.10)
+  }
+
+  &.tool {
+
+    --_bg-color: rgba(30, 136, 253, 0.20);
+    --_text-color: #1E88FD;
+    --_border-color: rgba(30, 136, 253, 0.10);
+  }
+
+  &.run {
+
+    --_bg-color: rgba(86, 47, 249, 0.30);
+    --_text-color: #A18AFF;
+    --_border-color: rgba(138, 110, 255, 0.10);
+  }
+
+
+  .log-time {
+    color: rgba(255, 255, 255, 0.50);
+
+    font-family: "Google Sans Mono";
+    font-size: container-scaled-cqw(12);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 85%;
+    white-space: nowrap;
+    padding-right: container-scaled-cqw(30);
+    min-width: container-scaled-cqw(90);
+    text-align: right;
+  }
+
+
+
+  .log-agent {
+    color: var(--neutral-white-60, rgba(255, 255, 255, 0.60));
+    font-family: "Google Sans Mono";
+    font-size: container-scaled-cqw(14);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 85%;
+    text-transform: uppercase;
+    min-width: container-scaled-cqw(85);
+  }
+
+  // ── Type badge ───────────────────────────────────────────────────────────────
+
+  .log-type-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: container-scaled-cqw(80);
+    height: container-scaled-cqw(27);
+  }
+
+  .log-type {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: container-scaled-cqw(18);
+
+    background: var(--_bg-color);
+    color: var(--_text-color);
+    border: 1.5 solid var(--_border-color);
+
+    font-family: "Google Sans Mono";
+    font-size: container-scaled-cqw(12);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%;
+  }
+
+  // ── Summary ──────────────────────────────────────────────────────────────────
+
+  .log-summary {
+    font-size: container-scaled-cqw(10);
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    width: 44%;
+
+    strong {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 600;
+    }
+  }
+}
+
+// ── Lifecycle badges (inside summary) ────────────────────────────────────────
+
+:host ::ng-deep .badge {
+  display: inline-block;
+  padding: container-scaled-cqw(1) container-scaled-cqw(5);
+  border-radius: container-scaled-cqw(3);
+  font-size: container-scaled-cqw(8);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: container-scaled-cqw(4);
+  vertical-align: middle;
+}
+
+:host ::ng-deep .badge-start {
+  background: rgba(63, 185, 80, 0.25);
+  color: #3fb950;
+}
+
+:host ::ng-deep .badge-end {
+  background: rgba(248, 81, 73, 0.2);
+  color: #f85149;
+}
+
+// ── Expanded JSON detail ──────────────────────────────────────────────────────
+
+.log-details-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+
+  &.open {
+    grid-template-rows: 1fr;
+  }
+}
+
+.log-details {
+  overflow: hidden;
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+
+  pre {
+    margin: 0;
+    padding: container-scaled-cqw(8) container-scaled-cqw(6) container-scaled-cqw(8) container-scaled-cqw(18);
+    font-size: container-scaled-cqw(12);
+    color: rgba(255, 255, 255, 0.45);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: container-scaled-cqw(200);
+    overflow-y: auto;
+    line-height: 1.5;
+    border-top: container-scaled-cqw(1) solid rgba(255, 255, 255, 0.06);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for Firefox */
+    scrollbar-width: none;
+
+    /* Hide scrollbar for IE and Edge */
+    -ms-overflow-style: none;
+
+  }
+}
+
+// ── Scroll-to-top button ───────────────────────────────────────────────────
+
+.btn-scroll-top {
+  position: absolute;
+  bottom: container-scaled-cqw(12);
+  left: 50%;
+  transform: translateX(-50%);
+  width: container-scaled-cqw(28);
+  height: container-scaled-cqw(28);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: container-scaled-cqw(1) solid rgba(255, 255, 255, 0.15);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+}

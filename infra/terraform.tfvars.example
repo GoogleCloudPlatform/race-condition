@@ -1,0 +1,39 @@
+# =============================================================================
+# OSS Deployment Configuration
+# =============================================================================
+# Copy this file to terraform.tfvars and fill in your values.
+#
+# Required:
+#   project_id          Your GCP project ID
+#
+# Optional:
+#   region              GCP region (default: us-central1)
+#   developers          List of developer principals for IAM access
+#   db_initial_password Initial database password
+#
+# Feature toggles (all default to false):
+#   enable_alloydb          Use AlloyDB instead of Cloud SQL
+#   enable_gke              Deploy GKE cluster for GPU runner workloads
+#   enable_runner_cloudrun  Deploy LLM-powered runner on Cloud Run
+#   enable_maps_api_key     Create Maps/Places/Weather API key
+#   enable_monitoring       Deploy monitoring alerts
+# =============================================================================
+
+project_id = "your-gcp-project-id"
+region     = "us-central1"
+
+# Add your identity for IAM access to databases and APIs
+developers = [
+  # "user:you@example.com",
+]
+
+# Uncomment to enable optional features:
+# enable_alloydb         = true
+# enable_gke             = true
+# enable_runner_cloudrun = true
+# enable_maps_api_key    = true
+# enable_monitoring      = true
+# alert_email            = "you@example.com"
+
+# Database password (change this!)
+# db_initial_password = "YourSecurePassword123!"

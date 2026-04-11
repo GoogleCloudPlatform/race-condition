@@ -1,0 +1,87 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Check license headers
+        run: |
+          go install github.com/google/addlicense@latest
+          addlicense -check -y 2026 -ignore 'gen_proto/**' -ignore 'web/**/node_modules/**' -ignore 'web/**/dist/**' .
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Build Go
+        run: go build ./...
+
+      - name: Test Go
+        run: go test ./... -short -count=1
+
+      - name: Build Frontend
+        working-directory: web/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Admin Dashboard
+        working-directory: web/admin-dash
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Tester UI
+        working-directory: web/tester
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install Python deps
+        run: uv sync --frozen
+
+      - name: Lint Python
+        run: uv run ruff check agents/
+
+      - name: Test Python
+        env:
+          GOOGLE_CLOUD_PROJECT: test-project
+          GOOGLE_CLOUD_LOCATION: global
+        run: uv run pytest agents/ -x -q -m "not slow"
