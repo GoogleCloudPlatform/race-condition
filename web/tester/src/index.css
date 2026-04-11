@@ -1,0 +1,201 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+html, body {
+  @apply h-screen overflow-hidden;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased font-inter;
+  background-image:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(99, 102, 241, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(168, 85, 247, 0.05) 0%,
+      transparent 50%
+    );
+}
+
+.card {
+  @apply bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl;
+}
+
+.input-modern {
+  @apply w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 
+         focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-600;
+}
+
+.btn-primary {
+  @apply bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all 
+         active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-900/20;
+}
+
+.btn-secondary {
+  @apply bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg border border-slate-700 transition-all 
+         active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full hover:bg-slate-700 transition-colors;
+}
+
+@keyframes pulse-emerald {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.glass-card {
+  @apply bg-slate-900/60 backdrop-blur-xl border border-slate-800 shadow-2xl;
+}
+
+.dense-list-item {
+  @apply py-1.5 px-3 hover:bg-slate-800/40 transition-colors border-b border-slate-800/50 last:border-0;
+}
+
+.grid-bg {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(30, 41, 59, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 41, 59, 0.2) 1px, transparent 1px);
+}
+
+@keyframes pulse-emerald {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.dot-live {
+  @apply w-2 h-2 rounded-full bg-emerald-500;
+  animation: pulse-emerald 2s infinite ease-in-out;
+}
+
+/* Markdown Rich Text Styling */
+.markdown-content h1 {
+  @apply text-lg font-black my-4 text-indigo-300 border-b border-indigo-500/20 pb-1;
+}
+.markdown-content h2 {
+  @apply text-base font-black my-3 text-indigo-400;
+}
+.markdown-content h3 {
+  @apply text-sm font-bold my-2 text-slate-100 uppercase tracking-wider;
+}
+.markdown-content p {
+  @apply mb-3 last:mb-0 leading-relaxed;
+}
+.markdown-content ul {
+  @apply list-disc ml-5 mb-3 space-y-1;
+}
+.markdown-content ol {
+  @apply list-decimal ml-5 mb-3 space-y-1;
+}
+.markdown-content li {
+  @apply text-slate-300;
+}
+.markdown-content strong {
+  @apply text-indigo-300 font-extrabold;
+}
+.markdown-content em {
+  @apply italic text-slate-400;
+}
+.markdown-content code {
+  @apply bg-slate-950/60 px-1.5 py-0.5 rounded font-mono text-[11px] text-pink-400 border border-slate-800/50;
+}
+.markdown-content pre {
+  @apply bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 my-4 shadow-inner;
+  overflow: visible !important;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.markdown-content pre code {
+  @apply bg-transparent border-none p-0 text-slate-200 text-[10px];
+}
+.markdown-content blockquote {
+  @apply border-l-4 border-slate-700 pl-4 italic text-slate-500 my-4;
+}
+.markdown-content a {
+  @apply text-indigo-400 underline hover:text-indigo-300 transition-colors;
+}
+.markdown-content hr {
+  @apply border-slate-800 my-6;
+}
+
+/* Compact Markdown for Line-based Logs */
+.prose-compact h1 {
+  @apply text-xs font-black my-1 text-indigo-300;
+}
+.prose-compact h2 {
+  @apply text-[11px] font-black my-1 text-indigo-400;
+}
+.prose-compact h3 {
+  @apply text-[10px] font-bold my-0.5 text-slate-100 uppercase;
+}
+.prose-compact p {
+  @apply mb-1 last:mb-0 leading-normal;
+}
+.prose-compact ul {
+  @apply list-disc ml-4 mb-1 space-y-0.5;
+}
+.prose-compact ol {
+  @apply list-decimal ml-4 mb-1 space-y-0.5;
+}
+.prose-compact li {
+  @apply text-slate-300 text-[11px];
+}
+.prose-compact blockquote {
+  @apply border-l-2 border-slate-700 pl-2 italic text-slate-500 my-1;
+}
+.prose-compact pre {
+  @apply bg-slate-950/80 p-2 rounded-lg border border-slate-800/80 my-2;
+  overflow: visible !important;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.prose-compact pre code {
+  @apply text-[9px];
+}
