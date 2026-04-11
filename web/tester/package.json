@@ -12,7 +12,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.3.2",
     "lodash-es": "^4.17.23",
     "luxon": "^3.7.2",
     "marked": "^17.0.3",
