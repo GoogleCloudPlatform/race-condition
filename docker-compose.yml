@@ -1,0 +1,56 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+services:
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "9103:8085"
+    environment:
+      - PUBSUB_PROJECT_ID=test-project
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxclients 2048 --tcp-backlog 128 --save "" --stop-writes-on-bgsave-error no
+    ulimits:
+      nofile:
+        soft: 4096
+        hard: 4096
+    ports:
+      - "9102:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: postgres
+    ports:
+      - "9113:5432"
+    volumes:
+      - alloydb-local-data:/var/lib/postgresql/data
+      - ./agents/planner_with_memory/alloydb/schema_local.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./agents/planner_with_memory/alloydb/seed_local.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  alloydb-local-data:

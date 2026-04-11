@@ -1,0 +1,57 @@
+<!doctype html>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Race Condition</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="/config.js"></script>
+  </head>
+  <body>
+    <div class="glass-container">
+      <header>
+        <div class="logo">
+          <span class="pulse-icon"></span>
+          <h1>Simulation Admin</h1>
+        </div>
+        <div class="status-summary">
+          <span id="global-status" class="status-badge status-unknown"
+            >System Pulse: Scanning...</span
+          >
+        </div>
+      </header>
+
+      <main id="categories-container">
+        <!-- Categories and Service Cards will be injected here -->
+      </main>
+
+      <footer>
+        <p>&copy; 2026 Google N26 DevKey Simulation Team</p>
+        <div id="last-update">Last Check: --:--:--</div>
+      </footer>
+    </div>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
