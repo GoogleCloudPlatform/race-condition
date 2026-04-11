@@ -1,0 +1,79 @@
+# General
+.DS_Store
+__MACOSX/
+.AppleDouble
+.LSOverride
+Icon[]
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Go
+bin/
+dist/
+.allowed_signers
+
+# Environment Variables
+.env
+.env.local
+.env.recovered
+
+# Worktree Support
+.worktrees/
+.port-slot
+docker-compose.override.yml
+
+# Simulation Artifacts
+*.log
+.adk/
+/frontend
+/gateway
+/stress
+.!*
+gen_proto/**/*_pb2.py
+gen_proto/**/*_pb2.pyi
+gen_proto/**/*.pb.go
+
+# Coverage Artifacts
+.coverage
+coverage.out
+coverage.html
+coverage.xml
+htmlcov/
+
+agents/catalog.json
+
+# Worktrees
+.worktrees
+
+# AlloyDB Auth Proxy binary (installed via scripts/core/install_alloydb_proxy.sh)
+alloydb-auth-proxy
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Local IDE/agent scratch
+.vscode/
+.gemini/

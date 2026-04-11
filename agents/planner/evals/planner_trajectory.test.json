@@ -1,0 +1,74 @@
+{
+  "eval_set_id": "planner_trajectory",
+  "name": "Planner Tool Trajectory Evaluation",
+  "description": "Verifies the planner agent calls tools in the expected order during marathon planning.",
+  "eval_cases": [
+    {
+      "evalId": "standard_marathon_planning",
+      "conversation": [
+        {
+          "invocationId": "turn_1",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Plan a marathon in Las Vegas for 10,000 runners. Theme: Strip Spectacular. Budget: $500,000. Date: March 2027."
+              }
+            ],
+            "role": "user"
+          },
+          "intermediateData": {
+            "toolUses": [
+              {
+                "name": "plan_marathon_route",
+                "args": {}
+              },
+              {
+                "name": "report_marathon_route",
+                "args": {}
+              }
+            ],
+            "toolResponses": [],
+            "intermediateResponses": []
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "plan_without_execution",
+      "conversation": [
+        {
+          "invocationId": "turn_1",
+          "userContent": {
+            "parts": [
+              {
+                "text": "Design a marathon course through downtown Las Vegas with 5,000 participants. Just plan it, don't run any simulation."
+              }
+            ],
+            "role": "user"
+          },
+          "intermediateData": {
+            "toolUses": [
+              {
+                "name": "plan_marathon_route",
+                "args": {}
+              },
+              {
+                "name": "report_marathon_route",
+                "args": {}
+              }
+            ],
+            "toolResponses": [],
+            "intermediateResponses": []
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    }
+  ],
+  "creation_timestamp": 0.0
+}
