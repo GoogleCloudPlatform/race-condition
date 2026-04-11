@@ -1,0 +1,226 @@
+{
+    "type": "FeatureCollection",
+    "features": [    
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Mandalay Bay"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.174838,
+                    36.091829
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Luxor"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.175838,
+                    36.09547
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Excalibur"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.175509,
+                    36.09892
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "New York"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.174421,
+                    36.102083
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "MGM Grand"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.171218,
+                    36.102002
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Belagio"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.174661,
+                    36.113193
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Caesars Palace"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.175861,
+                    36.116418
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Flamingo"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.171571,
+                    36.116171
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "High Roller"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.168205,
+                    36.117612
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Treasure Island"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.171558,
+                    36.124762
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Sphere"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.162109,
+                    36.121283
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Eiffel Tower"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.17218,
+                    36.112484
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "The STRAT"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.15643,
+                    36.147315
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Las Vegas Sign"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.17284,
+                    36.082057
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Michelob Ultra Arena"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.179042,
+                    36.090681
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Allegiant Stadium"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.183371,
+                    36.090766
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "The Venetian"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -115.169316,
+                    36.121718
+                ]
+            }
+        }
+    ]
+}

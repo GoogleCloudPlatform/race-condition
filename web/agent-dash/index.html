@@ -1,0 +1,1190 @@
+<!doctype html>
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent Debug Console | N26 Race Simulation</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --bg-color: #0d1117;
+        --surface-color: rgba(22, 27, 34, 0.8);
+        --border-color: rgba(48, 54, 61, 0.5);
+        --accent-color: #58a6ff;
+        --text-color: #c9d1d9;
+        --text-dim: #8b949e;
+        --runner-color: #238636;
+        --orch-color: #f85149;
+        --event-color: #d29922;
+        --tool-color: #f78166;
+        --model-color: #d2a8ff;
+        --error-color: #f85149;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: "Inter", sans-serif;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      header {
+        padding: 0.75rem 1.5rem;
+        background: var(--surface-color);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+      }
+
+      .status {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+      }
+
+      .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--error-color);
+        box-shadow: 0 0 8px var(--error-color);
+      }
+
+      .status-indicator.online {
+        background: #3fb950;
+        box-shadow: 0 0 8px #3fb950;
+      }
+
+      main {
+        flex: 1;
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 1rem;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        backdrop-filter: blur(5px);
+      }
+
+      .card h2 {
+        margin-top: 0;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin-bottom: 0.75rem;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat-val {
+        font-size: 1.1rem;
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .stat-label {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+      }
+
+      .feed-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .feed-header {
+        display: grid;
+        grid-template-columns: 105px 75px 95px 120px 130px 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-left: 3px solid transparent;
+        background: rgba(0, 0, 0, 0.4);
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        letter-spacing: 0.5px;
+      }
+
+      .feed {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        overflow-y: auto;
+        padding: 0.75rem;
+      }
+
+      .feed::-webkit-scrollbar {
+        width: 6px;
+      }
+      .feed::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+      }
+
+      .log-entry {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        position: relative;
+        border-left: 3px solid transparent; /* Default */
+      }
+
+      .log-entry.is-start {
+        border-right: 4px solid #3fb950 !important;
+      }
+
+      .log-entry.is-end {
+        border-right: 4px solid #f85149 !important;
+      }
+
+      .log-entry.is-error {
+        background: rgba(248, 81, 73, 0.1);
+        border: 1px solid rgba(248, 81, 73, 0.5);
+      }
+
+      .log-entry.is-tool {
+        background: rgba(43, 116, 137, 0.05);
+      }
+
+      .log-entry.is-model {
+        background: rgba(137, 87, 229, 0.05);
+      }
+
+      .lifecycle-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.6rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      .badge-start {
+        background: #3fb950;
+        color: white;
+      }
+      .badge-end {
+        background: #f85149;
+        color: white;
+      }
+
+      .log-header {
+        display: grid;
+        grid-template-columns: 105px 75px 95px 120px 130px 1fr;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .log-ts {
+        color: var(--text-dim);
+        font-size: 0.7rem;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .log-session {
+        color: var(--text-dim);
+        font-size: 0.65rem;
+        font-family: "JetBrains Mono", monospace;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .log-agent {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .log-type {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .type-event {
+        color: var(--event-color);
+        background: rgba(210, 153, 34, 0.1);
+      }
+      .type-tool {
+        color: var(--tool-color);
+        background: rgba(247, 129, 102, 0.1);
+      }
+      .type-model {
+        color: var(--model-color);
+        background: rgba(210, 168, 255, 0.1);
+      }
+      .type-lifecycle {
+        color: var(--accent-color);
+        background: rgba(88, 166, 255, 0.1);
+      }
+      .type-error {
+        color: var(--error-color);
+        background: rgba(248, 81, 73, 0.15);
+      }
+
+      .log-summary {
+        color: var(--text-color);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .clickable {
+        cursor: pointer;
+      }
+      .clickable:hover {
+        opacity: 0.8;
+        text-decoration: underline;
+      }
+
+      .filters-bar {
+        display: none;
+        padding: 0.5rem 1rem;
+        background: var(--surface-color);
+        border-bottom: 1px solid var(--border-color);
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+      }
+      .filters-bar.active {
+        display: flex;
+      }
+      .filter-pill {
+        display: flex;
+        align-items: center;
+        background: rgba(88, 166, 255, 0.2);
+        color: var(--accent-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: 1px solid rgba(88, 166, 255, 0.4);
+      }
+      .filter-pill .remove {
+        cursor: pointer;
+        margin-left: 0.5rem;
+        font-weight: bold;
+        opacity: 0.7;
+      }
+      .filter-pill .remove:hover {
+        opacity: 1;
+      }
+
+      .chart-container {
+        margin-top: 1rem;
+        height: 180px;
+        width: 100%;
+      }
+
+      .log-details {
+        margin-top: 0.3rem;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+        font-size: 0.7rem;
+        display: none;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+      }
+
+      .log-entry:hover {
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+      }
+
+      .log-entry.expanded .log-details {
+        display: block;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      #agent-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      .agent-pill {
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.7rem;
+        border: 1px solid var(--border-color);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>AGENT DEBUG :: N26.SIM</h1>
+      <div class="status">
+        <div id="connection-indicator" class="status-indicator"></div>
+        <span id="connection-text">Connecting...</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="sidebar">
+        <div class="card">
+          <h2>Simulation Metrics</h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">Total Sessions</div>
+              <div id="stat-sessions" class="stat-val">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Total Turns</div>
+              <div id="stat-turns" class="stat-val">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Avg Latency</div>
+              <div id="stat-latency" class="stat-val">0ms</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Events</div>
+              <div id="stat-events" class="stat-val">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Total Errors</div>
+              <div id="stat-errors" class="stat-val">0</div>
+            </div>
+            <div id="dropped-row" class="stat-item" style="display: none">
+              <div class="stat-label">Dropped Logs</div>
+              <div id="stat-dropped" class="stat-val" style="color: var(--event-color)">0</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">REAL-TIME METRICS</div>
+          <div class="chart-container">
+            <canvas id="metricsChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">TOKEN METRICS API</div>
+          <div id="token-metrics-list">
+            <div class="stat-label">Awaiting model inference...</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">ACTIVE AGENTS</div>
+          <div id="agent-list">
+            <div class="stat-label">None detected</div>
+          </div>
+        </div>
+      </div>
+      <div class="card feed-container">
+        <div id="filters" class="filters-bar">
+          <span
+            style="
+              color: var(--text-dim);
+              font-size: 0.85rem;
+              margin-right: 0.5rem;
+              font-weight: 600;
+            "
+            >ACTIVE FILTERS:</span
+          >
+          <div
+            id="active-filters-list"
+            style="display: flex; gap: 0.5rem; flex-wrap: wrap"
+          ></div>
+        </div>
+        <div class="feed-header">
+          <div>Time</div>
+          <div>Seq</div>
+          <div>Session</div>
+          <div>Agent</div>
+          <div>Type</div>
+          <div>Summary</div>
+        </div>
+        <div class="feed" id="log-feed">
+          <div
+            class="log-entry"
+            style="
+              border: none;
+              background: transparent;
+              color: var(--text-dim);
+              text-align: center;
+              justify-content: center;
+              height: 100%;
+            "
+          >
+            Waiting for simulation stream...
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const feed = document.getElementById("log-feed");
+      const indicator = document.getElementById("connection-indicator");
+      const connText = document.getElementById("connection-text");
+
+      let turnCount = 0;
+      let eventCount = 0;
+      let totalErrors = 0;
+      let totalLatency = 0;
+      let completedRuns = 0;
+      let agents = new Set();
+      let allSessions = new Set();
+      let sessionToAgent = {};
+      let seenLogs = new Set();
+      const MAX_FEED_ENTRIES = 1000;
+      const EVICTION_BATCH = 200;
+      let droppedLogCount = 0;
+      let activeModels = {}; // Tracks the model names currently in use by a session
+      let tokenMetrics = {}; // Aggregates total token counts per model
+      let lastLogsBySession = {}; // Tracks last log entry per session to merge streaming chunks
+      const activeStarts = {}; // Tracks timestamps for latency calculation
+      let logQueue = [];
+      let logRafId = null;
+
+      // Charting & Buckets
+      const bucketSizeMs = 1000; // 1 second buckets
+      let currentBucketTime =
+        Math.floor(Date.now() / bucketSizeMs) * bucketSizeMs;
+      let metricsData = [];
+      let currentBucket = {
+        time: currentBucketTime,
+        events: 0,
+        errors: 0,
+        latencies: [],
+      };
+
+      // Click-to-Filter State
+      const activeFilters = {
+        session: null,
+        agent: null,
+        type: null,
+      };
+
+      // Simple string hashing to HSL color
+      function hashToHsl(str, saturation, lightness) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      }
+
+      const wsProto = location.protocol === "https:" ? "wss:" : "ws:";
+      const ws = new WebSocket(`${wsProto}//${location.host}/ws`);
+
+      ws.onopen = () => {
+        indicator.classList.add("online");
+        connText.innerText = "Online - Streaming Logs";
+        feed.innerHTML = "";
+      };
+
+      ws.onclose = () => {
+        indicator.classList.remove("online");
+        connText.innerText = "Disconnected";
+      };
+
+      ws.onmessage = (event) => {
+        const log = JSON.parse(event.data);
+        addLog(log);
+        updateStats(log);
+      };
+
+      function addLog(log) {
+        // Deduplication
+        const logKey = `${log.session_id || "sys"}:${log.type}:${log.seq || 0}:${log.timestamp}`;
+        if (seenLogs.has(logKey)) return;
+        seenLogs.add(logKey);
+        // Keep seenLogs size manageable
+        if (seenLogs.size > 5000) {
+          const first = seenLogs.values().next().value;
+          seenLogs.delete(first);
+        }
+
+        if (log.session_id && log.agent && log.session_id !== "system") {
+          sessionToAgent[log.session_id] = log.agent;
+        }
+
+        eventCount++;
+
+        const sessionKey = log.session_id || "system";
+        const sessionColor = hashToHsl(sessionKey, 80, 50);
+        const agentColor = hashToHsl(log.agent || "system", 70, 65);
+
+        let entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.setAttribute("data-timestamp", log.timestamp);
+        entry.setAttribute("data-session", log.session_id || "system");
+        entry.setAttribute("data-agent", log.agent || "system");
+        entry.setAttribute("data-type", log.type);
+        entry.setAttribute("data-seq", log.seq || 0);
+        entry.style.borderLeft = `3px solid ${sessionColor}`; // Session visual grouping
+
+        logQueue.push({ element: entry, timestamp: log.timestamp });
+        if (logRafId === null) {
+          logRafId = requestAnimationFrame(flushLogQueue);
+        }
+
+        // Apply visual classes
+        entry.classList.remove(
+          "is-start",
+          "is-end",
+          "is-tool",
+          "is-model",
+          "is-error",
+        );
+
+        const isStart =
+          log.type.endsWith("_start") ||
+          log.type === "run_start" ||
+          log.type === "model_start";
+        const isEnd = log.type.endsWith("_end") || log.type === "run_end";
+        const isError = log.type.includes("error");
+
+        if (isStart) entry.classList.add("is-start");
+        if (isEnd) entry.classList.add("is-end");
+        if (isError) entry.classList.add("is-error");
+        if (log.type.includes("tool")) entry.classList.add("is-tool");
+        if (log.type.includes("model")) entry.classList.add("is-model");
+
+        const typeClass = isError
+          ? "type-error"
+          : log.type.includes("tool")
+            ? "type-tool"
+            : log.type.includes("model")
+              ? "type-model"
+              : log.type === "event"
+                ? "type-event"
+                : "type-lifecycle";
+
+        // Latency Tracking
+        let latencyStr = "";
+        let latencyMs = 0;
+
+        if (log.type === "run_start")
+          activeStarts[sessionKey + "_run"] = log.timestamp;
+        if (log.type === "model_start")
+          activeStarts[sessionKey + "_model"] = log.timestamp;
+        if (log.type === "tool_start")
+          activeStarts[sessionKey + "_tool_" + log.tool] = log.timestamp;
+
+        let startTs = activeStarts[sessionKey + "_run"];
+        if (log.type === "model_end" || log.type === "model_error")
+          startTs = activeStarts[sessionKey + "_model"];
+        if (log.type === "tool_end" || log.type === "tool_error")
+          startTs = activeStarts[sessionKey + "_tool_" + log.tool];
+
+        if (startTs && log.timestamp >= startTs) {
+          latencyMs = (log.timestamp - startTs) * 1000;
+          if (latencyMs < 1000)
+            latencyStr = `<span style="color:var(--text-dim);font-size:0.85rem"> (+${latencyMs.toFixed(0)}ms)</span>`;
+          else
+            latencyStr = `<span style="color:var(--text-dim);font-size:0.85rem"> (+${(latencyMs / 1000).toFixed(2)}s)</span>`;
+
+          if (log.type === "run_end") {
+            totalLatency += latencyMs;
+            completedRuns++;
+            currentBucket.latencies.push(latencyMs); // Push to current bucket
+          }
+        }
+
+        const displayTimestamp = parseFloat(
+          entry.getAttribute("data-timestamp"),
+        );
+        const tsStr = formatTime(displayTimestamp);
+        const sessionShort = log.session_id
+          ? log.session_id.substring(0, 8)
+          : "system";
+
+        const summaryHtml = getSummary(log, latencyStr);
+
+        // Update the content of the entry
+        entry.innerHTML = `
+            <div class="log-header">
+                <div class="log-ts" title="${log.timestamp}">${tsStr}</div>
+                <div class="log-seq" style="color:var(--text-dim);font-size:0.75rem;font-family:monospace;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="#${log.seq || 0}">#${log.seq || 0}</div>
+                <div class="log-session clickable" title="Filter by Session" onclick="setFilter('session', '${log.session_id || "system"}')">${sessionShort}</div>
+                <div class="log-agent clickable" style="color: ${agentColor}" title="Filter by Agent" onclick="setFilter('agent', '${log.agent || "system"}')">${log.agent || "system"}</div>
+                <div class="log-type ${typeClass} clickable" title="Filter by Type" onclick="setFilter('type', '${log.type}')">${log.type}</div>
+                <div class="log-summary">${summaryHtml}</div>
+            </div>
+            <div class="log-details">
+                <pre>${JSON.stringify(log, null, 2)}</pre>
+            </div>
+        `;
+
+        applyFiltersToEntry(entry);
+
+        entry.onclick = () => entry.classList.toggle("expanded");
+      }
+
+      function flushLogQueue() {
+        logRafId = null;
+        if (!feed) { logQueue = []; return; }
+        // TODO: Each insertChronologically call triggers a reflow because it
+        // does positional DOM insertion (insertBefore/appendChild). A future
+        // optimization could pre-sort the queue and batch-insert contiguous
+        // groups via DocumentFragment, but the chronological sort constraint
+        // makes this non-trivial. The rAF coalescing still helps by batching
+        // eviction and reducing the number of flush cycles.
+        for (const item of logQueue) {
+          insertChronologically(item.element, item.timestamp);
+        }
+        logQueue = [];
+
+        // Evict once per flush
+        if (feed.childNodes.length > MAX_FEED_ENTRIES) {
+          const toRemove = Math.min(EVICTION_BATCH, feed.childNodes.length);
+          for (let i = 0; i < toRemove; i++) {
+            if (feed.lastChild) feed.removeChild(feed.lastChild);
+          }
+          droppedLogCount += toRemove;
+          const droppedEl = document.getElementById("stat-dropped");
+          if (droppedEl) droppedEl.innerText = droppedLogCount.toLocaleString();
+          const droppedRow = document.getElementById("dropped-row");
+          if (droppedRow) droppedRow.style.display = "flex";
+        }
+      }
+
+      function insertChronologically(element, timestamp) {
+        const entries = feed.getElementsByClassName("log-entry");
+        if (entries.length === 0) {
+          feed.appendChild(element);
+          return;
+        }
+
+        const typeWeights = {
+          run_end: 100,
+          agent_end: 95,
+          model_error: 90,
+          tool_error: 90,
+          client_error: 90,
+          model_end: 80,
+          tool_end: 80,
+          user_message: 40,
+          model_start: 20,
+          tool_start: 20,
+          agent_start: 10,
+          run_start: 0,
+        };
+
+        const newType = element.getAttribute("data-type");
+        const newWeight =
+          typeWeights[newType] !== undefined ? typeWeights[newType] : 50;
+
+        const myAgent = element.getAttribute("data-agent");
+        const mySession = element.getAttribute("data-session");
+        const mySeq = parseInt(element.getAttribute("data-seq") || "0");
+
+        for (let i = 0; i < entries.length; i++) {
+          const entryTs = parseFloat(entries[i].getAttribute("data-timestamp"));
+          const entryType = entries[i].getAttribute("data-type");
+          const entryWeight =
+            typeWeights[entryType] !== undefined ? typeWeights[entryType] : 50;
+          const entryAgent = entries[i].getAttribute("data-agent");
+          const entrySession = entries[i].getAttribute("data-session");
+          const entrySeq = parseInt(entries[i].getAttribute("data-seq") || "0");
+
+          const diff = timestamp - entryTs;
+
+          // If significantly newer, insert above
+          if (diff > 0.05) {
+            feed.insertBefore(element, entries[i]);
+            return;
+          }
+          // If within 50ms, sort logically to fix async race conditions
+          else if (Math.abs(diff) <= 0.05) {
+            // Same exact process source? We can trust the monotonic sequence ID explicitly!
+            if (myAgent === entryAgent && mySession === entrySession) {
+              if (mySeq > entrySeq) {
+                feed.insertBefore(element, entries[i]);
+                return;
+              } else if (mySeq === entrySeq) {
+                // Fallback to weight if sequence missing or identical payload chunk
+                if (newWeight > entryWeight) {
+                  feed.insertBefore(element, entries[i]);
+                  return;
+                }
+              }
+            } else {
+              // Different agent/session, sequence IDs are uncorrelated. Fallback to logical weights.
+              if (newWeight > entryWeight) {
+                feed.insertBefore(element, entries[i]);
+                return;
+              } else if (newWeight === entryWeight && diff > 0) {
+                // Tie breaker for same logical weight
+                feed.insertBefore(element, entries[i]);
+                return;
+              }
+            }
+          }
+        }
+
+        feed.appendChild(element);
+      }
+
+      function formatTime(timestamp) {
+        const date = new Date(timestamp * 1000);
+        const h = date.getHours().toString().padStart(2, "0");
+        const m = date.getMinutes().toString().padStart(2, "0");
+        const s = date.getSeconds().toString().padStart(2, "0");
+        const ms = date.getMilliseconds().toString().padStart(3, "0");
+        return `${h}:${m}:${s}.${ms}`;
+      }
+
+      function getSummary(log, latencyStr = "") {
+        if (log.type === "run_start")
+          return '<span class="lifecycle-badge badge-start">STARTING</span> 🚀 NEW EXECUTION';
+        if (log.type === "run_end")
+          return `<span class="lifecycle-badge badge-end">FINISHED</span> 🏁 END EXECUTION ${latencyStr}`;
+        if (log.type === "agent_start")
+          return '<span class="lifecycle-badge badge-start">AGENT</span> ▶ Starting agent logic';
+        if (log.type === "agent_end")
+          return '<span class="lifecycle-badge badge-end">AGENT</span> ✔ Finished agent logic';
+
+        if (log.type === "model_error")
+          return `❌ Model Error: ${log.error?.message} ${latencyStr}`;
+        if (log.type === "tool_error")
+          return `❌ Tool Error (${log.tool}): ${log.error?.message} ${latencyStr}`;
+        if (log.type === "client_error")
+          return `❌ Connection Error: ${log.error?.message}`;
+
+        if (log.type === "user_message")
+          return `👤 <strong>USER:</strong> ${log.content ? log.content.substring(0, 100) : "..."}`;
+
+        if (log.type === "tool_start") return `▶ Call ${log.tool}`;
+        if (log.type === "tool_end") {
+          let a2uiBadge = "";
+          if (
+            log.result &&
+            log.result.type &&
+            typeof log.result.type === "string" &&
+            log.result.type.startsWith("a2ui-")
+          ) {
+            a2uiBadge = ` <span class="lifecycle-badge" style="background:var(--accent);color:#fff">A2UI PAYLOAD</span> <span style="font-size:0.7rem;opacity:0.8">${log.result.type}</span>`;
+          }
+          return `✔ Result from ${log.tool} ${latencyStr}${a2uiBadge}`;
+        }
+
+        if (log.type === "model_start") return `🧠 Thinking...`;
+        if (log.type === "model_end" || log.type === "event") {
+          const content =
+            log.type === "event"
+              ? log.content || ""
+              : log.response?.content || "";
+          if (!content) return `💬 (Turn Complete) ${latencyStr}`;
+          return `💬 ${content.substring(0, 100)}${content.length > 100 ? "..." : ""} ${latencyStr}`;
+        }
+
+        if (log.type.endsWith("_start"))
+          return `<span class="lifecycle-badge badge-start">BEFORE</span> ▶ ${log.type}`;
+        if (log.type.endsWith("_end"))
+          return `<span class="lifecycle-badge badge-end">AFTER</span> ✔ ${log.type} ${latencyStr}`;
+
+        return log.type;
+      }
+
+      function updateStats(log) {
+        // Bucket Math
+        const nowMs = Date.now();
+        const bucketTime = Math.floor(nowMs / bucketSizeMs) * bucketSizeMs;
+        if (bucketTime !== currentBucketTime) {
+          pushBucket();
+          currentBucketTime = bucketTime;
+          currentBucket = {
+            time: currentBucketTime,
+            events: 0,
+            errors: 0,
+            latencies: [],
+          };
+        }
+
+        // Every log entry is now a significant lifecycle event to track
+        currentBucket.events++;
+        document.getElementById("stat-events").innerText = eventCount;
+
+        if (log.type.includes("error")) {
+          totalErrors++;
+          currentBucket.errors++;
+          document.getElementById("stat-errors").innerText = totalErrors;
+        }
+        if (log.type === "run_end") {
+          turnCount++;
+          document.getElementById("stat-turns").innerText = turnCount;
+          if (completedRuns > 0) {
+            const avg = totalLatency / completedRuns;
+            document.getElementById("stat-latency").innerText =
+              `${avg.toFixed(0)}ms`;
+          }
+        }
+        if (log.agent && !agents.has(log.agent)) {
+          agents.add(log.agent);
+          renderAgents();
+        }
+        if (
+          log.session_id &&
+          log.session_id !== "system" &&
+          !allSessions.has(log.session_id)
+        ) {
+          allSessions.add(log.session_id);
+          document.getElementById("stat-sessions").innerText = allSessions.size;
+          renderAgents();
+        }
+
+        // Token Metrics Tracking
+        // CONTRACT: model name is at log.model (top-level), not log.request.model
+        // See: agents/tests/test_agent_dash_token_metrics.py
+        const sessionKey = log.session_id || "system";
+        if (log.type === "model_start" && log.model) {
+          activeModels[sessionKey] = log.model;
+        } else if (
+          log.type === "model_end" &&
+          log.response &&
+          log.response.usage
+        ) {
+          const modelName = activeModels[sessionKey] || "unknown-model";
+          const tokens = log.response.usage.total_token_count || 0;
+
+          if (!tokenMetrics[modelName]) {
+            tokenMetrics[modelName] = 0;
+          }
+          tokenMetrics[modelName] += tokens;
+          renderTokenMetrics();
+        }
+      }
+
+      function renderTokenMetrics() {
+        const list = document.getElementById("token-metrics-list");
+        const entries = Object.entries(tokenMetrics).sort(
+          (a, b) => b[1] - a[1],
+        );
+        if (entries.length === 0) return;
+
+        list.innerHTML = entries
+          .map(([model, count]) => {
+            const displayCount = count.toLocaleString();
+            return `<div class="stat-item" style="margin-bottom: 0.3rem">
+                      <div class="stat-label" style="font-size:0.65rem; color:var(--text-dim); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" title="${model}">${model}</div>
+                      <div class="stat-val" style="font-size:1rem">${displayCount} <span style="font-size:0.6rem; color:var(--text-dim); font-weight:normal">tokens</span></div>
+                    </div>`;
+          })
+          .join("");
+      }
+
+      function renderAgents() {
+        const list = document.getElementById("agent-list");
+        const agentCounts = {};
+        Object.values(sessionToAgent).forEach((a) => {
+          agentCounts[a] = (agentCounts[a] || 0) + 1;
+        });
+
+        list.innerHTML = Array.from(agents)
+          .map((a) => {
+            const count = agentCounts[a] || 0;
+            const agentColor = hashToHsl(a, 70, 65);
+            return `<div class="agent-pill clickable" style="border-left: 3px solid ${agentColor}; display: flex; justify-content: space-between; align-items: center;" onclick="setFilter('agent', '${a}')">
+                        <span>${a}</span>
+                        <span style="font-size: 0.65rem; opacity: 0.7; background: rgba(255,255,255,0.1); padding: 0 4px; border-radius: 3px;">${count}</span>
+                    </div>`;
+          })
+          .join("");
+      }
+
+      // Filtering Logic
+      function setFilter(key, value) {
+        activeFilters[key] = value;
+        renderActiveFilters();
+        applyAllFilters();
+      }
+
+      function clearFilter(key) {
+        activeFilters[key] = null;
+        renderActiveFilters();
+        applyAllFilters();
+      }
+
+      function renderActiveFilters() {
+        const bar = document.getElementById("filters");
+        const list = document.getElementById("active-filters-list");
+        list.innerHTML = "";
+
+        let hasActive = false;
+        for (const [key, val] of Object.entries(activeFilters)) {
+          if (val) {
+            hasActive = true;
+            const displayVal = key === "session" ? val.substring(0, 8) : val;
+            list.innerHTML += `<div class="filter-pill">${key.toUpperCase()}: ${displayVal} <span class="remove" onclick="clearFilter('${key}')" title="Clear">×</span></div>`;
+          }
+        }
+
+        if (hasActive) {
+          bar.classList.add("active");
+        } else {
+          bar.classList.remove("active");
+        }
+      }
+
+      function applyFiltersToEntry(entry) {
+        let show = true;
+        if (
+          activeFilters.agent &&
+          entry.getAttribute("data-agent") !== activeFilters.agent
+        )
+          show = false;
+        if (
+          activeFilters.session &&
+          entry.getAttribute("data-session") !== activeFilters.session
+        )
+          show = false;
+        if (
+          activeFilters.type &&
+          entry.getAttribute("data-type") !== activeFilters.type
+        )
+          show = false;
+
+        entry.style.display = show ? "flex" : "none";
+      }
+
+      function applyAllFilters() {
+        const feed = document.getElementById("log-feed");
+        for (const child of feed.children) {
+          applyFiltersToEntry(child);
+        }
+      }
+
+      // Chart.js Setup
+      Chart.defaults.color = "rgba(255,255,255,0.7)";
+      Chart.defaults.font.family = "'JetBrains Mono', monospace";
+      Chart.defaults.font.size = 10;
+
+      const ctx = document.getElementById("metricsChart").getContext("2d");
+      const metricsChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Events/s",
+              data: [],
+              borderColor: "#d29922", // event color
+              backgroundColor: "rgba(210, 153, 34, 0.1)",
+              borderWidth: 2,
+              tension: 0.3,
+              yAxisID: "y",
+              fill: true,
+              pointRadius: 0,
+            },
+            {
+              label: "Error Rate (%)",
+              data: [],
+              borderColor: "#f85149", // error color
+              borderWidth: 2,
+              tension: 0.3,
+              yAxisID: "y2",
+              pointRadius: 0,
+            },
+            {
+              label: "Avg Latency (ms)",
+              data: [],
+              borderColor: "#58a6ff", // accent color
+              borderDash: [5, 5],
+              borderWidth: 2,
+              tension: 0.3,
+              yAxisID: "y1",
+              pointRadius: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              left: 10,
+              right: 15,
+              bottom: 5,
+            },
+          },
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              display: true,
+              labels: { boxWidth: 10, usePointStyle: true, padding: 15 },
+            },
+          },
+          scales: {
+            x: { display: false },
+            y: {
+              display: true,
+              position: "left",
+              min: 0,
+              grid: { color: "rgba(255,255,255,0.05)" },
+              ticks: { maxTicksLimit: 5, color: "#d29922" },
+            },
+            y2: {
+              display: true,
+              position: "left",
+              min: 0,
+              max: 100,
+              grid: { drawOnChartArea: false },
+              ticks: { maxTicksLimit: 5, color: "#f85149" },
+            },
+            y1: {
+              display: true,
+              position: "right",
+              min: 0,
+              grid: { drawOnChartArea: false },
+              ticks: {
+                maxTicksLimit: 5,
+                padding: 5,
+                color: "#58a6ff",
+                callback: function (value) {
+                  return (value / 1000).toFixed(1) + "s";
+                },
+              },
+            },
+          },
+          animation: { duration: 0 }, // Disable animations for performance during stress tests
+        },
+      });
+
+      function pushBucket() {
+        const maxPoints = 60; // Keep last 60 seconds
+
+        let avgLat = 0;
+        if (currentBucket.latencies.length > 0) {
+          avgLat =
+            currentBucket.latencies.reduce((a, b) => a + b, 0) /
+            currentBucket.latencies.length;
+        }
+
+        let errRate = 0;
+        if (currentBucket.events > 0) {
+          errRate = (currentBucket.errors / currentBucket.events) * 100;
+        }
+
+        metricsChart.data.labels.push("");
+        metricsChart.data.datasets[0].data.push(currentBucket.events);
+        metricsChart.data.datasets[1].data.push(errRate.toFixed(1));
+        metricsChart.data.datasets[2].data.push(avgLat);
+
+        if (metricsChart.data.labels.length > maxPoints) {
+          metricsChart.data.labels.shift();
+          metricsChart.data.datasets[0].data.shift();
+          metricsChart.data.datasets[1].data.shift();
+          metricsChart.data.datasets[2].data.shift();
+        }
+
+        metricsChart.update();
+      }
+
+      // Force push a bucket every second to keep the chart moving even when idle
+      setInterval(() => {
+        const nowMs = Date.now();
+        const bucketTime = Math.floor(nowMs / bucketSizeMs) * bucketSizeMs;
+        if (bucketTime !== currentBucketTime) {
+          pushBucket();
+          currentBucketTime = bucketTime;
+          currentBucket = {
+            time: currentBucketTime,
+            events: 0,
+            errors: 0,
+            latencies: [],
+          };
+        }
+      }, bucketSizeMs);
+    </script>
+  </body>
+</html>

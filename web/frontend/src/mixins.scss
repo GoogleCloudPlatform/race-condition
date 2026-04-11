@@ -1,0 +1,150 @@
+@mixin BodyLarge {
+    /* Body/L - Bold */
+    font-family: "Google Sans Display";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 130%;
+    color: white;
+
+}
+
+@mixin BodyMedium {
+    font-family: "Google Sans Display";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%;
+
+}
+
+@mixin BodySmall {
+    font-family: "Google Sans Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 105%;
+}
+
+@mixin BodyXSmall {
+    font-family: "Google Sans Display";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 105%;
+
+}
+
+@mixin Headline1 {
+    font-family: "Google Sans Display";
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 100%;
+}
+
+@mixin Headline2 {
+    font-family: "Google Sans Display";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 130%;
+}
+
+@mixin Headline3($weight: 400) {
+    font-family: "Google Sans Display";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: $weight; // 400 or 500
+    line-height: 130%;
+}
+
+@mixin Headline4($weight: 400) {
+    font-family: "Google Sans Display";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: $weight; // 400 or 500
+    line-height: 125%;
+
+}
+
+@mixin Headline5($weight: 400) {
+    font-family: "Google Sans Display";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: $weight; // 400 or 500
+    line-height: 105%;
+}
+
+
+@mixin Headline6($weight: 400) {
+    font-family: "Google Sans Display";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: $weight; // 400 or 500
+    line-height: 105%;
+}
+
+
+@mixin MonoFont {
+    font-family: "Google Sans Mono";
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 85%;
+    /* 8.5px */
+}
+
+@mixin BodyLarge {
+    /* Body/L - Bold */
+    font-family: "Google Sans Display";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 130%;
+    color: white;
+
+}
+
+@mixin BodyMedium {
+    font-family: "Google Sans Display";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%;
+
+}
+
+
+@mixin Label {
+    color: var(--neutral-white-60, rgba(255, 255, 255, 0.60));
+    font-family: "Google Sans Mono";
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 130%;
+    /* 19.5px */
+    text-transform: uppercase;
+}
+
+
+
+@function container-scaled-cqw($px) {
+    // Parenthesize #{$px} so negative values parse as a single numerator (e.g. calc((-5) / …)).
+    @return calc((#{$px}) / var(--container-width) * var(--scale) * 100 * 1cqw);
+}
+
+
+@mixin Card {
+    border-radius: container-scaled-cqw(40);
+    border: container-scaled-cqw(2.5) solid var(--neutral-white-10);
+    // backdrop-filter: blur(30px);
+}
+
+
+@mixin PanelBackground {
+    border-radius: container-scaled-cqw(60);
+    border: container-scaled-cqw(1) solid var(--neutral-white-5);
+    background: linear-gradient(180deg, rgba(32, 34, 34, 0.10) 0%, rgba(19, 19, 19, 0.10) 100%);
+    backdrop-filter: blur(45px);
+}

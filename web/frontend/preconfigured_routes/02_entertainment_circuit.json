@@ -1,0 +1,510 @@
+{
+  "route_id": "seed-0002-entertainment-circuit-e5f6g7h8",
+  "name": "Entertainment Circuit",
+  "route_data": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "marker-type": "start",
+          "name": "Start Line"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.1650922127429, 36.12255090341557]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "marker-type": "finish",
+          "name": "Finish Line"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.172851, 36.086141]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": null,
+          "route_type": "marathon",
+          "distance_mi": 26.2188,
+          "certified": true
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.1650922127429, 36.12255090341557],
+            [-115.164092, 36.122365]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Spring Mountain Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.164092, 36.122365],
+            [-115.159232, 36.122342],
+            [-115.157368, 36.121702],
+            [-115.156003, 36.121275],
+            [-115.154992, 36.121255]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Paradise Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.154992, 36.121255],
+            [-115.154846, 36.129524]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Desert Inn Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.154846, 36.129524],
+            [-115.148007, 36.129384],
+            [-115.145929, 36.12976],
+            [-115.136902, 36.129775],
+            [-115.118554, 36.129837]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Eastern Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.118554, 36.129837],
+            [-115.118616, 36.136838],
+            [-115.118708, 36.140575],
+            [-115.118798, 36.144289]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sahara Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.118798, 36.144289],
+            [-115.1099, 36.144303]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "McLeod Drive"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.1099, 36.144303],
+            [-115.109873, 36.140678],
+            [-115.109846, 36.137049],
+            [-115.10976, 36.129783],
+            [-115.109777, 36.127532],
+            [-115.109352, 36.126241],
+            [-115.108723, 36.125296],
+            [-115.109533, 36.124821],
+            [-115.109773, 36.124417],
+            [-115.109786, 36.123719],
+            [-115.109783, 36.122286],
+            [-115.109845, 36.11857],
+            [-115.109863, 36.115016],
+            [-115.109876, 36.111147],
+            [-115.109882, 36.109248],
+            [-115.109906, 36.107431],
+            [-115.109981, 36.10363],
+            [-115.109981, 36.100005],
+            [-115.10994, 36.096562],
+            [-115.109926, 36.093205],
+            [-115.109931, 36.092395],
+            [-115.109718, 36.09173],
+            [-115.10967, 36.091265],
+            [-115.109818, 36.090132],
+            [-115.109804, 36.087668],
+            [-115.109797, 36.087346],
+            [-115.109914, 36.086892],
+            [-115.109926, 36.086427],
+            [-115.109885, 36.084928],
+            [-115.109968, 36.084419],
+            [-115.109918, 36.082607],
+            [-115.109869, 36.07884],
+            [-115.109799, 36.076208],
+            [-115.109934, 36.075737],
+            [-115.110089, 36.075431],
+            [-115.110457, 36.075025],
+            [-115.111667, 36.074452],
+            [-115.112189, 36.074062],
+            [-115.112584, 36.073522],
+            [-115.112747, 36.072971],
+            [-115.112785, 36.072643],
+            [-115.112787, 36.071558]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sunset Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.112787, 36.071558],
+            [-115.118705, 36.071597],
+            [-115.123791, 36.071635],
+            [-115.125484, 36.071659],
+            [-115.127784, 36.071695],
+            [-115.134528, 36.071755],
+            [-115.141217, 36.071622],
+            [-115.146103, 36.07154],
+            [-115.154589, 36.07133],
+            [-115.163478, 36.071233],
+            [-115.172406, 36.071123],
+            [-115.176859, 36.070889],
+            [-115.180738, 36.070927],
+            [-115.190008, 36.071746]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Valley View Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.190008, 36.071746],
+            [-115.189992, 36.075347],
+            [-115.189916, 36.082665],
+            [-115.189874, 36.086314],
+            [-115.189855, 36.093616],
+            [-115.189846, 36.100905]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Tropicana Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.189846, 36.100905],
+            [-115.199224, 36.100894]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Arville Street"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.199224, 36.100894],
+            [-115.199327, 36.108361],
+            [-115.199385, 36.115508],
+            [-115.199254, 36.122666],
+            [-115.19918, 36.12633],
+            [-115.199099, 36.129994],
+            [-115.199273, 36.133645],
+            [-115.199469, 36.137308]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Edna Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.199469, 36.137308],
+            [-115.190538, 36.137336]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Valley View Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.190538, 36.137336],
+            [-115.190826, 36.144416]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sahara Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.190826, 36.144416],
+            [-115.185501, 36.144355],
+            [-115.181971, 36.144355],
+            [-115.177591, 36.144306],
+            [-115.173165, 36.144276],
+            [-115.171172, 36.144215],
+            [-115.167619, 36.144059],
+            [-115.164819, 36.14396],
+            [-115.157376, 36.143661]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Las Vegas Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [-115.157376, 36.143661],
+            [-115.162204, 36.1363],
+            [-115.165668, 36.131033],
+            [-115.169311, 36.125471],
+            [-115.171965, 36.12121],
+            [-115.172601, 36.119587],
+            [-115.17284, 36.11849],
+            [-115.172869, 36.114682],
+            [-115.172975, 36.108764],
+            [-115.172955, 36.100858],
+            [-115.172932, 36.097313],
+            [-115.172908, 36.093604],
+            [-115.172851, 36.086141]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.14212531957847, 36.12976632050585]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 1.864
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.11863909325734, 36.13777603807267]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 3.728
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.10977470475892, 36.1310253811435]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 5.592
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.10996187815824, 36.10459909494057]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 7.456
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.10983780691963, 36.07766714017823]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 9.32
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.13738557829025, 36.07169818165457]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 11.184
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.1707542499106, 36.07114335086356]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 13.048
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.18991089820645, 36.08310824868228]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 14.912
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.19924611794836, 36.10249744388781]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 16.776
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.19911052085509, 36.12947285909876]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 18.64
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.1848332774151, 36.144355]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 20.504
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.16015200918999, 36.13942856345331]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 22.368
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.17286737705902, 36.11489510893963]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 24.232
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.17286457408925, 36.08791825312348]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 26.096
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.17185353881692, 36.071129806757405]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "location": "Halfway"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-115.172851, 36.086141]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "location": "Finish Line"
+        }
+      }
+    ]
+  },
+  "created_at": "2026-01-20T10:30:00+00:00",
+  "evaluation_score": 87,
+  "evaluation_result": {
+    "passed": true,
+    "overall_score": 89,
+    "scores": {
+      "safety_compliance": 89,
+      "logistics_completeness": 89,
+      "participant_experience": 89,
+      "community_impact": 89,
+      "financial_viability": 89,
+      "intent_alignment": 89,
+      "distance_compliance": 91
+    },
+    "criteria_count": 7
+  },
+  "simulations": []
+}
