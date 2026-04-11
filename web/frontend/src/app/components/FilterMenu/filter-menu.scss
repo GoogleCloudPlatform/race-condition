@@ -1,0 +1,235 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+:host {
+  pointer-events: none;
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--z-panel);
+}
+
+.filter-menu {
+  pointer-events: all;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px;
+
+  border-radius: 32px;
+  border: 1px solid var(--neutral-white-5);
+  background: linear-gradient(180deg, rgba(32, 34, 34, 0.25) 0%, rgba(19, 19, 19, 0.25) 100%);
+  backdrop-filter: blur(45px);
+
+  .filter-row {
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    margin-top: 0;
+    transition:
+      height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.2s ease,
+      margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &.open {
+    .filter-row {
+      height: 52px;
+      opacity: 1;
+      pointer-events: all;
+      margin-top: 8px;
+    }
+  }
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease;
+
+  .material-icons {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    transform: rotate(45deg);
+    transition:
+      color 0.2s ease,
+      font-size 0.2s ease;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+
+    .material-icons {
+      font-size: 28px;
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+}
+
+.filter-row {
+  position: relative;
+
+  .filter-label {
+    position: absolute;
+    left: 76px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    background: rgba(255, 255, 255, 0.92);
+    padding: 6px 16px;
+    border-radius: 20px;
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(-8px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:hover .filter-label {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  // Default ENABLED
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    font-variation-settings: 'wght' 200;
+    color: rgba(255, 255, 255, 0.8);
+    transition:
+      color 0.2s ease,
+      font-size 0.2s ease;
+  }
+
+  // Default DISABLED
+  &:not(.active) {
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 0 0 1.25px rgba(255, 255, 255, 0.05);
+
+    .material-symbols-outlined {
+      color: rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  // Hover ENABLED
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+
+  // Hover DISABLED
+  &:not(.active):hover {
+    background: rgba(0, 0, 0, 0);
+    box-shadow: inset 0 0 0 1.25px rgba(255, 255, 255, 0.05);
+
+    .material-symbols-outlined {
+      font-size: 28px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.label-scroll {
+  position: relative;
+  overflow: hidden;
+  height: 20px;
+
+  .label-old,
+  .label-current {
+    display: block;
+    font-family: 'Google Sans Display';
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    line-height: 20px;
+    height: 20px;
+  }
+
+  .label-old {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  &.animating {
+    .label-old {
+      opacity: 1;
+      animation: scroll-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .label-current {
+      animation: scroll-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+  }
+}
+
+@keyframes scroll-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes scroll-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

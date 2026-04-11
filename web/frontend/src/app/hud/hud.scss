@@ -1,0 +1,248 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use '../../mixins.scss' as *;
+
+
+
+
+:host {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family:
+        'DM Sans',
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+}
+
+* {
+    user-select: none;
+    -webkit-user-select: none;
+    box-sizing: border-box;
+}
+
+input,
+select {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* ── Hamburger menu (top-left) ── */
+.menu-wrapper {
+    pointer-events: all;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: container-scaled-cqw(8);
+
+    width: 33vw;
+
+    container-type: inline-size;
+    --scale: 1;
+    --container-width: 760;
+
+}
+
+
+.information-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+    gap: container-scaled-cqw(12);
+    padding: container-scaled-cqw(12) container-scaled-cqw(8);
+
+    .menu-button {
+        position: relative;
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 0;
+        transition:
+            background 0.18s,
+            border-color 0.18s,
+            box-shadow 0.18s;
+
+        span {
+            font-size: container-scaled-cqw(24);
+            color: var(--neutral-white-80);
+        }
+    }
+
+
+
+    .demo-title {
+        font-family: "Google Sans Display";
+        font-size: container-scaled-cqw(21);
+        font-style: normal;
+        font-weight: 400;
+        line-height: 100%;
+        color: var(--neutral-white-50);
+    }
+}
+
+
+
+
+.menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0;
+    overflow-y: auto;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.2s ease;
+
+    &.isOpen {
+        pointer-events: all;
+        opacity: 1;
+
+        background: rgba(0, 0, 0, 0.55);
+
+        .menu-panel {
+            transform: translateX(0) !important;
+        }
+    }
+
+
+    .menu-panel {
+        @include PanelBackground;
+        border-radius: container-scaled-cqw(60);
+
+        overflow: hidden;
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 2px 8px rgba(0, 0, 0, 0.3);
+        transform: translateX(-100%);
+        transition: all 0.2s ease;
+
+        padding: container-scaled-cqw(40) container-scaled-cqw(32);
+        padding-top: container-scaled-cqw(100);
+
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: container-scaled-cqw(40);
+
+        .menu-title {
+            color: var(--neutral-white-40);
+            font-family: "Google Sans Display";
+            font-size: container-scaled-cqw(20);
+            font-style: normal;
+            font-weight: 500;
+            line-height: 125%;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+            gap: container-scaled-cqw(24);
+            padding: container-scaled-cqw(25) container-scaled-cqw(32);
+
+            border-radius: container-scaled-cqw(80);
+            cursor: pointer;
+
+            &.active {
+                background: var(--neutral-white-5);
+
+                &:hover {
+                    background: var(--neutral-white-10);
+
+                    .icon {
+                        transform: translateX(0) rotate(180deg);
+                    }
+                }
+
+                .icon {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+
+            &:hover {
+                background: var(--neutral-white-5);
+
+
+
+                .icon {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+
+
+            .demo-number {
+                @include Headline6;
+                color: white;
+                font-size: container-scaled-cqw(12);
+
+            }
+
+            .demo-name {
+                @include Headline1;
+                color: white;
+                font-size: container-scaled-cqw(32);
+            }
+
+            .icon {
+                color: white;
+                font-size: container-scaled-cqw(24);
+                margin-left: auto;
+
+                opacity: 0;
+                transform: translateX(-50%);
+                transition: all 0.2s ease;
+            }
+        }
+    }
+}
+
+
+.work-in-progress-container {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 6px;
+    border-radius: 0 0 6px 6px;
+}

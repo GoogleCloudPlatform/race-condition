@@ -1,0 +1,76 @@
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package gateway;
+
+option go_package = "github.com/GoogleCloudPlatform/race-condition/gen_proto/gateway";
+
+// Origin describes the source of a message
+message Origin {
+  string type = 1;       // "agent", "client", "system"
+  string id = 2;         // "planner", "tester-ui"
+  string session_id = 3; // UUID or specific session identifier
+  string display_name = 4; // Human-readable name (e.g. "Cloud Marathon Planner")
+}
+
+// Wrapper is the top-level envelope for all binary messages.
+message Wrapper {
+  string timestamp = 1;
+  string type = 2; // Data type: "text", "json", "a2ui", "telemetry"
+  string request_id = 3;
+  string session_id = 4; // Legacy, kept for backwards compat during migration
+  bytes payload = 5; // Serialized actual payload content
+  Origin origin = 6;
+  repeated string destination = 7; // Array of session UUIDs. Empty means broadcast.
+  string status = 8;
+  string event = 9; // "narrative", "tool_call", "model_end", etc.
+  bytes metadata = 10; // JSON encoded metadata (tokens, model ID)
+  string simulation_id = 11; // Groups messages by simulation run
+}
+
+// BroadcastRequest allows a single client to fan-out a payload to many agents.
+message BroadcastRequest {
+  bytes payload = 1;
+  repeated string target_session_ids = 2;
+  bool async = 3; // If true, return ack immediately; if false, wait for responses.
+}
+
+// BatchResponse aggregates responses from multiple agents into one message.
+message BatchResponse {
+  string request_id = 1;
+  repeated Wrapper responses = 2;
+}
+
+// ToolCallRequest is used by agents (Brain) to query or act on the state registry (Body).
+message ToolCallRequest {
+  string resource_type = 1;
+  map<string, string> params = 2;
+}
+
+// ToolCallResponse is the result of a ToolCallRequest.
+message ToolCallResponse {
+  bytes data = 1;
+  string error = 2;
+}
+
+// A2UIAction carries a user interaction from an A2UI Button back to the
+// originating agent session.
+message A2UIAction {
+  string session_id = 1;     // Target agent session UUID
+  string action_name = 2;    // Action identifier (e.g. "run_simulation")
+  bytes context = 3;         // Optional JSON context for future extensibility
+}
+
