@@ -34,7 +34,7 @@
     "@angular/router": "^21.2.1",
     "ngx-countup": "^21.0.0",
     "ngx-markdown": "^21.1.0",
-    "protobufjs": "^8.0.0",
+    "protobufjs": "^8.0.1",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",
     "three": "^0.183.1",
