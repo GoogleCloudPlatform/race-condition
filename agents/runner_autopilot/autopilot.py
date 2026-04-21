@@ -117,6 +117,7 @@ def _text_response(text: str) -> LlmResponse:
 # ---------------------------------------------------------------------------
 
 
+# [START autopilot_responses]
 def handle_start_gun(state: StateLike, data: dict) -> LlmResponse:
     """Race started. Acknowledge the start gun.
 
@@ -229,6 +230,7 @@ def build_summary(state: StateLike) -> LlmResponse:
     else:
         status = "running"
     return _text_response(f"Status: {status}, velocity={velocity:.1f}, water={water:.0f}%, distance={distance:.1f}mi")
+# [END autopilot_responses]
 
 
 # ---------------------------------------------------------------------------
@@ -249,6 +251,7 @@ HANDLERS: dict[RunnerEventType, Callable[[StateLike, dict], LlmResponse]] = {
 # ---------------------------------------------------------------------------
 
 
+# [START autopilot_dispatch]
 def autopilot_callback(
     callback_context: CallbackContext,
     llm_request: LlmRequest,
@@ -282,3 +285,4 @@ def autopilot_callback(
         event.data["_session_id"] = getattr(getattr(callback_context, "session", None), "id", "default")
 
     return handler(state, event.data)
+# [END autopilot_dispatch]

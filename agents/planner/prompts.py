@@ -181,6 +181,7 @@ planning/simulation query. Never mix them in one turn.
 # PromptBuilder
 # ---------------------------------------------------------------------------
 
+# [START planner_builder]
 PLANNER = PromptBuilder(
     OrderedDict(
         role=ROLE,
@@ -191,6 +192,7 @@ PLANNER = PromptBuilder(
         financial=FINANCIAL,
     )
 )
+# [END planner_builder]
 
 # Backward compat
 PLANNER_INSTRUCTION = PLANNER.build()

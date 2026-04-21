@@ -43,6 +43,7 @@ You MUST NEVER re-execute or re-start a simulation after one has already
 completed in this invocation. The simulation is done. Proceed to
 record-keeping and A2UI card emission only."""
 
+# [START memory_workflow]
 MEMORY_WORKFLOW = (
     TERMINAL_RULES
     + """
@@ -79,6 +80,7 @@ MEMORY_WORKFLOW = (
     Do NOT call `recall_past_simulations` or `get_local_and_traffic_rules` again.
     Do NOT restart the workflow. The planning phase is COMPLETE."""
 )
+# [END memory_workflow]
 
 MEMORY_EXECUTION = """\
 # Execution (User-Triggered — NOT part of the planning workflow above)
@@ -300,6 +302,7 @@ simulation result JSON. Both calls must complete before responding."""
 # PromptBuilder
 # ---------------------------------------------------------------------------
 
+# [START planner_memory_builder]
 PLANNER_WITH_MEMORY = PLANNER_WITH_EVAL.override(
     tools=MEMORY_TOOLS,
     workflow=MEMORY_WORKFLOW,
@@ -307,6 +310,7 @@ PLANNER_WITH_MEMORY = PLANNER_WITH_EVAL.override(
     memory=MEMORY,
     post_simulation=POST_SIMULATION,
 )
+# [END planner_memory_builder]
 
 # Backward compat
 MEMORY_SYSTEM_INSTRUCTION = PLANNER_WITH_MEMORY.build()

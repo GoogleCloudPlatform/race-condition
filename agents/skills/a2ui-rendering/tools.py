@@ -310,6 +310,7 @@ def _validate_surface_update(
 # ---------------------------------------------------------------------------
 
 
+# [START a2ui_validation_tool]
 async def validate_and_emit_a2ui(
     payload: str,
     tool_context: ToolContext,
@@ -429,3 +430,4 @@ async def validate_and_emit_a2ui(
         "status": "success",
         "a2ui": data,
     }
+# [END a2ui_validation_tool]

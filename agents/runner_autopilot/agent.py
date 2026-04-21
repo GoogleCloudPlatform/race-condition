@@ -40,6 +40,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# [START autopilot_agent]
 def get_agent():
     """Create a runner_autopilot agent by extending the base runner."""
     agent = get_base_agent()
@@ -52,6 +53,7 @@ def get_agent():
         max_output_tokens=1,
     )
     return agent
+# [END autopilot_agent]
 
 
 root_agent = get_agent()

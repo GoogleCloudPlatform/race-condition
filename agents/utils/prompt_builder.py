@@ -28,6 +28,7 @@ InstructionProvider = Union[
 ]
 
 
+# [START prompt_builder]
 class PromptBuilder:
     """Ordered, named sections assembled into a single prompt.
 
@@ -75,3 +76,4 @@ class PromptBuilder:
         merged = OrderedDict(self._sections)
         merged.update(sections)
         return PromptBuilder(merged)
+# [END prompt_builder]

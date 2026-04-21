@@ -127,6 +127,7 @@ When executing, include `simulation_config` with `runner_count`:
 You DO NOT need to pass the GeoJSON route in your message to submit_plan_to_simulator.
 The tool automatically retrieves it from session state. Provide only a concise narrative."""
 
+# [START a2ui_prompt_template]
 A2UI = """\
 # A2UI Dashboard Format Reference
 When the Workflow directs you to emit the A2UI dashboard, use A2UI v0.8.0
@@ -329,11 +330,13 @@ You MUST NOT include any of the following in the sim_results card:
   All numeric scores MUST be 0-100 integers from `evaluate_plan.scores`.
 - A Total distance value greater than 26.2 miles.
 """
+# [END a2ui_prompt_template]
 
 # ---------------------------------------------------------------------------
 # PromptBuilder
 # ---------------------------------------------------------------------------
 
+# [START planner_eval_builder]
 PLANNER_WITH_EVAL = PLANNER.override(
     tools=EVAL_TOOLS,
     workflow=EVAL_WORKFLOW,
@@ -341,6 +344,7 @@ PLANNER_WITH_EVAL = PLANNER.override(
     a2ui=A2UI,
     execution=EVAL_EXECUTION,
 )
+# [END planner_eval_builder]
 
 # Backward compat
 EXTENDED_SYSTEM_INSTRUCTION = PLANNER_WITH_EVAL.build()

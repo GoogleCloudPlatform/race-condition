@@ -160,6 +160,7 @@ async def emit_gateway_message(
     logger.debug(f"GATEWAY_MSG: [{event}] from {origin_msg.id} to {destination} ({status})")
 
 
+# [START emit_narrative_pulse]
 async def emit_narrative_pulse(
     session_id: str,
     text: str,
@@ -179,6 +180,7 @@ async def emit_narrative_pulse(
         metadata=metadata,
         simulation_id=simulation_id,
     )
+# [END emit_narrative_pulse]
 
 
 # [START emit_pulse]
