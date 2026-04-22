@@ -83,8 +83,6 @@ module "networking" {
   project_id     = var.project_id
   project_number = module.project_apis.project_number
   region         = var.region
-
-  depends_on = [module.project_apis]
 }
 
 module "iam" {
@@ -96,8 +94,6 @@ module "iam" {
   frontend_writers      = []
   maps_mcp_users        = var.enable_maps_api_key ? var.developers : []
   agent_engine_sa_users = var.agent_engine_sa_users
-
-  depends_on = [module.project_apis]
 }
 
 module "redis" {
@@ -108,8 +104,6 @@ module "redis" {
   private_vpc_connection_id = module.networking.private_vpc_connection_id
   tier                      = "BASIC"
   memory_size_gb            = 1
-
-  depends_on = [module.project_apis]
 }
 
 module "pubsub" {
@@ -118,8 +112,6 @@ module "pubsub" {
   project_number   = module.project_apis.project_number
   region           = var.region
   compute_sa_email = module.iam.compute_sa_email
-
-  depends_on = [module.project_apis]
 }
 
 module "model_armor" {
@@ -133,37 +125,18 @@ module "model_armor" {
 # Database -- Cloud SQL PostgreSQL (default) or AlloyDB (opt-in)
 # =============================================================================
 
-# Generate a strong default DB password when the operator does not supply
-# var.db_initial_password. The value lives in TF state, so re-applies are
-# idempotent (no password churn). Both database modules persist whichever
-# password is chosen into Secret Manager.
-resource "random_password" "db_initial" {
-  length      = 32
-  special     = false # alphanumeric -- safe in cloud-sql-postgres local-exec PGPASSWORD interpolation
-  min_lower   = 4
-  min_upper   = 4
-  min_numeric = 4
-}
-
-locals {
-  db_password = coalesce(var.db_initial_password, random_password.db_initial.result)
-}
-
 module "cloud_sql_postgres" {
   count = var.enable_alloydb ? 0 : 1
 
   source                    = "./modules/cloud-sql-postgres"
   project_id                = var.project_id
-  project_number            = module.project_apis.project_number
   region                    = var.region
   vpc_id                    = module.networking.vpc_id
   private_vpc_connection_id = module.networking.private_vpc_connection_id
   compute_sa                = module.iam.compute_sa
   agent_engine_sa_email     = module.iam.agent_engine_sa_email
   iam_users                 = var.developers
-  initial_password          = local.db_password
-
-  depends_on = [module.project_apis]
+  initial_password          = var.db_initial_password
 }
 
 module "alloydb" {
@@ -178,10 +151,8 @@ module "alloydb" {
   compute_sa                = module.iam.compute_sa
   agent_engine_sa_email     = module.iam.agent_engine_sa_email
   iam_users                 = var.developers
-  initial_password          = local.db_password
+  initial_password          = var.db_initial_password
   cpu_count                 = 2
-
-  depends_on = [module.project_apis]
 }
 
 # =============================================================================
@@ -195,8 +166,6 @@ module "gke_model_serving" {
   project_id     = var.project_id
   project_number = module.project_apis.project_number
   region         = var.region
-
-  depends_on = [module.project_apis]
 }
 
 module "gke_runner" {
@@ -249,68 +218,4 @@ module "monitoring" {
   # Redis memory, NAT egress, and Redis connection alerts.
 
   depends_on = [module.project_apis]
-}
-
-# =============================================================================
-# Cloud Run services + IAM (gated by enable_services)
-#
-# Two-pass apply pattern: the Phase 1 base-infra apply runs with
-# enable_services=false. After image builds finish, the Phase 2 services
-# apply runs with enable_services=true and image_tags populated. This
-# avoids a chicken-and-egg between Cloud Run services and image tags.
-# =============================================================================
-
-locals {
-  database_ip = var.enable_alloydb ? (
-    length(module.alloydb) > 0 ? module.alloydb[0].ip_address : ""
-    ) : (
-    length(module.cloud_sql_postgres) > 0 ? module.cloud_sql_postgres[0].private_ip_address : ""
-  )
-
-  database_secret_id = var.enable_alloydb ? (
-    length(module.alloydb) > 0 ? module.alloydb[0].password_secret_id : ""
-    ) : (
-    length(module.cloud_sql_postgres) > 0 ? module.cloud_sql_postgres[0].password_secret_id : ""
-  )
-}
-
-module "cloud_run_services" {
-  count = var.enable_services ? 1 : 0
-
-  source = "./modules/cloud-run-services"
-
-  project_id          = var.project_id
-  region              = var.region
-  compute_sa_email    = module.iam.compute_sa_email
-  vpc_network_name    = module.networking.vpc_name
-  vpc_subnet_name     = module.networking.serverless_subnet_name
-  image_tags          = var.image_tags
-  redis_host          = module.redis.host
-  redis_port          = module.redis.port
-  database_ip         = local.database_ip
-  database_secret_id  = local.database_secret_id
-  orchestration_topic = module.pubsub.topic_name
-  embedding_backend   = var.embedding_backend
-  agent_urls          = var.agent_urls
-
-  depends_on = [
-    module.project_apis,
-    module.redis,
-    module.pubsub,
-    module.networking,
-    module.iam,
-  ]
-}
-
-module "cloud_run_iam" {
-  count = var.enable_services ? 1 : 0
-
-  source = "./modules/cloud-run-iam"
-
-  project_id               = var.project_id
-  region                   = var.region
-  service_names            = module.cloud_run_services[0].service_names
-  agent_engine_sa_email    = module.iam.agent_engine_sa_email
-  compute_sa_email         = module.iam.compute_sa_email
-  frontend_unauthenticated = var.frontend_unauthenticated
 }

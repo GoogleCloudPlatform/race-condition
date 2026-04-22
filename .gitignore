@@ -80,6 +80,9 @@ __pycache__/
 
 # Local IDE/agent scratch
 .vscode/
+# Track the OSS template's .gemini/config.yaml (overlaid into the public repo
+# during `make oss-sync`; needs to be committed even though .gemini/ is ignored).
+!scripts/oss/templates/.gemini/
 
 # Diagnostic harness outputs (per-trial JSON dumps from
 # scripts/diagnostics/demo1_harness.py); see

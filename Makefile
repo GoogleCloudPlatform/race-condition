@@ -5,7 +5,7 @@
 -include .env
 export
 
-.PHONY: init check-prereqs infra-init infra-plan infra-apply infra-destroy infra-output deploy deploy-local help test lint lint-go lint-py lint-pyright lint-configs fmt build proto ensure-venv coverage coverage-go coverage-py test-unit-go test-integration-go test-py-integration test-web verify perf-test perf-diagnostic eval-stress test-e2e-simulation docker-build-all docker-build-go docker-build-py eval start stop restart
+.PHONY: init check-prereqs infra-init infra-plan infra-apply infra-destroy infra-output deploy deploy-local help test lint lint-go lint-py lint-pyright lint-configs fmt build proto ensure-venv coverage coverage-go coverage-py test-unit-go test-integration-go test-py-integration test-web verify perf-test perf-diagnostic eval-stress test-e2e-simulation docker-build-all docker-build-go docker-build-py eval oss-harden start stop restart
 
 .DEFAULT_GOAL := help
 
@@ -171,6 +171,9 @@ docker-build-go: docker-build-gateway docker-build-admin docker-build-tester doc
 
 docker-build-py: docker-build-runner_autopilot docker-build-runner_cloudrun docker-build-dash
 
+
+oss-harden: ## Apply security hardening to the OSS repo (Actions, rulesets, Dependabot)
+	@bash scripts/oss/configure_repo.sh $(OSS_REPO)
 
 # resolves the target the same way the sync script does.
 	if [ -f .git ]; then \

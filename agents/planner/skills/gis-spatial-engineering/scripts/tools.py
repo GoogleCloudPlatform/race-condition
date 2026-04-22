@@ -1756,8 +1756,12 @@ async def _gemini_traffic_enrichment(closed_segments: list, affected_intersectio
     from google import genai
     from agents.utils.retry import resilient_http_options
 
+    # Use Vertex AI on the global endpoint (Gemini 3 preview models live there).
+    # vertexai=False would target the public Gemini API, which has no auth on
+    # Cloud Run / Agent Engine and hangs forever waiting for an API key.
     client = genai.Client(
-        vertexai=False,
+        vertexai=True,
+        project=os.environ.get("GOOGLE_CLOUD_PROJECT", os.environ.get("PROJECT_ID", "")),
         location="global",
         http_options=resilient_http_options(),
     )

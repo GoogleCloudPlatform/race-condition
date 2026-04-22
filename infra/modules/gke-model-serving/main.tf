@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-resource "google_project_service_identity" "container" {
-  provider = google-beta
-  project  = var.project_id
-  service  = "container.googleapis.com"
-}
-
 resource "google_compute_network" "model_serving" {
   name                    = var.vpc_name
   project                 = var.project_id
@@ -98,8 +92,6 @@ resource "google_storage_bucket_iam_member" "gke_node_bucket_access" {
   bucket = google_storage_bucket.model_storage.name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:service-${var.project_number}@gcp-sa-gkenode.iam.gserviceaccount.com"
-
-  depends_on = [google_project_service_identity.container]
 }
 
 resource "google_service_account_iam_member" "gpu_reader_workload_identity" {

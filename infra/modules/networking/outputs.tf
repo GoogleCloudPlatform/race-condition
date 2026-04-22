@@ -40,8 +40,3 @@ output "private_vpc_connection_id" {
 output "nat_router_name" {
   value = google_compute_router_nat.nat.name
 }
-
-output "psc_network_attachment" {
-  description = "PSC network attachment for Agent Engine (Reasoning Engine)"
-  value       = google_compute_network_attachment.re_psc_attachment.id
-}

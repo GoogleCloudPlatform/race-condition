@@ -1,0 +1,35 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Configuration for the Gemini Code Assist GitHub App.
+# https://developers.google.com/gemini-code-assist/docs/customize-gemini-behavior-github
+
+# Project-specific guidance for Gemini when reviewing code or triaging issues.
+have_fun: false
+
+code_review:
+  disable: false
+  comment_severity_threshold: MEDIUM
+  max_review_comments: -1
+  pull_request_opened:
+    help: false
+    summary: true
+    code_review: true
+
+# Path filters: skip generated and vendor code in reviews.
+ignore_patterns:
+  - 'gen_proto/**'
+  - 'web/**/dist/**'
+  - 'web/**/node_modules/**'
+  - 'web/**/.angular/**'
+  - 'uv.lock'
+  - 'go.sum'
+  - 'package-lock.json'
+  - '**/*.svg'
+  - '**/*.png'
+  - 'docs/images/**'
