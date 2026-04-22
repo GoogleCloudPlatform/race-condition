@@ -416,7 +416,10 @@ steps:
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
         AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner --print-url | tail -1)
-        echo "planner=$$AE_URL" > /workspace/ae_urls/planner.url
+        # Bare URL (no `name=` prefix). The gateway parses AGENT_URLS as
+        # comma-separated URLs and discovers each agent's name from its
+        # /a2a/v1/card. Matches the dev/prod .env contract.
+        echo "$$AE_URL" > /workspace/ae_urls/planner.url
 
   - id: deploy-ae-simulator
     name: python:3.13-slim
@@ -431,7 +434,7 @@ steps:
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
         AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only simulator --print-url | tail -1)
-        echo "simulator=$$AE_URL" > /workspace/ae_urls/simulator.url
+        echo "$$AE_URL" > /workspace/ae_urls/simulator.url
 
   - id: deploy-ae-planner-with-eval
     name: python:3.13-slim
@@ -446,7 +449,7 @@ steps:
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
         AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner_with_eval --print-url | tail -1)
-        echo "planner_with_eval=$$AE_URL" > /workspace/ae_urls/planner_with_eval.url
+        echo "$$AE_URL" > /workspace/ae_urls/planner_with_eval.url
 
   - id: deploy-ae-simulator-with-failure
     name: python:3.13-slim
@@ -461,7 +464,7 @@ steps:
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
         AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only simulator_with_failure --print-url | tail -1)
-        echo "simulator_with_failure=$$AE_URL" > /workspace/ae_urls/simulator_with_failure.url
+        echo "$$AE_URL" > /workspace/ae_urls/simulator_with_failure.url
 
   - id: deploy-ae-planner-with-memory
     name: python:3.13-slim
@@ -476,7 +479,7 @@ steps:
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
         AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner_with_memory --print-url | tail -1)
-        echo "planner_with_memory=$$AE_URL" > /workspace/ae_urls/planner_with_memory.url
+        echo "$$AE_URL" > /workspace/ae_urls/planner_with_memory.url
 
   # ----------------------------------------------------------
   # 8. Collect AE URLs into a single comma-separated string
@@ -494,7 +497,9 @@ steps:
       - -c
       - |
         set -e
-        # Format: planner=URL,simulator=URL,...
+        # Format: bare comma-separated URLs (e.g. https://ae1,https://ae2,...).
+        # The gateway parses AGENT_URLS as URLs and discovers each agent's
+        # name from its /a2a/v1/card. Matches the dev/prod .env contract.
         cat /workspace/ae_urls/*.url | paste -sd, - > /workspace/agent_urls.txt
         echo "AGENT_URLS=$(cat /workspace/agent_urls.txt)"
 

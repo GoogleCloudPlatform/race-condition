@@ -154,13 +154,16 @@ run "gateway_threads_agent_urls_into_env" {
   command = plan
 
   variables {
-    agent_urls = "planner=https://planner.example,simulator=https://sim.example"
+    # Bare comma-separated URLs (no `name=` prefix). Gateway parses
+    # AGENT_URLS as URLs and discovers each agent's name via its
+    # /a2a/v1/card. Matches the dev/prod .env contract.
+    agent_urls = "https://planner.example,https://sim.example"
   }
 
   assert {
     condition = length([
       for e in google_cloud_run_v2_service.gateway.template[0].containers[0].env :
-      e if e.name == "AGENT_URLS" && e.value == "planner=https://planner.example,simulator=https://sim.example"
+      e if e.name == "AGENT_URLS" && e.value == "https://planner.example,https://sim.example"
     ]) == 1
     error_message = "gateway must receive AGENT_URLS env var matching var.agent_urls"
   }

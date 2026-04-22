@@ -98,7 +98,7 @@ variable "embedding_backend" {
 }
 
 variable "agent_urls" {
-  description = "Comma-separated agent_name=url pairs threaded into the gateway's AGENT_URLS env. Populated by the Phase 4 collect-ae-urls step."
+  description = "Comma-separated bare agent URLs threaded into the gateway's AGENT_URLS env (e.g. https://ae1,https://ae2). The gateway parses these and discovers each agent's name from its /a2a/v1/card. Populated by the Phase 4 collect-ae-urls step."
   type        = string
   default     = ""
 }

@@ -78,7 +78,7 @@ variable "embedding_backend" {
 }
 
 variable "agent_urls" {
-  description = "Comma-separated agent_name=url pairs for AE-deployed agents (gateway AGENT_URLS env). Populated by Phase 4.5 cloud-build collect-ae-urls step."
+  description = "Comma-separated bare URLs for AE-deployed agents (gateway AGENT_URLS env, e.g. https://ae1,https://ae2). The gateway parses these and discovers each agent's name from its /a2a/v1/card. Populated by Phase 4.5 cloud-build collect-ae-urls step."
   type        = string
   default     = ""
 }
