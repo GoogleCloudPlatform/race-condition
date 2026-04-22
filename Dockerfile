@@ -43,7 +43,7 @@ COPY gen_proto/ gen_proto/
 # --- Web: build Vite/React frontends (admin-dash + tester) ---
 # NOTE: Node version must match the project's local dev environment to ensure
 # npm lockfile compatibility (npm lockfile v3 format varies across major versions).
-FROM node:24-slim AS web-builder
+FROM node:25-slim AS web-builder
 
 # admin-dash — deps first for layer caching
 WORKDIR /app/web/admin-dash
