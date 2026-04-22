@@ -12,16 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-locals {
-  compute_sa      = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
-  build_sa        = "serviceAccount:${coalesce(var.code_project_number, var.project_number)}@cloudbuild.gserviceaccount.com"
-  agent_engine_sa = "serviceAccount:agent-engine-sa@${var.project_id}.iam.gserviceaccount.com"
-}
-
 resource "google_service_account" "agent_engine" {
   account_id   = "agent-engine-sa"
   display_name = "Race Condition Agent Engine (Reasoning Engine) Service Account"
   project      = var.project_id
+}
+
+locals {
+  compute_sa = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+  build_sa   = "serviceAccount:${coalesce(var.code_project_number, var.project_number)}@cloudbuild.gserviceaccount.com"
+  # Reference the resource attribute (not a hardcoded string) so every
+  # `google_project_iam_member` consuming `local.agent_engine_sa` picks
+  # up an implicit dependency on the SA resource. Without this edge,
+  # Terraform parallelizes the IAM bindings with SA creation and the
+  # IAM API races against eventual-consistency propagation -- producing
+  # `Service account ... does not exist` 400s on a fresh project.
+  agent_engine_sa = "serviceAccount:${google_service_account.agent_engine.email}"
 }
 
 resource "google_project_service_identity" "iap_sa" {

@@ -145,9 +145,11 @@ def _get_gateway_url(project_id: str, region: str) -> str | None:
 
 # --- Service definitions: Agent Engine agents only ---
 
-# 2Gi memory is the OSS-verified baseline for all AE agents -- 1Gi causes
-# worker OOM during ADK runtime startup before the health probe responds.
-# max_instances=1 caps concurrent runtime cost.
+# Smallest usable AE config for OSS cost-efficiency.
+# 2Gi/1CPU is enough for the agent ADK runtime to load; the hot path is
+# waiting on Gemini API responses, not local compute. min_instances and
+# max_instances are intentionally not set so AE uses its defaults
+# (scale-to-zero between simulations).
 SERVICES = {
     "simulator": {
         "type": "reasoning-engine",
@@ -155,7 +157,6 @@ SERVICES = {
         "module": "agents.simulator.agent",
         "attr": "simulator_a2a_agent",
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
     },
     "planner": {
         "type": "reasoning-engine",
@@ -163,7 +164,6 @@ SERVICES = {
         "module": "agents.planner.agent",
         "attr": "planner_a2a_agent",
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
     },
     "planner_with_eval": {
         "type": "reasoning-engine",
@@ -172,7 +172,6 @@ SERVICES = {
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
     },
     "simulator_with_failure": {
         "type": "reasoning-engine",
@@ -181,7 +180,6 @@ SERVICES = {
         "attr": "simulator_with_failure_a2a_agent",
         "extra_packages": ["agents/simulator"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
     },
     "planner_with_memory": {
         "type": "reasoning-engine",
@@ -190,7 +188,6 @@ SERVICES = {
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner", "agents/planner_with_eval"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
     },
 }
 
@@ -515,6 +512,51 @@ def _read_requirements():
         return []
 
 
+# Cloudpickle bytes embed class definitions and state-dict shapes from
+# the build venv. If the Agent Engine runtime resolves any of those
+# class-providing packages to a DIFFERENT version (e.g. ``a2a-sdk>=0.3.26``
+# resolves to ``1.0.0`` at runtime while the build had ``0.3.26`` from
+# uv.lock), the runtime's class has different ``__setstate__`` semantics
+# or attribute layout and ``cloudpickle.loads()`` blows up partway
+# through reconstruction.
+#
+# Observed in the wild on a fresh OSS Agent Engine create:
+# ``KeyError: 'serialized'`` from ``protobuf.Message.__setstate__`` --
+# the underlying state dict came from a transitive Pydantic model in a
+# newer ``a2a-sdk`` whose pickle reduce path the older build's protobuf
+# didn't understand.
+#
+# Defensive fix: pin EVERY top-level requirement to the exact version
+# installed in the build venv. This forces the AE runtime container to
+# match build byte-for-byte for the dependency closure we declared.
+def _pin_all_requirements(requirements):
+    """Rewrite every requirement to ``pkg[extras]==<resolved version>`` from the venv."""
+    import importlib.metadata
+    import re
+
+    def _pkg_name(req):
+        # Strip extras and constraints to get the bare distribution name.
+        return re.split(r"[<>=!~\[ ]", req, maxsplit=1)[0].strip().lower()
+
+    def _pkg_extras(req):
+        # Preserve ``[extras]`` since they affect what pip installs.
+        m = re.search(r"\[[^\]]+\]", req)
+        return m.group(0) if m else ""
+
+    pinned = []
+    for req in requirements:
+        name = _pkg_name(req)
+        extras = _pkg_extras(req)
+        try:
+            version = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            # Not installed in the build venv -- keep the original constraint.
+            pinned.append(req)
+            continue
+        pinned.append(f"{name}{extras}=={version}")
+    return pinned
+
+
 # --- Deploy: Agent Engine ---
 
 
@@ -559,6 +601,7 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
     ae_req = "google-cloud-aiplatform[agent_engines,adk]>=1.121.0"
     if not any("google-cloud-aiplatform" in r for r in requirements):
         requirements.append(ae_req)
+    requirements = _pin_all_requirements(requirements)
     print(f"   {len(requirements)} dependencies")
 
     # Stage source packages.
@@ -661,10 +704,13 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
     original_dir = os.getcwd()
     os.chdir(staging_dir)
     try:
-        # Right-sized resource limits and max_instances from SERVICES cfg.
-        # Fallback defaults are intentionally small for OSS cost-efficiency.
-        resource_limits = cfg.get("resource_limits", {"memory": "1Gi", "cpu": "1"})
+        # Resource floor: 2Gi/1CPU per-service in the SERVICES dict
+        # (the AE container is mostly waiting on Gemini API responses).
+        resource_limits = cfg.get("resource_limits", {"memory": "2Gi", "cpu": "1"})
 
+        # min_instances/max_instances intentionally not set unless the
+        # SERVICES cfg overrides: AE's defaults give scale-to-zero
+        # between simulations and a sensible burst cap.
         deploy_kwargs = dict(
             agent_engine=a2a_agent,
             display_name=service_name,
@@ -672,12 +718,13 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
             requirements=requirements,
             extra_packages=staged_packages,
             env_vars=ae_env_vars,
-            min_instances=0,
-            max_instances=cfg.get("max_instances", 1),
+            min_instances=cfg.get("min_instances", 0),
             resource_limits=resource_limits,
             container_concurrency=5,
             gcs_dir_name=f"agent_engine/{service_name}",
         )
+        if "max_instances" in cfg:
+            deploy_kwargs["max_instances"] = cfg["max_instances"]
         if psc_config:
             deploy_kwargs["psc_interface_config"] = psc_config
         if sa:
