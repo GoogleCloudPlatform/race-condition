@@ -48,7 +48,7 @@
     "@angular/compiler-cli": "^21.2.1",
     "@ngx-env/builder": "^21.0.1",
     "@types/three": "^0.183.1",
-    "typescript": "~5.9.2",
+    "typescript": "~6.0.3",
     "vitest": "^4.1.4"
   }
 }
