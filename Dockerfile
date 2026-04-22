@@ -62,7 +62,7 @@ RUN npm run build
 WORKDIR /app
 
 # --- Python: dependency cache (rebuilt only when pyproject.toml/uv.lock change) ---
-FROM python:3.13-slim AS python-deps
+FROM python:3.14-slim AS python-deps
 WORKDIR /app
 ENV PYTHONUNBUFFERED=1
 RUN pip install --no-cache-dir uv==0.7.12
