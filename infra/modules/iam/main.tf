@@ -12,22 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+locals {
+  compute_sa      = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+  build_sa        = "serviceAccount:${coalesce(var.code_project_number, var.project_number)}@cloudbuild.gserviceaccount.com"
+  agent_engine_sa = "serviceAccount:agent-engine-sa@${var.project_id}.iam.gserviceaccount.com"
+}
+
 resource "google_service_account" "agent_engine" {
   account_id   = "agent-engine-sa"
   display_name = "Race Condition Agent Engine (Reasoning Engine) Service Account"
   project      = var.project_id
-}
-
-locals {
-  compute_sa = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
-  build_sa   = "serviceAccount:${coalesce(var.code_project_number, var.project_number)}@cloudbuild.gserviceaccount.com"
-  # Reference the resource attribute (not a hardcoded string) so every
-  # `google_project_iam_member` consuming `local.agent_engine_sa` picks
-  # up an implicit dependency on the SA resource. Without this edge,
-  # Terraform parallelizes the IAM bindings with SA creation and the
-  # IAM API races against eventual-consistency propagation -- producing
-  # `Service account ... does not exist` 400s on a fresh project.
-  agent_engine_sa = "serviceAccount:${google_service_account.agent_engine.email}"
 }
 
 resource "google_project_service_identity" "iap_sa" {
@@ -86,17 +80,6 @@ resource "google_project_iam_member" "compute_pubsub_publisher" {
   member  = local.compute_sa
 }
 
-# Grant the Cloud Build default compute SA Vertex AI access. Required by
-# the embedding-backfill Cloud Build step (cloudbuild-bootstrap.yaml in
-# the backend repo), which calls Vertex AI's gemini-embedding-001 model
-# to populate the rules table embeddings after seed-rules runs. The
-# default Cloud Build SA == the project's Compute Engine default SA.
-resource "google_project_iam_member" "cloudbuild_compute_aiplatform_user" {
-  project = var.project_id
-  role    = "roles/aiplatform.user"
-  member  = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
-}
-
 # --- Cross-project Cloud Build permissions ---
 
 resource "google_project_iam_member" "build_ar_admin" {
@@ -128,18 +111,6 @@ resource "google_project_iam_member" "build_sa_user" {
 resource "google_project_iam_member" "agent_engine_pubsub_publisher" {
   project = var.project_id
   role    = "roles/pubsub.publisher"
-  member  = local.agent_engine_sa
-}
-
-# AE agents (simulator, planners) call the gateway via Cloud Run
-# service-to-service auth (e.g. spawn_runners). The project-level grant
-# below allows invoking any Cloud Run service in the project; in OSS
-# deployments deploy.py also adds an explicit service-level binding on
-# the gateway service for defense in depth (project-level grants have
-# shown propagation timing issues for AE workloads).
-resource "google_project_iam_member" "agent_engine_run_invoker" {
-  project = var.project_id
-  role    = "roles/run.invoker"
   member  = local.agent_engine_sa
 }
 
@@ -249,13 +220,6 @@ resource "google_project_iam_member" "developer_alloydb_database_user" {
   for_each = toset(var.backend_writers)
   project  = var.project_id
   role     = "roles/alloydb.databaseUser"
-  member   = each.value
-}
-
-resource "google_project_iam_member" "developer_cloudsql_client" {
-  for_each = toset(var.backend_writers)
-  project  = var.project_id
-  role     = "roles/cloudsql.client"
   member   = each.value
 }
 

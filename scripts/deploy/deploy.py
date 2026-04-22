@@ -681,12 +681,39 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
             if url:
                 ae_env_vars[f"{svc_key.upper()}_INTERNAL_URL"] = url
 
+    # Database wiring for planner_with_memory's route store + rules tools.
+    # The agent code reads env vars named ``ALLOYDB_*`` regardless of the
+    # actual backend; in OSS those are wired to the Cloud SQL instance
+    # provisioned by Terraform (``database_ip`` resolves to the Cloud SQL
+    # private IP because ``enable_alloydb`` defaults to false). The
+    # ``USE_ALLOYDB=false`` switch flips the agent's tool layer to its
+    # Cloud SQL + Vertex AI embedding code path
+    # (see agents/planner_with_memory/memory/tools.py:_resolve_embedding_backend).
+    db_host = tf.get("database_ip") or ""
+    db_type = tf.get("database_type") or "cloud-sql"
+    db_secret_id = tf.get("database_password_secret_id") or ""
+    db_name = tf.get("database_name") or "postgres"
+    if db_host:
+        ae_env_vars["USE_ALLOYDB"] = "true" if db_type == "alloydb" else "false"
+        ae_env_vars["ALLOYDB_HOST"] = db_host
+        ae_env_vars["ALLOYDB_USER"] = "postgres"
+        ae_env_vars["ALLOYDB_DATABASE"] = db_name
+        ae_env_vars["ALLOYDB_SCHEMA"] = "public"
+        if db_secret_id:
+            # Vertex AI Agent Engine env supports Secret Manager refs as
+            # dicts: ``{"secret": "<secret-id>", "version": "latest"}``.
+            ae_env_vars["ALLOYDB_PASSWORD"] = {
+                "secret": db_secret_id,
+                "version": "latest",
+            }
+
     # Strip empty values: Vertex AI's reasoning_engine.spec.deployment_spec.env
     # validator rejects "Required field is not set" when an env var has an
     # empty value (e.g. GATEWAY_URL during the bootstrap phase, before the
     # Cloud Run gateway has been deployed by tf-apply-services). Missing keys
     # are accepted; empty values are not. Any vars stripped here can be
-    # populated post-bootstrap by an explicit AE update.
+    # populated post-bootstrap by an explicit AE update. Secret-ref dict
+    # values pass through (the != "" comparison is False for non-strings).
     ae_env_vars = {k: v for k, v in ae_env_vars.items() if v != ""}
 
     # PSC network attachment (from Terraform or env).

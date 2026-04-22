@@ -50,11 +50,6 @@ output "vpc_name" {
   value       = module.networking.vpc_name
 }
 
-output "vpc_subnet" {
-  description = "Serverless subnet name for Cloud Run direct VPC egress"
-  value       = module.networking.serverless_subnet_name
-}
-
 # =============================================================================
 # Redis
 # =============================================================================
@@ -125,20 +120,6 @@ output "agent_engine_sa_email" {
 }
 
 # =============================================================================
-# Agent Engine
-# =============================================================================
-
-output "staging_bucket" {
-  description = "GCS staging bucket for Agent Engine deployments"
-  value       = "gs://${module.project_apis.staging_bucket}"
-}
-
-output "psc_network_attachment" {
-  description = "PSC network attachment for Agent Engine VPC connectivity"
-  value       = module.networking.psc_network_attachment
-}
-
-# =============================================================================
 # Optional: GKE
 # =============================================================================
 
@@ -159,25 +140,5 @@ output "features" {
     runner_cloudrun = var.enable_runner_cloudrun
     maps_api_key    = var.enable_maps_api_key
     monitoring      = var.enable_monitoring
-    services        = var.enable_services
   }
-}
-
-# =============================================================================
-# Cloud Run services (only populated when enable_services=true)
-# =============================================================================
-
-output "service_urls" {
-  description = "Map of Cloud Run service name -> .run.app URL. Empty when enable_services=false."
-  value       = var.enable_services ? module.cloud_run_services[0].service_urls : {}
-}
-
-output "service_names" {
-  description = "Map of Cloud Run service key -> deployed name. Empty when enable_services=false."
-  value       = var.enable_services ? module.cloud_run_services[0].service_names : {}
-}
-
-output "gateway_url" {
-  description = "Gateway .run.app URL. Empty string when enable_services=false."
-  value       = var.enable_services ? module.cloud_run_services[0].gateway_url : ""
 }
