@@ -31,7 +31,7 @@
 # --- Go: build base with deps and shared source ---
 # Use $BUILDPLATFORM so the Go compiler runs natively (no QEMU emulation).
 # Cross-compilation is handled via GOOS/GOARCH env vars.
-FROM --platform=$BUILDPLATFORM golang:1.25 AS go-base
+FROM --platform=$BUILDPLATFORM golang:1.26 AS go-base
 ARG TARGETOS TARGETARCH
 ENV GOOS=${TARGETOS} GOARCH=${TARGETARCH}
 WORKDIR /app
