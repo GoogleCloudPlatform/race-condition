@@ -21,7 +21,7 @@ requires-python = ">=3.13"
 dependencies = [
     "a2a-sdk>=0.3.26,<0.4.0",
     "asyncpg>=0.30.0",
-    "google-adk[extensions,eval]==1.30.0",
+    "google-adk[extensions,eval]==1.31.1",
     "google-cloud-iamconnectorcredentials>=0.1.0",
     "google-cloud-aiplatform>=1.143.0",
     "google-adk-community>=0.4.1",
