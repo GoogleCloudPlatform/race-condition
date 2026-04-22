@@ -8,6 +8,7 @@ metadata:
     - validate_and_emit_a2ui
 ---
 
+<!-- [START a2ui_skill_spec] -->
 # A2UI Rendering
 
 ## A2UI Overview
@@ -234,3 +235,4 @@ When you do need to present rich UI:
 **You MUST call `validate_and_emit_a2ui` TWICE** — once for
 `surfaceUpdate` and once for `beginRendering`. Without `beginRendering`,
 the frontend will not render your surface.
+<!-- [END a2ui_skill_spec] -->

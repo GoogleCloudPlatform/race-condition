@@ -312,6 +312,7 @@ def _validate_surface_update(data: dict[str, Any]) -> list[dict[str, str]]:
 # ---------------------------------------------------------------------------
 
 
+# [START a2ui_validation_tool]
 async def validate_and_emit_a2ui(
     payload: str,
     tool_context: ToolContext,
@@ -328,6 +329,7 @@ async def validate_and_emit_a2ui(
         On failure: {"status": "error", "violations": [...], "suggestion": "..."}
             Each violation is a dict with "component_id", "field", and "message" keys.
     """
+    # [START a2ui_json_parsing]
     # 1. JSON parsing — detect concatenated objects and unwrap {"a2ui": ...}
     try:
         decoder = json.JSONDecoder()
@@ -392,7 +394,9 @@ async def validate_and_emit_a2ui(
     # the wrapper is the tool's *output* format, not its input format).
     if "a2ui" in data and isinstance(data["a2ui"], dict) and len(data) == 1:
         data = data["a2ui"]
+    # [END a2ui_json_parsing]
 
+    # [START a2ui_type_dispatch]
     # 2. Message type dispatch
     detected_type = None
     for msg_type in VALID_MESSAGE_TYPES:
@@ -412,11 +416,14 @@ async def validate_and_emit_a2ui(
             ],
             "suggestion": ("Include one of: beginRendering, surfaceUpdate, dataModelUpdate, or deleteSurface."),
         }
+    # [END a2ui_type_dispatch]
 
+    # [START a2ui_validation_passes]
     # 3. For surfaceUpdate, run full component validation
     violations: list[dict[str, str]] = []
     if detected_type == "surfaceUpdate":
         violations = _validate_surface_update(data)
+    # [END a2ui_validation_passes]
 
     # [START a2ui_validation_result]
     if violations:
@@ -433,3 +440,4 @@ async def validate_and_emit_a2ui(
         "a2ui": data,
     }
     # [END a2ui_validation_result]
+# [END a2ui_validation_tool]
