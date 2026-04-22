@@ -37,7 +37,7 @@
     "protobufjs": "^8.0.0",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",
-    "three": "^0.183.1",
+    "three": "^0.184.0",
     "tslib": "^2.3.0",
     "tweakpane": "^4.0.5",
     "zone.js": "^0.16.1"
@@ -47,7 +47,7 @@
     "@angular/cli": "^21.2.1",
     "@angular/compiler-cli": "^21.2.1",
     "@ngx-env/builder": "^21.0.1",
-    "@types/three": "^0.183.1",
+    "@types/three": "^0.184.0",
     "typescript": "~5.9.2",
     "vitest": "^4.1.4"
   }
