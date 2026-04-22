@@ -1,0 +1,344 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use '../../../../../../mixins' as *;
+
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  box-sizing: border-box;
+}
+
+.material-icons {
+  font-size: inherit;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.sim-panel-wrapper {
+  position: fixed;
+  top: container-scaled-cqw(8);
+  right: container-scaled-cqw(8);
+  bottom: container-scaled-cqw(8);
+
+  width: 26vw;
+
+  border-radius: container-scaled-cqw(60);
+
+  overflow: hidden;
+
+  container-type: inline-size;
+
+  --container-width: var(--simulation-panel-container-width);
+
+
+  .simulation-running-panel {
+    position: fixed;
+
+    right: container-scaled-cqw(8);
+    bottom: container-scaled-cqw(8);
+
+    width: 26vw;
+    height: fit-content;
+    padding: container-scaled-cqw(40);
+
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: container-scaled-cqw(60);
+    background: linear-gradient(180deg, rgba(35, 40, 42, 0.30) 0%, rgba(24, 24, 24, 0.30) 100%);
+    backdrop-filter: blur(25px);
+
+    pointer-events: all;
+
+    color: white;
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+
+      h1 {
+        @include Headline1;
+        font-size: container-scaled-cqw(32);
+        ;
+        color: white;
+      }
+    }
+
+    .distance {
+      width: 100%;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      padding-bottom: container-scaled-cqw(16);
+
+
+      .stat {
+        width: 100%;
+      }
+    }
+
+    .statistics {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      // margin-block: container-scaled-cqw(32);
+      gap: container-scaled-cqw(8);
+      width: 100%;
+      border-top: 2px solid rgba(255, 255, 255, 0.20);
+      padding: container-scaled-cqw(16) 0 container-scaled-cqw(32) 0;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 45%;
+      gap: container-scaled-cqw(10);
+      text-align: center;
+    }
+
+    .value {
+      color: var(--neutral-white-100, #FFF);
+      font-family: "Google Sans Mono";
+      font-size: container-scaled-cqw(18);
+
+      font-style: normal;
+      font-weight: 400;
+      line-height: 130%;
+    }
+
+    .label {
+      @include Label;
+      font-size: container-scaled-cqw(15);
+      min-height: container-scaled-cqw(27);
+
+
+      span {
+        font-size: container-scaled-cqw(12);
+        display: block;
+      }
+    }
+
+    .button-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: container-scaled-cqw(8);
+
+
+      .followButton {
+        background: linear-gradient(180deg, rgba(35, 40, 42, 0.30) 0%, rgba(24, 24, 24, 0.30) 100%);
+        backdrop-filter: blur(25px);
+        border: none;
+        padding: container-scaled-cqw(16) container-scaled-cqw(45);
+        border-radius: container-scaled-cqw(64);
+
+        color: var(--neutral-white-100, #FFF);
+        text-align: center;
+        font-family: "Google Sans Display";
+        font-size: container-scaled-cqw(14);
+
+        font-style: normal;
+        font-weight: 500;
+        line-height: 105%;
+
+
+        border-radius: container-scaled-cqw(64);
+        border: none;
+        outline: container-scaled-cqw(2.5) solid var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        background: none;
+        cursor: pointer;
+
+        transition: all var(--agent-tab-pill-transition-ms) ease;
+
+        &:hover {
+          background: var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+        }
+
+        &:active {
+          outline: container-scaled-cqw(2.5) solid var(--neutral-black-20, rgba(0, 0, 0, 0.20));
+          background: var(--neutral-black-20, rgba(0, 0, 0, 0.20));
+        }
+
+
+
+        &:disabled {
+          background: none;
+          outline: container-scaled-cqw(2) solid var(--neutral-white-5);
+          color: var(--neutral-white-60);
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    @property --progress {
+      syntax: '<number>';
+      initial-value: 0;
+      inherits: true;
+    }
+
+    .progress-container {
+      position: relative;
+      border-radius: container-scaled-cqw(80);
+
+
+      margin-block: container-scaled-cqw(32);
+
+
+      width: 80%;
+      height: auto;
+      aspect-ratio: 372 / 105;
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        padding: container-scaled-cqw(12);
+        border-radius: inherit;
+
+        background: conic-gradient(from 0deg,
+            rgba(30, 136, 253, 1) 0%,
+            rgba(254, 43, 39, 1) min(34%, calc(var(--progress) * 1%)),
+            rgba(255, 185, 0, 1) min(52%, calc(var(--progress) * 1%)),
+            rgba(0, 171, 73, 1) min(77%, calc(var(--progress) * 1%)),
+            rgba(30, 136, 253, 1) calc(var(--progress) * 1%),
+            transparent calc(var(--progress) * 1%));
+
+        filter: blur(10px);
+
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+      }
+
+      &::before {
+        z-index: -1;
+
+        background: rgba(0, 0, 0, 0.5);
+        filter: none;
+
+      }
+
+      .time {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        @include Headline2;
+        font-size: container-scaled-cqw(24);
+
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        // gap: container-scaled-cqw(8);
+        margin: 0;
+        max-width: 100%;
+        padding-inline: container-scaled-cqw(4);
+        white-space: nowrap;
+
+        gap: container-scaled-cqw(9);
+
+
+        .time-part {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: container-scaled-cqw(4);
+
+          min-width: container-scaled-cqw(63);
+
+
+          .time-num {
+            display: inline-block;
+
+            font-variant-numeric: tabular-nums;
+
+            color: var(--neutral-white-100, #FFF);
+            text-align: center;
+            font-family: "Google Sans Display";
+            font-size: container-scaled-cqw(24);
+            font-style: normal;
+            font-weight: 500;
+            line-height: 130%;
+
+          }
+
+          .time-unit {
+            color: var(--neutral-white-60, rgba(255, 255, 255, 0.60));
+            text-align: center;
+            font-family: "Google Sans Display";
+            font-size: container-scaled-cqw(14);
+            font-style: normal;
+            font-weight: 400;
+            line-height: 130%;
+
+          }
+        }
+      }
+
+
+    }
+  }
+
+  .expand-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+    padding: container-scaled-cqw(10);
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    transform: rotate(45deg);
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      background 0.15s;
+
+    font-size: container-scaled-cqw(18);
+
+    &.sim {
+      padding: container-scaled-cqw(10);
+      font-size: container-scaled-cqw(18);
+    }
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.06);
+    }
+  }
+}

@@ -1,0 +1,271 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use '../../../../../../mixins' as *;
+
+:host {
+  position: relative;
+  margin-left: auto;
+}
+
+.agent-settings-menu {
+  position: relative;
+}
+
+.agent-settings-menu__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.agent-settings-menu__backdrop--open {
+  pointer-events: all;
+}
+
+.agent-settings-menu__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: container-scaled-cqw(10);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  background: var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+  border: none;
+  border-radius: 50%;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.agent-settings-menu__trigger:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.agent-settings-menu__trigger--open {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.agent-settings-menu__trigger--open .material-icons {
+  transform: rotate(30deg);
+}
+
+.agent-settings-menu__trigger .material-icons {
+  font-size: container-scaled-cqw(18);
+  transition: transform 0.3s;
+}
+
+.agent-settings-menu__trigger[disabled] {
+  cursor: default;
+}
+
+.agent-settings-menu__trigger[disabled]:hover {
+  color: rgba(255, 255, 255, 0.4);
+  background: var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+}
+
+.agent-settings-menu__dropdown {
+  position: absolute;
+  top: calc(100% + container-scaled-cqw(8));
+  right: 0;
+  z-index: 100;
+  min-width: container-scaled-cqw(180);
+  padding: container-scaled-cqw(24);
+  white-space: nowrap;
+  border-radius: container-scaled-cqw(24) container-scaled-cqw(4) container-scaled-cqw(24) container-scaled-cqw(24);
+
+  @include PanelBackground;
+  background: #1f1f1f;
+}
+
+.agent-settings-menu__heading {
+  padding: container-scaled-cqw(2) 0;
+  font-family: 'Google Sans Display';
+  font-size: container-scaled-cqw(18);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 105%;
+  color: #fff;
+}
+
+.agent-settings-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: container-scaled-cqw(4);
+  margin-top: container-scaled-cqw(24);
+}
+
+.agent-settings-menu__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: container-scaled-cqw(8);
+  padding: container-scaled-cqw(5) container-scaled-cqw(4);
+  font-size: container-scaled-cqw(12);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: default;
+  border-radius: container-scaled-cqw(6);
+  transition: background 0.12s;
+}
+
+.agent-settings-menu__row:hover {
+  background: none;
+}
+
+.agent-settings-menu__row--gateway-download:hover {
+  background: none;
+}
+
+.agent-settings-menu__caption {
+  font-family: 'Google Sans Display';
+  font-size: container-scaled-cqw(15);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 105%;
+  color: #fff;
+}
+
+.agent-settings-menu__download-btn {
+  margin: 0;
+  margin-left: auto;
+  padding: container-scaled-cqw(8) container-scaled-cqw(20);
+  font: inherit;
+  font-size: container-scaled-cqw(12);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(10, 10, 12, 0.92);
+  cursor: pointer;
+  background: #fff;
+  border: none;
+  border-radius: container-scaled-cqw(9999);
+  transition: opacity 0.15s ease;
+}
+
+.agent-settings-menu__download-btn:hover {
+  opacity: 0.92;
+}
+
+.agent-settings-menu__download-btn:active {
+  opacity: 0.85;
+}
+
+.agent-settings-menu__download-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.agent-settings-menu__download-btn:disabled:hover {
+  opacity: 0.45;
+}
+
+.agent-settings-menu__timescale-input {
+  width: container-scaled-cqw(72);
+  min-width: 0;
+  margin-left: auto;
+  padding: container-scaled-cqw(6) container-scaled-cqw(10);
+  font: inherit;
+  font-size: container-scaled-cqw(14);
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  appearance: textfield;
+  background: rgba(12, 12, 14, 0.95);
+  border: container-scaled-cqw(1) solid rgba(255, 255, 255, 0.2);
+  border-radius: container-scaled-cqw(8);
+}
+
+.agent-settings-menu__timescale-input::-webkit-outer-spin-button,
+.agent-settings-menu__timescale-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.agent-settings-menu__toggle {
+  display: flex;
+  align-items: center;
+  gap: container-scaled-cqw(8);
+  margin-left: auto;
+  cursor: default;
+}
+
+.agent-settings-menu__toggle-track {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-width: container-scaled-cqw(140);
+  padding: container-scaled-cqw(3);
+  background: rgba(204, 204, 204, 0.11);
+  border-radius: container-scaled-cqw(9999);
+}
+
+.agent-settings-menu__toggle-thumb {
+  position: absolute;
+  top: container-scaled-cqw(3);
+  bottom: container-scaled-cqw(3);
+  left: var(--thumb-x, #{container-scaled-cqw(3)});
+  z-index: 0;
+  width: var(--thumb-w, 0px);
+  pointer-events: none;
+  background: #fff;
+  border-radius: container-scaled-cqw(9999);
+  transition:
+    left 0.2s ease,
+    width 0.2s ease;
+}
+
+.agent-settings-menu__toggle-segment {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: container-scaled-cqw(5) container-scaled-cqw(10);
+  font-family: 'Google Sans Display';
+  font-size: container-scaled-cqw(14);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 105%;
+  color: var(--neutral-white-60, rgba(255, 255, 255, 0.6));
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: container-scaled-cqw(9999);
+  transition: color 0.2s ease;
+}
+
+.agent-settings-menu__toggle-segment[aria-pressed='true'] {
+  font-family: 'Google Sans Display';
+  font-size: container-scaled-cqw(14);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 105%;
+  color: #323232;
+  text-align: center;
+}
+
+.agent-settings-menu__toggle-segment:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

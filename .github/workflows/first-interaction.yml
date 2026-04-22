@@ -1,0 +1,85 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Surfaces first-time contributor PRs so maintainers know to give them
+# a closer look. Adds a label and posts a brief welcome comment.
+#
+# Uses pull_request_target so the workflow has write access to the base
+# repo when the PR comes from a fork. We never check out PR code here;
+# the job only calls the GitHub API.
+
+name: First Interaction
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Check author history and label/comment
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const prNumber = context.payload.pull_request.number;
+
+            // Skip bots; Dependabot and friends don't need a welcome.
+            if (context.payload.pull_request.user.type === 'Bot') {
+              core.info(`Skipping bot author: ${author}`);
+              return;
+            }
+
+            const { data: priorPRs } = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${context.repo.owner}/${context.repo.repo} is:pr author:${author}`,
+              per_page: 2,
+            });
+
+            // The current PR counts as one result. More than one means
+            // they've been here before.
+            if (priorPRs.total_count > 1) {
+              core.info(`${author} has prior PRs; nothing to do.`);
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: ['first-time-contributor'],
+            });
+
+            const body = [
+              `Thanks for the PR, @${author}. This is your first one in this repo, so a quick heads up on what happens next:`,
+              ``,
+              `- A maintainer needs to approve CI before it runs. That is a security policy for outside contributors, not a comment on your code.`,
+              `- Code owners from \`@GoogleCloudPlatform/race-condition-maintainers\` will be auto-requested for review.`,
+              `- Commits need to be signed and the branch history linear. \`CONTRIBUTING.md\` covers the local commands if anything trips.`,
+              ``,
+              `Someone will be in touch shortly.`,
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body,
+            });

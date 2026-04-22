@@ -1,0 +1,98 @@
+# General
+.DS_Store
+__MACOSX/
+.AppleDouble
+.LSOverride
+Icon[]
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Go
+bin/
+dist/
+.allowed_signers
+
+# Environment Variables
+.env
+.env.local
+.env.recovered
+
+# Worktree Support
+.worktrees/
+.port-slot
+docker-compose.override.yml
+
+# Simulation Artifacts
+*.log
+logs/
+.adk/
+/frontend
+/gateway
+/stress
+.!*
+
+# Coverage Artifacts
+.coverage
+coverage.out
+coverage.html
+coverage.xml
+htmlcov/
+
+agents/catalog.json
+
+# Worktrees
+.worktrees
+
+# AlloyDB Auth Proxy binary (installed via scripts/core/install_alloydb_proxy.sh)
+alloydb-auth-proxy
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+
+# Angular
+.angular/
+
+# Local IDE/agent scratch
+.vscode/
+# Track the OSS template's .gemini/config.yaml (overlaid into the public repo
+# during `make oss-sync`; needs to be committed even though .gemini/ is ignored).
+!scripts/oss/templates/.gemini/
+
+# Diagnostic harness outputs (per-trial JSON dumps from
+# scripts/diagnostics/demo1_harness.py); see
+# docs/plans/2026-04-18-bug-b-h1-parallel-tool-revert-design.md.
+.harness-runs/
+
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+infra/*.tfstate
+infra/*.tfstate.*
+infra/tfplan

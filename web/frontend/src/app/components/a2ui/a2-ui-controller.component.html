@@ -1,0 +1,351 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!-- [START a2ui_template_entry] -->
+<div *ngIf="rootNode()" class="a2ui-controller">
+  <ng-container *ngTemplateOutlet="renderer; context: { node: rootNode() }"></ng-container>
+</div>
+
+<ng-template #renderer let-node="node">
+  <ng-container *ngIf="node && shouldRenderA2uiNode(node)">
+    <div
+      [class]="
+        'a2ui-' +
+        getType(node) +
+        (isExpandableSummaryCard(node) ? ' a2ui-Card-expandable' : '') +
+        (getType(node) === 'Card' && isFinancialRefusalSurface()
+          ? ' a2ui-Card--financial-refusal'
+          : getType(node) === 'Card' && isFinancialUpdateSurface()
+            ? ' a2ui-Card--financial-update'
+            : getType(node) === 'Card' && isRootCardListRoutesSurface(node)
+              ? ' a2ui-Card--route-list'
+              : '')
+      "
+      [attr.data-id]="getId(node)"
+      [attr.data-demo]="demoService.activeDemo()"
+      [class.expanded]="isExpandableSummaryCard(node) && isCardExpanded(node)"
+      (click)="onExpandableShellClick($event, node)"
+    >
+      <ng-container [ngSwitch]="getType(node)">
+        <!-- [END a2ui_template_entry] -->
+        <!-- Layout Containers -->
+        <ng-container *ngSwitchCase="'Card'">
+          <ng-container *ngIf="isExpandableSummaryCard(node); else cardPlain">
+            <div
+              class="a2ui-Card-expandable-summary"
+              role="button"
+              tabindex="0"
+              [attr.aria-expanded]="isCardExpanded(node)"
+              (keydown)="onExpandableSummaryKeydown($event, node)"
+            >
+              <div class="a2ui-Card-expandable-summary-main">
+                <ng-container
+                  *ngTemplateOutlet="
+                    renderer;
+                    context: { node: resolveNode(getExpandableHeaderChildRef(node)) }
+                  "
+                ></ng-container>
+              </div>
+            </div>
+            <div
+              class="a2ui-Card-expandable-body-wrap"
+              [class.a2ui-Card-expandable-body-wrap--open]="isCardExpanded(node)"
+              [attr.aria-hidden]="!isCardExpanded(node)"
+            >
+              <div class="a2ui-Card-expandable-body-inner">
+                <div
+                  class="a2ui-Column a2ui-Card-expandable-body"
+                  [attr.data-id]="getExpandableColumnDataId(node)"
+                >
+                  <ng-container *ngFor="let child of getExpandableMiddleChildRefs(node)">
+                    <ng-container
+                      *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+                    ></ng-container>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+            <div class="a2ui-Card-expandable-footer">
+              <ng-container
+                *ngTemplateOutlet="
+                  renderer;
+                  context: { node: resolveNode(getExpandableFooterChildRef(node)) }
+                "
+              ></ng-container>
+            </div>
+          </ng-container>
+          <ng-template #cardPlain>
+            <ng-container *ngFor="let child of getChildren(node)">
+              <ng-container
+                *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+              ></ng-container>
+            </ng-container>
+          </ng-template>
+        </ng-container>
+
+        <!-- [START a2ui_template_column] -->
+        <ng-container *ngSwitchCase="'Column'">
+          <ng-container *ngFor="let child of getChildren(node)">
+            <ng-container
+              *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+            ></ng-container>
+          </ng-container>
+        </ng-container>
+        <!-- [END a2ui_template_column] -->
+
+        <ng-container *ngSwitchCase="'Row'">
+          <ng-container *ngIf="isImageTextRow(node); else normalRow">
+            <div class="image-text-row">
+              <img
+                [src]="getImageFromRow(node)"
+                [class]="
+                  'a2ui-image ' + 'image-' + getUsageHint(resolveNode(getChildren(node)[0]))
+                "
+              />
+              <span class="overlay-text">{{ getTextFromRow(node) }}</span>
+            </div>
+          </ng-container>
+          <ng-template #normalRow>
+            <ng-container *ngFor="let child of getChildren(node)">
+              <ng-container
+                *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+              ></ng-container>
+            </ng-container>
+          </ng-template>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'List'">
+          <ng-container *ngFor="let child of getChildren(node)">
+            <ng-container
+              *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+            ></ng-container>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'Tabs'">
+          <div class="tabs-header">
+            <button
+              *ngFor="let tab of getTabItems(node); let i = index"
+              [class.active]="isActiveTab(node, i)"
+              (click)="setActiveTab(node, i)"
+            >
+              {{ getTabTitle(tab) }}
+            </button>
+          </div>
+          <div class="tabs-content">
+            <ng-container *ngFor="let tab of getTabItems(node); let i = index">
+              <ng-container *ngIf="isActiveTab(node, i)">
+                <ng-container
+                  *ngTemplateOutlet="renderer; context: { node: resolveNode(getTabChild(tab)) }"
+                ></ng-container>
+              </ng-container>
+            </ng-container>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'Modal'">
+          <div class="modal-entry-point" (click)="openModal(node)">
+            <ng-container
+              *ngTemplateOutlet="
+                renderer;
+                context: { node: resolveNode(getModalEntryPoint(node)) }
+              "
+            ></ng-container>
+          </div>
+          <div *ngIf="isModalOpen(node)" class="modal-backdrop" (click)="closeModal(node)">
+            <div class="modal-panel" (click)="$event.stopPropagation()">
+              <button class="modal-close" (click)="closeModal(node)" aria-label="Close">
+                <span class="material-icons">close</span>
+              </button>
+              <div class="modal-content">
+                <ng-container
+                  *ngTemplateOutlet="
+                    renderer;
+                    context: { node: resolveNode(getModalContent(node)) }
+                  "
+                ></ng-container>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- [START a2ui_template_display] -->
+        <!-- Display Elements -->
+        <span *ngSwitchCase="'Text'" [class]="'text-' + getUsageHint(node)">
+          {{ getText(node) }}
+        </span>
+
+        <span *ngSwitchCase="'Icon'" [class]="'material-icons icon'">
+          {{ getIconName(node) }}
+        </span>
+
+        <img
+          *ngSwitchCase="'Image'"
+          [src]="getUrl(node)"
+          [class]="'a2ui-image ' + 'image-' + getUsageHint(node)"
+        />
+        <!-- [END a2ui_template_display] -->
+
+        <video
+          *ngSwitchCase="'Video'"
+          [src]="getUrl(node)"
+          controls
+          [attr.autoplay]="isAutoplay(node) || null"
+          [attr.loop]="isLoop(node) || null"
+          [attr.muted]="isMuted(node) || null"
+          [attr.playsinline]="isPlaysinline(node) || null"
+        ></video>
+
+        <audio
+          *ngSwitchCase="'AudioPlayer'"
+          [src]="getUrl(node)"
+          controls
+          [attr.autoplay]="isAutoplay(node) || null"
+          [attr.loop]="isLoop(node) || null"
+          [attr.muted]="isMuted(node) || null"
+        ></audio>
+
+        <div
+          *ngSwitchCase="'Divider'"
+          class="divider"
+          [class.horizontal]="getAxis(node) === 'horizontal'"
+          [class.vertical]="getAxis(node) === 'vertical'"
+        ></div>
+
+        <!-- [START a2ui_template_button] -->
+        <!-- Interactive Controls -->
+        <ng-container *ngSwitchCase="'Button'">
+          <button
+            *ngIf="!(isScorecardExpandToggleButton(node) && alwaysExpandExpandableCards())"
+            [class.primary]="isPrimary(node)"
+            [class.loading]="loadingButtonIds().has(getId(node))"
+            [class.a2ui-Button-runSimulation]="isRunSimulationButton(node)"
+            [disabled]="loadingButtonIds().has(getId(node))"
+            (click)="handleButtonClick($event, node)"
+          >
+            <span *ngIf="isScorecardExpandToggleButton(node)" class="material-icons unfold">{{
+              isOpenCardExpanded(node) ? 'unfold_less' : 'unfold_more'
+            }}</span>
+            <ng-container *ngIf="isRunSimulationButton(node)">
+              <span class="a2ui-Button-runSimulation-stack">
+                <span
+                  class="a2ui-Button-runSimulation-layer"
+                  [class.is-visible]="!loadingButtonIds().has(getId(node))"
+                >
+                  <span class="material-icons">play_arrow</span>
+                  <ng-container *ngFor="let child of getChildren(node)">
+                    <ng-container
+                      *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+                    ></ng-container>
+                  </ng-container>
+                </span>
+                <span
+                  class="a2ui-Button-runSimulation-layer"
+                  [class.is-visible]="loadingButtonIds().has(getId(node))"
+                >
+                  <span class="run-simulation-running-label">{{
+                    isAgentWorking() ? 'Running...' : 'Simulated'
+                  }}</span>
+                </span>
+              </span>
+            </ng-container>
+            <ng-container *ngIf="!isRunSimulationButton(node)">
+              <ng-container
+                *ngIf="
+                  isScorecardExpandToggleButton(node) && isOpenCardExpanded(node);
+                  else scorecardToggleLabel
+                "
+              >
+                <span class="close-report-label">Close report</span></ng-container
+              >
+              <ng-template #scorecardToggleLabel>
+                <ng-container *ngFor="let child of getChildren(node)">
+                  <ng-container
+                    *ngTemplateOutlet="renderer; context: { node: resolveNode(child) }"
+                  ></ng-container>
+                </ng-container>
+              </ng-template>
+            </ng-container>
+          </button>
+        </ng-container>
+        <!-- [END a2ui_template_button] -->
+
+        <input
+          *ngSwitchCase="'TextField'"
+          [type]="getFieldType(node)"
+          [placeholder]="getLabel(node)"
+          [value]="getText(node)"
+        />
+
+        <div class="datetime-input-wrapper" *ngSwitchCase="'DateTimeInput'">
+          <span class="material-icons datetime-icon">
+            {{ getDateTimeIcon(node) }}
+          </span>
+          <input
+            [type]="getDateTimeInputType(node)"
+            [value]="getDateTimeValue(node)"
+            class="datetime-input"
+          />
+        </div>
+
+        <div class="a2ui-Slider" *ngSwitchCase="'Slider'">
+          <div class="slider-track">
+            <div class="label">{{ getLabel(node) }}</div>
+            <div id="fill" class="gradient-fill">
+              <div class="thumb-line"></div>
+            </div>
+          </div>
+          <input
+            type="range"
+            [value]="getValue(node)"
+            [min]="getMinValue(node)"
+            [max]="getMaxValue(node)"
+            (input)="handleSliderChange(node, $event)"
+          />
+        </div>
+
+        <div class="a2ui-CheckBox" *ngSwitchCase="'CheckBox'">
+          <label class="checkbox-label">
+            <input type="checkbox" [checked]="getValue(node)" />
+            <span class="checkbox-custom"></span>
+            <span class="checkbox-text">{{ getLabel(node) }}</span>
+          </label>
+        </div>
+
+        <div class="multiple-choice-options" *ngSwitchCase="'MultipleChoice'">
+          <button
+            *ngFor="let option of getOptions(node)"
+            class="multiple-choice-option"
+            [class.selected]="isOptionSelected(node, $any(option).value)"
+            (click)="handleButtonClick($event, node)"
+          >
+            <span class="material-icons mc-icon">
+              {{
+                isOptionSelected(node, $any(option).value) ? 'check_circle' : 'radio_button_unchecked'
+              }}
+            </span>
+            <span class="mc-label">{{ resolveOptionLabel(option) }}</span>
+          </button>
+        </div>
+
+        <!-- Fallback for unknown types -->
+        <div *ngSwitchDefault class="unknown-component">
+          Unknown component type: {{ getType(node) }}
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+</ng-template>

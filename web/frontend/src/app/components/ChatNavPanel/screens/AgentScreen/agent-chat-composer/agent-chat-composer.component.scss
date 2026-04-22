@@ -1,0 +1,127 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ */
+
+@use '../../../../../../mixins' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.agent-chat-composer__input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: container-scaled-cqw(8);
+  width: 100%;
+  height: fit-content;
+  padding: container-scaled-cqw(24);
+}
+
+.agent-chat-composer__loader-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.agent-chat-composer__loader-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.agent-chat-composer__loader-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.agent-chat-composer__textarea {
+  @include Headline2;
+
+  width: 100%;
+  height: auto;
+  padding: container-scaled-cqw(24);
+  padding-right: container-scaled-cqw(100);
+  overflow-y: hidden;
+  font-size: container-scaled-cqw(24);
+  color: rgba(255, 255, 255, 0.85);
+  resize: none;
+  outline: none;
+  background: rgba(0, 0, 0, 0.15);
+  border: none;
+  border-radius: container-scaled-cqw(32);
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.agent-chat-composer__textarea::-webkit-scrollbar {
+  display: none;
+}
+
+.agent-chat-composer__textarea:disabled {
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.agent-chat-composer__send {
+  position: absolute;
+  right: container-scaled-cqw(48);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 8%;
+  height: auto;
+  padding: 0;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.agent-chat-composer__send--cached {
+  right: container-scaled-cqw(105);
+}
+
+.agent-chat-composer__send .material-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: container-scaled-cqw(22);
+  color: #ffffff;
+}
+
+.agent-chat-composer__send:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.agent-chat-composer__send:disabled {
+  cursor: default;
+  opacity: 0.25;
+  transform: none;
+}
+
+.agent-chat-composer__input--loading .agent-chat-composer__send {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+@keyframes agent-chat-composer-loader-bounce {
+
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.6);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

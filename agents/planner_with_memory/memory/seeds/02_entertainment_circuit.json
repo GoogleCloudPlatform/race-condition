@@ -1,0 +1,1136 @@
+{
+  "route_id": "seed-0002-entertainment-circuit-e5f6g7h8",
+  "name": "Entertainment Circuit",
+  "route_data": {
+    "type": "FeatureCollection",
+    "name": "Entertainment Circuit",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "marker-type": "start",
+          "name": "Start Line"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.172851,
+            36.086141
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "marker-type": "finish",
+          "name": "Finish Line"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.164035,
+            36.114504
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Las Vegas Boulevard",
+          "route_type": "marathon",
+          "distance_mi": 26.724,
+          "certified": true
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.172851,
+              36.086141
+            ],
+            [
+              -115.172908,
+              36.093604
+            ],
+            [
+              -115.172932,
+              36.097313
+            ],
+            [
+              -115.172955,
+              36.100858
+            ],
+            [
+              -115.172975,
+              36.108764
+            ],
+            [
+              -115.172869,
+              36.114682
+            ],
+            [
+              -115.17284,
+              36.11849
+            ],
+            [
+              -115.172601,
+              36.119587
+            ],
+            [
+              -115.171965,
+              36.12121
+            ],
+            [
+              -115.169311,
+              36.125471
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Spring Mountain Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.169311,
+              36.125471
+            ],
+            [
+              -115.173163,
+              36.125508
+            ],
+            [
+              -115.17672,
+              36.125953
+            ],
+            [
+              -115.180632,
+              36.126217
+            ],
+            [
+              -115.190211,
+              36.12652
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Valley View Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.190211,
+              36.12652
+            ],
+            [
+              -115.190156,
+              36.122758
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Twain Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.190156,
+              36.122758
+            ],
+            [
+              -115.194715,
+              36.122719
+            ],
+            [
+              -115.199254,
+              36.122666
+            ],
+            [
+              -115.203033,
+              36.122631
+            ],
+            [
+              -115.208152,
+              36.122538
+            ],
+            [
+              -115.216502,
+              36.122172
+            ],
+            [
+              -115.224925,
+              36.121778
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Jones Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.224925,
+              36.121778
+            ],
+            [
+              -115.224949,
+              36.125442
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Spring Mountain Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.224949,
+              36.125442
+            ],
+            [
+              -115.233948,
+              36.125586
+            ],
+            [
+              -115.242999,
+              36.12572
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Rainbow Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.242999,
+              36.12572
+            ],
+            [
+              -115.242988,
+              36.12948
+            ],
+            [
+              -115.242944,
+              36.136816
+            ],
+            [
+              -115.242931,
+              36.144152
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sahara Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.242931,
+              36.144152
+            ],
+            [
+              -115.247425,
+              36.144026
+            ],
+            [
+              -115.24967,
+              36.143967
+            ],
+            [
+              -115.251935,
+              36.143905
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Tenaya Way"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.251935,
+              36.143905
+            ],
+            [
+              -115.251942,
+              36.136619
+            ],
+            [
+              -115.252005,
+              36.129335
+            ],
+            [
+              -115.251998,
+              36.125643
+            ],
+            [
+              -115.251976,
+              36.121917
+            ],
+            [
+              -115.251957,
+              36.114574
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Flamingo Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.251957,
+              36.114574
+            ],
+            [
+              -115.242974,
+              36.114536
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Rainbow Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.242974,
+              36.114536
+            ],
+            [
+              -115.242997,
+              36.110626
+            ],
+            [
+              -115.243058,
+              36.103477
+            ],
+            [
+              -115.243088,
+              36.099799
+            ],
+            [
+              -115.242944,
+              36.092429
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Hacienda Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.242944,
+              36.092429
+            ],
+            [
+              -115.234061,
+              36.092525
+            ],
+            [
+              -115.225073,
+              36.092625
+            ],
+            [
+              -115.21657,
+              36.093128
+            ],
+            [
+              -115.207951,
+              36.093616
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Decatur Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.207951,
+              36.093616
+            ],
+            [
+              -115.207915,
+              36.086348
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Russell Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.207915,
+              36.086348
+            ],
+            [
+              -115.203845,
+              36.086358
+            ],
+            [
+              -115.1992,
+              36.08633
+            ],
+            [
+              -115.194532,
+              36.08634
+            ],
+            [
+              -115.189874,
+              36.086314
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Valley View Boulevard"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.189874,
+              36.086314
+            ],
+            [
+              -115.189916,
+              36.082665
+            ],
+            [
+              -115.189992,
+              36.075347
+            ],
+            [
+              -115.190008,
+              36.071746
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Sunset Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.190008,
+              36.071746
+            ],
+            [
+              -115.180738,
+              36.070927
+            ],
+            [
+              -115.176859,
+              36.070889
+            ],
+            [
+              -115.172406,
+              36.071123
+            ],
+            [
+              -115.163478,
+              36.071233
+            ],
+            [
+              -115.154589,
+              36.07133
+            ],
+            [
+              -115.146103,
+              36.07154
+            ],
+            [
+              -115.141217,
+              36.071622
+            ],
+            [
+              -115.134528,
+              36.071755
+            ],
+            [
+              -115.127784,
+              36.071695
+            ],
+            [
+              -115.125484,
+              36.071659
+            ],
+            [
+              -115.123791,
+              36.071635
+            ],
+            [
+              -115.118705,
+              36.071597
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Eastern Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.118705,
+              36.071597
+            ],
+            [
+              -115.118759,
+              36.078803
+            ],
+            [
+              -115.118814,
+              36.086189
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Russell Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.118814,
+              36.086189
+            ],
+            [
+              -115.125387,
+              36.086356
+            ],
+            [
+              -115.126643,
+              36.08666
+            ],
+            [
+              -115.129065,
+              36.088388
+            ],
+            [
+              -115.130535,
+              36.088917
+            ],
+            [
+              -115.136898,
+              36.088934
+            ],
+            [
+              -115.141808,
+              36.088929
+            ],
+            [
+              -115.144503,
+              36.089328
+            ],
+            [
+              -115.146349,
+              36.089362
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Paradise Road"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.146349,
+              36.089362
+            ],
+            [
+              -115.14982,
+              36.101028
+            ],
+            [
+              -115.152058,
+              36.107974
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Harmon Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.152058,
+              36.107974
+            ],
+            [
+              -115.163958,
+              36.108023
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Hacienda Avenue"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -115.163958,
+              36.108023
+            ],
+            [
+              -115.164035,
+              36.114504
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.17538809410308,
+            36.125786371345484
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 3.1,
+          "km": 4.989
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.22493150706947,
+            36.12277141260665
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 6.2,
+          "km": 9.978
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.25193683141613,
+            36.14199875744537
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 9.3,
+          "km": 14.967
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.24305053589995,
+            36.10435176805307
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 12.4,
+          "km": 19.956
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.20792807074487,
+            36.088986838159876
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 15.5,
+          "km": 24.945
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.17388818403288,
+            36.07104511294325
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 18.6,
+          "km": 29.934
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.11870688783408,
+            36.07184892096883
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 21.7,
+          "km": 34.923
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.14849687515006,
+            36.096580989196354
+          ]
+        },
+        "properties": {
+          "type": "water_station",
+          "mi": 24.8,
+          "km": 39.912
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.17290626907773,
+            36.09337737064976
+          ]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "mi": 0.5,
+          "tier": "major",
+          "location": "Start Area"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.14882770137041,
+            36.07147257279192
+          ]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "mi": 20.0,
+          "tier": "major",
+          "location": "The Wall"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.16292927180767,
+            36.10801876406039
+          ]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "mi": 26.219,
+          "tier": "major",
+          "location": "Finish Line"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.24295777930101,
+            36.13451861472098
+          ]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "mi": 8.0,
+          "tier": "course",
+          "location": "Mile 8"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.242979022127,
+            36.09422145191674
+          ]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "mi": 13.1,
+          "tier": "course",
+          "location": "Halfway"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.18992474214451,
+            36.081823223506056
+          ]
+        },
+        "properties": {
+          "type": "medical_tent",
+          "mi": 17.0,
+          "tier": "course",
+          "location": "Mile 17"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.18923871185281,
+            36.12648924487853
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 3.875,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.23552722822896,
+            36.12560938046433
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 6.975,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.25199248205111,
+            36.13078231332923
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 10.075,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.24295781600674,
+            36.093136110900474
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 13.175,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.21608318567586,
+            36.093155562987604
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 14.725,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.18771705539734,
+            36.07154359615646
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 17.825,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.13226922613666,
+            36.07173490414713
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 20.925,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.14170197654532,
+            36.088929107966855
+          ]
+        },
+        "properties": {
+          "type": "portable_toilet",
+          "mi": 24.025,
+          "units": 10
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.20468119015693,
+            36.1226010563226
+          ]
+        },
+        "properties": {
+          "type": "cheer_zone",
+          "mi": 5.0,
+          "name": "Start Energy"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.24425623926798,
+            36.14411484375884
+          ]
+        },
+        "properties": {
+          "type": "cheer_zone",
+          "mi": 8.74,
+          "name": "Early Boost"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.242979022127,
+            36.09422145191674
+          ]
+        },
+        "properties": {
+          "type": "cheer_zone",
+          "mi": 13.1,
+          "name": "Momentum Mile"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.18999403950073,
+            36.07488798486594
+          ]
+        },
+        "properties": {
+          "type": "cheer_zone",
+          "mi": 17.479,
+          "name": "Halfway Celebration"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.14882770137041,
+            36.07147257279192
+          ]
+        },
+        "properties": {
+          "type": "cheer_zone",
+          "mi": 20.0,
+          "name": "The Push"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -115.14933424990004,
+            36.09939539825233
+          ]
+        },
+        "properties": {
+          "type": "cheer_zone",
+          "mi": 25.0,
+          "name": "Wall Breakers"
+        }
+      }
+    ]
+  },
+  "created_at": "2026-01-20T10:30:00+00:00",
+  "evaluation_score": 0.87,
+  "evaluation_result": {
+    "passed": true,
+    "overall_score": 0.87,
+    "weighted_average": 0.886,
+    "scores": {
+      "safety_compliance": {
+        "score": 0.89,
+        "weight": 0.2,
+        "weighted": 0.178
+      },
+      "logistics_completeness": {
+        "score": 0.88,
+        "weight": 0.15,
+        "weighted": 0.132
+      },
+      "participant_experience": {
+        "score": 0.9,
+        "weight": 0.15,
+        "weighted": 0.135
+      },
+      "community_impact": {
+        "score": 0.86,
+        "weight": 0.1,
+        "weighted": 0.086
+      },
+      "financial_viability": {
+        "score": 0.87,
+        "weight": 0.1,
+        "weighted": 0.087
+      },
+      "intent_alignment": {
+        "score": 0.89,
+        "weight": 0.25,
+        "weighted": 0.2225
+      },
+      "distance_compliance": {
+        "score": 0.91,
+        "weight": 0.05,
+        "weighted": 0.0455
+      }
+    },
+    "criteria_count": 7
+  },
+  "simulations": []
+}

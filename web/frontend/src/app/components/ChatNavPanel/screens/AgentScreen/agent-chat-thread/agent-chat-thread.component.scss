@@ -1,0 +1,429 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use '../../../../../../mixins' as *;
+@use '../agent-screen-chat-keyframes';
+
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.agent-chat-thread__scroll {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: container-scaled-cqw(16);
+  min-height: 0;
+  padding: container-scaled-cqw(8) container-scaled-cqw(24);
+  padding-bottom: container-scaled-cqw(75);
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.agent-chat-thread__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.agent-chat-thread__msg {
+  @include Card;
+  @include Headline2;
+
+  display: flex;
+  flex-direction: column;
+  gap: container-scaled-cqw(6);
+  align-self: flex-start;
+  width: 100%;
+  padding: container-scaled-cqw(32);
+  color: var(--neutral-white-80);
+  animation: agent-chat-slide-in-left 0.35s ease-out both;
+}
+
+.agent-chat-thread__msg--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.agent-chat-thread__msg--user .agent-chat-thread__msg-text {
+  text-align: right;
+}
+
+:host ::ng-deep .agent-chat-thread__msg--user .agent-chat-thread__msg-text > * {
+  margin-block: 0;
+}
+
+.agent-chat-thread__msg-body {
+  width: 100%;
+  min-width: 0;
+}
+
+.agent-chat-thread__msg-body--inline {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: container-scaled-cqw(12);
+}
+
+.agent-chat-thread__msg-body--inline .agent-chat-thread__msg-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.agent-chat-thread__msg-body--inline .agent-chat-thread__time {
+  flex-shrink: 0;
+  padding-top: container-scaled-cqw(2);
+  padding-right: 0;
+}
+
+.agent-chat-thread__msg--user .agent-chat-thread__msg-body--inline {
+  flex-direction: row-reverse;
+}
+
+.agent-chat-thread__msg-text {
+  font-size: container-scaled-cqw(25);
+  line-height: normal;
+}
+
+:host ::ng-deep .agent-chat-thread__msg-text > * {
+  margin-block: container-scaled-cqw(12);
+}
+
+:host ::ng-deep .agent-chat-thread__msg-text li > ul,
+:host ::ng-deep .agent-chat-thread__msg-text li > ol {
+  padding-inline-start: container-scaled-cqw(20);
+  margin-block: container-scaled-cqw(4);
+}
+
+:host ::ng-deep .agent-chat-thread__msg-text ul,
+:host ::ng-deep .agent-chat-thread__msg-text ol {
+  list-style-position: inside;
+}
+
+.agent-chat-thread__msg--error {
+  color: var(--core-red-500);
+  background: rgba(152, 3, 0, 0.1);
+  border: none;
+  backdrop-filter: blur(30px);
+}
+
+.agent-chat-thread__msg--error .agent-chat-thread__msg-head {
+  justify-content: flex-start;
+}
+
+.agent-chat-thread__msg--error .agent-chat-thread__time {
+  margin-left: auto;
+  color: var(--shades-bright-red);
+}
+
+.agent-chat-thread__msg-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: container-scaled-cqw(8);
+  width: 100%;
+}
+
+.agent-chat-thread__msg-head h2 {
+  @include Headline1;
+
+  font-size: container-scaled-cqw(32);
+}
+
+.agent-chat-thread__msg-error-icon {
+  font-family: 'Material Icons', 'SF Mono', monospace;
+  font-size: container-scaled-cqw(28);
+}
+
+.agent-chat-thread__msg--user .agent-chat-thread__msg-head {
+  flex-direction: row-reverse;
+}
+
+.agent-chat-thread__a2ui {
+  display: flex;
+  flex-direction: column;
+  gap: container-scaled-cqw(8);
+  align-self: flex-start;
+  width: 100%;
+  animation: agent-chat-slide-in-left 0.35s ease-out both;
+}
+
+.agent-chat-thread__a2ui-head {
+  display: flex;
+  align-items: center;
+  gap: container-scaled-cqw(8);
+}
+
+.agent-chat-thread__time {
+  padding-right: container-scaled-cqw(8);
+  font-family: 'SF Mono', monospace;
+  font-size: container-scaled-cqw(12);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.agent-chat-thread__btn-sm {
+  padding: container-scaled-cqw(6) container-scaled-cqw(14);
+  font-family: inherit;
+  font-size: container-scaled-cqw(12);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: container-scaled-cqw(8);
+}
+
+.agent-chat-thread__btn-sm:hover {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.agent-chat-thread__empty,
+.agent-chat-thread__system {
+  padding: container-scaled-cqw(8);
+  font-size: container-scaled-cqw(12);
+  color: rgba(255, 255, 255, 0.18);
+  text-align: center;
+}
+
+.agent-chat-thread__tool-call {
+  @include Card;
+
+  width: 100%;
+  height: auto;
+  padding: container-scaled-cqw(16);
+  aspect-ratio: 632 / 138;
+  transition: padding 0.2s ease;
+}
+
+.agent-chat-thread__tool-call-head {
+  display: flex;
+}
+
+.agent-chat-thread__tool-call-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: container-scaled-cqw(100);
+  height: container-scaled-cqw(100);
+  aspect-ratio: 1 / 1;
+  background: rgba(30, 136, 253, 0.2);
+  border: container-scaled-cqw(2.5) solid rgba(0, 0, 0, 0.1);
+  border-radius: container-scaled-cqw(24);
+  transition: all 0.3s ease;
+}
+
+.agent-chat-thread__tool-call-status--error {
+  background: rgba(255, 75, 100, 0.2);
+}
+
+.agent-chat-thread__tool-call-status--warning {
+  background: rgba(253, 175, 30, 0.2);
+}
+
+.agent-chat-thread__tool-call-spinner {
+  width: container-scaled-cqw(36);
+  height: container-scaled-cqw(36);
+  border: 3px solid var(--neutral-black-20);
+  border-top-color: var(--blue-500);
+  border-radius: 50%;
+  animation: agent-chat-spin 1.5s linear infinite;
+}
+
+.agent-chat-thread__tool-call-ico-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: container-scaled-cqw(42);
+  height: container-scaled-cqw(42);
+  font-size: container-scaled-cqw(16);
+  color: white;
+  background-color: var(--blue-500);
+  border-radius: 50%;
+}
+
+.agent-chat-thread__tool-call-ico-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: container-scaled-cqw(42);
+  height: container-scaled-cqw(42);
+  font-size: container-scaled-cqw(25);
+  line-height: normal;
+  color: #323232;
+  background-color: #ff4b64;
+  border-radius: 50%;
+}
+
+.agent-chat-thread__tool-call-ico-warn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: container-scaled-cqw(42);
+  height: container-scaled-cqw(42);
+  font-size: container-scaled-cqw(25);
+  line-height: normal;
+  color: #323232;
+  background-color: #fdaf1e;
+  border-radius: 50%;
+}
+
+.agent-chat-thread__tool-call-top {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: container-scaled-cqw(8);
+  justify-content: center;
+  min-width: 0;
+  padding-left: container-scaled-cqw(16);
+}
+
+.agent-chat-thread__tool-call-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: container-scaled-cqw(8);
+  width: 100%;
+}
+
+.agent-chat-thread__tool-call-badge {
+  padding: container-scaled-cqw(6) container-scaled-cqw(10);
+  font-family: 'Google Sans Mono';
+  font-size: container-scaled-cqw(12);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  color: var(--blue-500);
+  background: rgba(30, 136, 253, 0.2);
+  border: container-scaled-cqw(1.5) solid rgba(30, 136, 253, 0.1);
+  border-radius: container-scaled-cqw(18);
+  transition: all 0.3s ease;
+}
+
+.agent-chat-thread__tool-call-badge--error {
+  color: #ff4b64;
+  background: rgba(255, 75, 100, 0.2);
+}
+
+.agent-chat-thread__tool-call-badge--warning {
+  color: #fdaf1e;
+  background: rgba(253, 175, 30, 0.2);
+}
+
+.agent-chat-thread__tool-call-title-row {
+  display: flex;
+  gap: container-scaled-cqw(16);
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.agent-chat-thread__tool-call-name {
+  flex: 1;
+  min-width: 0;
+  padding-right: container-scaled-cqw(20);
+  font-family: 'Google Sans Mono';
+  font-size: container-scaled-cqw(20);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 130%;
+  color: var(--neutral-white-80, rgba(255, 255, 255, 0.8));
+  text-transform: lowercase;
+  white-space: break-spaces;
+  word-break: break-word;
+}
+
+.agent-chat-thread__tool-call-title-row button {
+  width: container-scaled-cqw(30);
+  height: container-scaled-cqw(30);
+  font-size: container-scaled-cqw(14);
+  color: white;
+  background: var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+  border: none;
+  border-radius: container-scaled-cqw(17);
+  transition: transform 0.2s ease;
+
+  .material-icons {
+    font-size: inherit;
+    line-height: 1;
+    vertical-align: middle;
+  }
+}
+
+.agent-chat-thread__tool-call-body {
+  display: none;
+  padding: 0;
+  margin: 0;
+  font-family: 'Google Sans Mono';
+  font-size: container-scaled-cqw(20);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 125%;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body p {
+  display: -webkit-box;
+  margin-block: container-scaled-cqw(12);
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body p:has(ul, ol) {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: unset;
+}
+
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body pre code {
+  white-space: break-spaces;
+}
+
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body li > ul,
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body li > ol,
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body li {
+  margin-block: container-scaled-cqw(12);
+}
+
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body ul,
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body ol {
+  padding-left: calc((16) / var(--container-width) * var(--scale) * 100 * 1cqw);
+}
+
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body ul p,
+:host ::ng-deep .agent-chat-thread__tool-call .agent-chat-thread__tool-call-body ol p {
+  display: inline;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.agent-chat-thread__tool-call--expanded .agent-chat-thread__tool-call-title-row button {
+  transform: rotate(180deg);
+}
+
+.agent-chat-thread__tool-call--expanded .agent-chat-thread__tool-call-body {
+  display: block;
+  margin-top: container-scaled-cqw(16);
+  padding: 0 0 container-scaled-cqw(8) container-scaled-cqw(8);
+}

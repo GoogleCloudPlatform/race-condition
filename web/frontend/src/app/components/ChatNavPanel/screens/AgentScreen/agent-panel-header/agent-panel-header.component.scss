@@ -1,0 +1,59 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ */
+
+@use '../../../../../../mixins' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.agent-panel-header {
+  z-index: 99 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  padding: container-scaled-cqw(32) container-scaled-cqw(24);
+  border-radius: container-scaled-cqw(20) container-scaled-cqw(20) 0 0;
+}
+
+.agent-panel-header__title-row {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: container-scaled-cqw(8);
+}
+
+.agent-panel-header__expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: container-scaled-cqw(10);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  background: var(--neutral-white-5, rgba(255, 255, 255, 0.05));
+  border: none;
+  border-radius: 50%;
+  transform: rotate(45deg);
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.agent-panel-header__expand-btn .material-icons {
+  font-size: container-scaled-cqw(18);
+  line-height: 1;
+}
+
+.agent-panel-header__expand-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.06);
+}

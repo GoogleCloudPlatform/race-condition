@@ -1,0 +1,107 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="agent-chat-thread__scroll" #chatScroll (scroll)="host.onChatScroll($event)">
+  <ng-container *ngFor="let item of host.displayItems; let i = index; trackBy: trackByDisplayItem">
+    <ng-container *ngIf="item.kind === 'system'">
+      <div class="agent-chat-thread__system" [innerHTML]="item.msg.text | markdown | async"></div>
+    </ng-container>
+    <ng-container *ngIf="item.kind === 'tool_call'">
+      <div
+        class="agent-chat-thread__tool-call"
+        [class.agent-chat-thread__tool-call--expanded]="host.expandedToolCalls.has(i)"
+      >
+        <div class="agent-chat-thread__tool-call-head">
+          <div
+            class="agent-chat-thread__tool-call-status"
+            [class.agent-chat-thread__tool-call-status--error]="item.done && item.error"
+            [class.agent-chat-thread__tool-call-status--warning]="item.done && item.warning"
+          >
+            <span class="material-icons agent-chat-thread__tool-call-ico-error" *ngIf="item.done && item.error"
+              >close</span
+            >
+            <span class="material-icons agent-chat-thread__tool-call-ico-warn" *ngIf="item.done && item.warning"
+              >error_outline</span
+            >
+            <span
+              *ngIf="item.done && !item.warning && !item.error"
+              class="material-icons agent-chat-thread__tool-call-ico-done"
+              >check</span
+            >
+            <span *ngIf="!item.done" class="agent-chat-thread__tool-call-spinner"></span>
+          </div>
+          <div class="agent-chat-thread__tool-call-top">
+            <div class="agent-chat-thread__tool-call-info">
+              <span
+                class="agent-chat-thread__tool-call-badge"
+                [class.agent-chat-thread__tool-call-badge--warning]="item.done && item.warning"
+                [class.agent-chat-thread__tool-call-badge--error]="item.done && item.error"
+                >TOOL_CALL</span
+              >
+            </div>
+            <div class="agent-chat-thread__tool-call-title-row">
+              <h2 class="agent-chat-thread__tool-call-name">{{ item.msg.toolName }}</h2>
+              <button *ngIf="item.done && item.msg.text" (click)="host.toggleToolCall(i)">
+                <span class="material-icons">expand_more </span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="agent-chat-thread__tool-call-body">
+          <p *ngIf="item.done && item.msg.text" [innerHTML]="item.msg.text | markdown | async"></p>
+        </div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="item.kind === 'a2ui'">
+      <div class="agent-chat-thread__a2ui">
+        <div class="agent-chat-thread__a2ui-head"></div>
+        <a2ui-controller
+          [node]="item.node"
+          [alwaysExpandExpandableCards]="true"
+          [isAgentWorking]="host.isAgentWorking"
+        ></a2ui-controller>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="item.kind === 'message'">
+      <div
+        class="agent-chat-thread__msg"
+        [class.agent-chat-thread__msg--user]="item.msg.isUser"
+        [class.agent-chat-thread__msg--error]="item.msg.msgType === 'tool_error'"
+      >
+        <div class="agent-chat-thread__msg-head" *ngIf="item.msg.msgType === 'tool_error'">
+          <span class="agent-chat-thread__msg-error-icon">error_outline</span>
+          <h2>Error message</h2>
+        </div>
+        <div
+          class="agent-chat-thread__msg-body"
+          [class.agent-chat-thread__msg-body--inline]="item.msg.msgType !== 'tool_error'"
+        >
+          <div
+            class="agent-chat-thread__msg-text"
+            [class.agent-chat-thread__msg-text--error]="item.msg.msgType === 'tool_error'"
+            [innerHTML]="item.msg.text | markdown | async"
+          ></div>
+        </div>
+        <a2ui-controller
+          *ngIf="item.msg.msgType === 'tool_end' && item.msg.result"
+          [node]="item.msg.result"
+          [alwaysExpandExpandableCards]="true"
+          [isAgentWorking]="host.isAgentWorking"
+        ></a2ui-controller>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

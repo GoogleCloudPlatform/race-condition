@@ -1,0 +1,79 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="agent-tab-strip__bar">
+  <button
+    type="button"
+    class="agent-tab-strip__btn"
+    [disabled]="!panelExpanded"
+    [class.agent-tab-strip__btn--active]="activeTab === 'agent'"
+    [class.agent-tab-strip__btn--wide]="activeTab === 'agent' && tabBtnWide"
+    (click)="host.setActiveTab('agent')"
+  >
+    <spinner [spinning]="isAgentWorking"></spinner>
+    <span
+      *ngIf="activeTab === 'agent' && panelExpanded && showTabLabels"
+      [@tabLabel]
+      (@tabLabel.done)="host.onTabLabelAnimationDone($event)"
+      >Agent</span
+    >
+  </button>
+  <button
+    type="button"
+    class="agent-tab-strip__btn agent-tab-strip__btn--organizer"
+    [disabled]="!panelExpanded"
+    [class.agent-tab-strip__btn--active]="activeTab === 'organizer'"
+    [class.agent-tab-strip__btn--wide]="activeTab === 'organizer' && tabBtnWide"
+    (click)="host.setActiveTab('organizer')"
+  >
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M12.2175 4.12502C12.4909 3.44857 13.0015 2.89495 13.6537 2.56778C14.3058 2.24062 15.0548 2.16233 15.7606 2.34757C16.4663 2.53282 17.0803 2.9689 17.4877 3.57419C17.8951 4.17948 18.0679 4.91249 17.9738 5.63602C17.8798 6.35955 17.5253 7.024 16.9767 7.50501C16.4281 7.98602 15.7229 8.25061 14.9933 8.24927C14.2637 8.24792 13.5596 7.98072 13.0128 7.49769C12.4659 7.01465 12.1139 6.34889 12.0225 5.62502H7.5C6.90326 5.62502 6.33097 5.86207 5.90901 6.28403C5.48705 6.70598 5.25 7.27828 5.25 7.87502C5.25 8.47175 5.48705 9.04405 5.90901 9.46601C6.33097 9.88796 6.90326 10.125 7.5 10.125H18C18.9946 10.125 19.9484 10.5201 20.6516 11.2234C21.3549 11.9266 21.75 12.8805 21.75 13.875C21.75 14.8696 21.3549 15.8234 20.6516 16.5267C19.9484 17.2299 18.9946 17.625 18 17.625H9.7275C9.63612 18.3489 9.28406 19.0147 8.73723 19.4977C8.19041 19.9807 7.48629 20.2479 6.75667 20.2493C6.02705 20.2506 5.32195 19.986 4.77334 19.505C4.22473 19.024 3.87022 18.3595 3.77616 17.636C3.6821 16.9125 3.85494 16.1795 4.26233 15.5742C4.66972 14.9689 5.28374 14.5328 5.98945 14.3476C6.69516 14.1623 7.44419 14.2406 8.09635 14.5678C8.7485 14.895 9.25907 15.4486 9.5325 16.125H18C18.5967 16.125 19.169 15.888 19.591 15.466C20.0129 15.0441 20.25 14.4718 20.25 13.875C20.25 13.2783 20.0129 12.706 19.591 12.284C19.169 11.8621 18.5967 11.625 18 11.625H7.5C6.50544 11.625 5.55161 11.2299 4.84835 10.5267C4.14509 9.82341 3.75 8.86958 3.75 7.87502C3.75 6.88046 4.14509 5.92663 4.84835 5.22337C5.55161 4.52011 6.50544 4.12502 7.5 4.12502H12.2175Z"
+        fill="white"
+      />
+    </svg>
+    <span
+      *ngIf="activeTab === 'organizer' && panelExpanded && showTabLabels"
+      [@tabLabel]
+      (@tabLabel.done)="host.onTabLabelAnimationDone($event)"
+      >Organizer</span
+    >
+  </button>
+  <button
+    type="button"
+    class="agent-tab-strip__btn"
+    [disabled]="!panelExpanded"
+    [class.agent-tab-strip__btn--active]="activeTab === 'log'"
+    [class.agent-tab-strip__btn--wide]="activeTab === 'log' && tabBtnWide"
+    (click)="host.setActiveTab('log')"
+  >
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M4.70757 5.29292C4.51897 5.11076 4.26636 5.00997 4.00417 5.01224C3.74197 5.01452 3.49116 5.11969 3.30575 5.3051C3.12034 5.49051 3.01517 5.74132 3.0129 6.00352C3.01062 6.26571 3.11141 6.51832 3.29357 6.70692L8.58657 11.9999L3.29357 17.2929C3.19806 17.3852 3.12188 17.4955 3.06947 17.6175C3.01706 17.7395 2.98947 17.8707 2.98832 18.0035C2.98717 18.1363 3.01247 18.268 3.06275 18.3909C3.11303 18.5138 3.18728 18.6254 3.28117 18.7193C3.37507 18.8132 3.48672 18.8875 3.60962 18.9377C3.73251 18.988 3.86419 19.0133 3.99697 19.0122C4.12975 19.011 4.26097 18.9834 4.38297 18.931C4.50498 18.8786 4.61532 18.8024 4.70757 18.7069L10.7076 12.7069C10.895 12.5194 11.0004 12.2651 11.0004 11.9999C11.0004 11.7348 10.895 11.4804 10.7076 11.2929L4.70757 5.29292ZM12.0006 16.9999C11.7354 16.9999 11.481 17.1053 11.2935 17.2928C11.1059 17.4803 11.0006 17.7347 11.0006 17.9999C11.0006 18.2651 11.1059 18.5195 11.2935 18.707C11.481 18.8946 11.7354 18.9999 12.0006 18.9999H20.0006C20.2658 18.9999 20.5201 18.8946 20.7077 18.707C20.8952 18.5195 21.0006 18.2651 21.0006 17.9999C21.0006 17.7347 20.8952 17.4803 20.7077 17.2928C20.5201 17.1053 20.2658 16.9999 20.0006 16.9999H12.0006Z"
+        fill="white"
+      />
+    </svg>
+
+    <span
+      *ngIf="activeTab === 'log' && panelExpanded && showTabLabels"
+      [@tabLabel]
+      (@tabLabel.done)="host.onTabLabelAnimationDone($event)"
+      >Log</span
+    >
+  </button>
+</div>

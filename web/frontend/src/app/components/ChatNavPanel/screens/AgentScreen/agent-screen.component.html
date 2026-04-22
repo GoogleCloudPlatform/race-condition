@@ -1,0 +1,59 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<!-- ── Left: Runners/Planner + Chat ──────────────────────────── -->
+<simulation-panel
+  [hidden]="!simulation.showSimPanel"
+  [simulationProgress]="simulation.simulationProgress"
+  [averageDistance]="simulation.averageDistance"
+  [numberOfFinishers]="simulation.numberOfFinishers"
+  [averagePace]="simulation.averagePace"
+  [isFollowingLeader]="simulation.isFollowingLeader"
+  (followLeader)="simulation.onFollowLeader()"
+  (followRandomRunner)="simulation.onFollowRandomRunner()"
+  (expand)="onExpandFromSimulationPanel()"
+></simulation-panel>
+<div [hidden]="simulation.showSimPanel">
+  <div
+    class="agent-screen__panel-wrap"
+    [class.agent-screen__panel-wrap--thinking]="isAgentWorking && panelTab.activeTab === 'agent'"
+  >
+    <div class="agent-screen__panel" [class.agent-screen__panel--closed]="!panelTab.isExpanded">
+      <div class="agent-screen__wave-blur"><div class="agent-screen__wave-inner"></div></div>
+      <app-agent-panel-header
+        [host]="this"
+        [panelExpanded]="panelTab.isExpanded"
+        [activeTab]="panelTab.activeTab"
+        [tabBtnWide]="panelTab.tabBtnWide"
+        [showTabLabels]="panelTab.showTabLabels"
+        [isAgentWorking]="isAgentWorking"
+        (expandToggle)="togglePanelExpanded()"
+      />
+      <app-agent-chat-panel
+        [host]="this"
+        [class.agent-chat-panel--inactive]="panelTab.activeTab !== 'agent'"
+      />
+
+      <app-organizer
+        [class.active]="panelTab.activeTab === 'organizer'"
+        [hidden]="panelTab.activeTab !== 'organizer'"
+        [runCachedMessages]="runCachedMessages"
+      ></app-organizer>
+
+      <app-log [class.active]="panelTab.activeTab === 'log'" [hidden]="panelTab.activeTab !== 'log'"></app-log>
+    </div>
+  </div>
+</div>

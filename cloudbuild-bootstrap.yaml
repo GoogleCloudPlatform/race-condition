@@ -1,0 +1,597 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ============================================================
+# Cloud Build orchestrator for Race Condition (OSS one-shot deploy)
+#
+# Single Cloud Build job that takes a freshly created GCP project
+# from zero to seven healthy Cloud Run services + Agent Engine
+# agents in one shot:
+#
+#   1. bootstrap-state-bucket   gsutil mb if missing
+#   2. tf-init-base             terraform init (GCS backend)
+#   3. tf-apply-base            terraform apply -var enable_services=false
+#                               (networking, IAM, Redis, Pub/Sub, Cloud SQL)
+#   4. read-tf-outputs          dump terraform outputs to /workspace/tf_outputs.json
+#   4a. schema-migration        run schema_local.sql via cloud-sql-proxy + psql
+#   4b. seed-rules              load curated rules into the rules table
+#   4c. embedding-backfill      compute Vertex AI embeddings for new rules rows
+#   5. build-angular            npm ci + npm run build (frontend Dockerfile prereq)
+#   6. build-{gateway,admin,    docker build + push (parallel, 7 services)
+#       dash,frontend,tester,
+#       runner-autopilot,
+#       runner-cloudrun}
+#   7. deploy-ae-{planner,      python scripts/deploy/deploy.py --only X --print-url
+#       simulator,...}          (5 AE agents in parallel; each writes its URL to
+#                                /workspace/ae_urls/<name>.url)
+#   8. collect-ae-urls          cats /workspace/ae_urls/*.url -> AGENT_URLS string
+#   9. tf-apply-services        terraform apply -var enable_services=true
+#                                with image_tags + agent_urls populated
+#  10. print-urls               final terraform outputs for the user
+#
+# Invoke from the repo root:
+#   gcloud builds submit \
+#     --config cloudbuild-bootstrap.yaml \
+#     --project ${PROJECT_ID} \
+#     --region us-central1 \
+#     --substitutions _REGION=us-central1
+#
+# Substitutions:
+#   _REGION         GCP region (default us-central1)
+#   _STATE_BUCKET   GCS bucket for TF state (default ${PROJECT_ID}-tf-state)
+# ============================================================
+
+substitutions:
+  _REGION: us-central1
+  _STATE_BUCKET: ""
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+  dynamicSubstitutions: true
+
+timeout: 3600s
+
+steps:
+  # ----------------------------------------------------------
+  # 1. Bootstrap GCS state bucket (idempotent)
+  # ----------------------------------------------------------
+  - id: bootstrap-state-bucket
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    waitFor: ["-"]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        BUCKET="${_STATE_BUCKET}"
+        if [ -z "$$BUCKET" ]; then
+          BUCKET="${PROJECT_ID}-tf-state"
+        fi
+        if ! gsutil ls -b "gs://$$BUCKET" >/dev/null 2>&1; then
+          echo "Creating GCS state bucket gs://$$BUCKET ..."
+          gsutil mb -p "${PROJECT_ID}" -l "${_REGION}" -c STANDARD "gs://$$BUCKET"
+          gsutil versioning set on "gs://$$BUCKET"
+        else
+          echo "GCS state bucket gs://$$BUCKET already exists."
+        fi
+        echo "$$BUCKET" > /workspace/.state_bucket
+
+  # ----------------------------------------------------------
+  # 2. terraform init (parameterized GCS backend)
+  # ----------------------------------------------------------
+  - id: tf-init-base
+    name: hashicorp/terraform:1.14
+    entrypoint: sh
+    waitFor: [bootstrap-state-bucket]
+    args:
+      - -c
+      - |
+        set -e
+        BUCKET=$(cat /workspace/.state_bucket)
+        cd infra
+        terraform init -input=false \
+          -backend-config="bucket=$$BUCKET" \
+          -backend-config="prefix=oss/state"
+
+  # ----------------------------------------------------------
+  # 3. terraform apply (base infra; enable_services=false)
+  # ----------------------------------------------------------
+  - id: tf-apply-base
+    name: hashicorp/terraform:1.14
+    entrypoint: sh
+    waitFor: [tf-init-base]
+    args:
+      - -c
+      - |
+        set -e
+        cd infra
+        terraform apply -auto-approve -input=false \
+          -var "project_id=${PROJECT_ID}" \
+          -var "region=${_REGION}" \
+          -var "enable_services=false"
+
+  # ----------------------------------------------------------
+  # 4. Read TF outputs once for downstream steps
+  # ----------------------------------------------------------
+  - id: read-tf-outputs
+    name: hashicorp/terraform:1.14
+    entrypoint: sh
+    waitFor: [tf-apply-base]
+    args:
+      - -c
+      - |
+        set -e
+        cd infra
+        terraform output -json > /workspace/tf_outputs.json
+        AR_URL=$(terraform output -raw artifact_registry_url)
+        echo "$$AR_URL" > /workspace/.ar_url
+
+  # ----------------------------------------------------------
+  # 4a. schema-migration -- run schema_local.sql against the
+  #     freshly-provisioned Cloud SQL instance via cloud-sql-proxy.
+  #     Uses cloud-sdk:slim (Debian) so we get gcloud + apt for
+  #     postgresql-client; downloads cloud-sql-proxy v2 directly.
+  # ----------------------------------------------------------
+  - id: schema-migration
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        apt-get update -qq && apt-get install -y -qq --no-install-recommends postgresql-client jq wget
+        wget -q -O /usr/local/bin/cloud-sql-proxy \
+          https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.1/cloud-sql-proxy.linux.amd64
+        chmod +x /usr/local/bin/cloud-sql-proxy
+
+        CONN=$(jq -r '.database_connection_name.value' /workspace/tf_outputs.json)
+        SECRET=$(jq -r '.database_password_secret_id.value' /workspace/tf_outputs.json)
+        DB_NAME=$(jq -r '.database_name.value // "agent_memory"' /workspace/tf_outputs.json)
+        if [ -z "$$CONN" ] || [ "$$CONN" = "null" ]; then
+          echo "ERROR: database_connection_name not found in tf_outputs.json" >&2
+          exit 1
+        fi
+
+        PGPASSWORD=$(gcloud secrets versions access latest --secret="$$SECRET" --project="${PROJECT_ID}")
+        export PGPASSWORD
+
+        cloud-sql-proxy "$$CONN" --port=15432 --quiet &
+        PROXY_PID=$!
+        sleep 4
+        # Schema lives in the agent_memory database -- the same DB the
+        # planner_with_memory agent connects to via ALLOYDB_DATABASE.
+        psql -h 127.0.0.1 -p 15432 -U postgres -d "$$DB_NAME" \
+          -f infra/modules/cloud-sql-postgres/schema_local.sql --no-psqlrc -q
+        RESULT=$?
+        kill $$PROXY_PID 2>/dev/null || true
+        exit $$RESULT
+
+  # ----------------------------------------------------------
+  # 4b. seed-rules -- load the curated regulation chunks into the
+  #     rules table. Idempotent (ON CONFLICT DO NOTHING in the SQL).
+  # ----------------------------------------------------------
+  - id: seed-rules
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    waitFor: [schema-migration]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        apt-get update -qq && apt-get install -y -qq --no-install-recommends postgresql-client jq wget
+        wget -q -O /usr/local/bin/cloud-sql-proxy \
+          https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.1/cloud-sql-proxy.linux.amd64
+        chmod +x /usr/local/bin/cloud-sql-proxy
+
+        CONN=$(jq -r '.database_connection_name.value' /workspace/tf_outputs.json)
+        SECRET=$(jq -r '.database_password_secret_id.value' /workspace/tf_outputs.json)
+        DB_NAME=$(jq -r '.database_name.value // "agent_memory"' /workspace/tf_outputs.json)
+
+        PGPASSWORD=$(gcloud secrets versions access latest --secret="$$SECRET" --project="${PROJECT_ID}")
+        export PGPASSWORD
+
+        cloud-sql-proxy "$$CONN" --port=15432 --quiet &
+        PROXY_PID=$!
+        sleep 4
+        psql -h 127.0.0.1 -p 15432 -U postgres -d "$$DB_NAME" \
+          -f infra/modules/cloud-sql-postgres/seed_rules.sql --no-psqlrc -q
+        RESULT=$?
+        kill $$PROXY_PID 2>/dev/null || true
+        exit $$RESULT
+
+  # ----------------------------------------------------------
+  # 4c. embedding-backfill -- compute Vertex AI embeddings for any
+  #     rules row that lacks one. Cloud SQL Postgres has no
+  #     ai.embedding() extension; the script does it client-side.
+  #     Idempotent (script's WHERE embedding IS NULL skips rows).
+  # ----------------------------------------------------------
+  - id: embedding-backfill
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [seed-rules]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        apt-get update -qq && apt-get install -y -qq --no-install-recommends curl jq wget ca-certificates
+        # Install Google Cloud SDK (for `gcloud secrets versions access`).
+        curl -sSL https://sdk.cloud.google.com > /tmp/install-gcloud.sh
+        bash /tmp/install-gcloud.sh --disable-prompts --install-dir=/opt > /dev/null
+        export PATH="/opt/google-cloud-sdk/bin:$$PATH"
+        # Install cloud-sql-proxy v2.
+        wget -q -O /usr/local/bin/cloud-sql-proxy \
+          https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.1/cloud-sql-proxy.linux.amd64
+        chmod +x /usr/local/bin/cloud-sql-proxy
+        # Install Python deps the backfill script needs.
+        pip install --quiet --no-cache-dir asyncpg google-genai
+
+        CONN=$(jq -r '.database_connection_name.value' /workspace/tf_outputs.json)
+        SECRET=$(jq -r '.database_password_secret_id.value' /workspace/tf_outputs.json)
+        DB_NAME=$(jq -r '.database_name.value // "agent_memory"' /workspace/tf_outputs.json)
+
+        PGPASSWORD=$(gcloud secrets versions access latest --secret="$$SECRET" --project="${PROJECT_ID}")
+
+        cloud-sql-proxy "$$CONN" --port=15432 --quiet &
+        PROXY_PID=$!
+        sleep 4
+
+        # Schema/seed/backfill all run against the agent_memory database
+        # (the one the planner_with_memory agent reads at runtime via
+        # ALLOYDB_DATABASE).
+        DATABASE_HOST=127.0.0.1 \
+        DATABASE_PORT=15432 \
+        DATABASE_USER=postgres \
+        DATABASE_PASSWORD="$$PGPASSWORD" \
+        DATABASE_NAME="$$DB_NAME" \
+        PROJECT_ID="${PROJECT_ID}" \
+        GOOGLE_GENAI_USE_VERTEXAI=true \
+        GOOGLE_CLOUD_LOCATION=global \
+          python infra/modules/cloud-sql-postgres/embedding_backfill.py
+        RESULT=$?
+        kill $$PROXY_PID 2>/dev/null || true
+        exit $$RESULT
+
+  # ----------------------------------------------------------
+  # 5. Build the Angular frontend (Docker stage prereq)
+  # ----------------------------------------------------------
+  - id: build-angular
+    name: node:24-slim
+    entrypoint: bash
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        cd web/frontend
+        npm ci
+        npm run build
+        # Flatten Angular 17+ output to the path the Dockerfile expects.
+        if [ -d dist/client/browser ]; then
+          mv dist/client/browser/* dist/
+          rmdir dist/client/browser dist/client 2>/dev/null || true
+        fi
+
+  # ----------------------------------------------------------
+  # 6. Parallel image builds (one Cloud Build step per service)
+  #    Each step builds via the multi-stage Dockerfile target,
+  #    tags as ${AR_URL}/${SERVICE}:${BUILD_ID}, and pushes.
+  # ----------------------------------------------------------
+  - id: build-gateway
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target gateway -t "$$AR_URL/gateway:${BUILD_ID}" .
+        docker push "$$AR_URL/gateway:${BUILD_ID}"
+
+  - id: build-admin
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target admin -t "$$AR_URL/admin:${BUILD_ID}" .
+        docker push "$$AR_URL/admin:${BUILD_ID}"
+
+  - id: build-dash
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target dash -t "$$AR_URL/dash:${BUILD_ID}" .
+        docker push "$$AR_URL/dash:${BUILD_ID}"
+
+  - id: build-tester
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target tester -t "$$AR_URL/tester:${BUILD_ID}" .
+        docker push "$$AR_URL/tester:${BUILD_ID}"
+
+  - id: build-runner-autopilot
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target runner_autopilot -t "$$AR_URL/runner_autopilot:${BUILD_ID}" .
+        docker push "$$AR_URL/runner_autopilot:${BUILD_ID}"
+
+  - id: build-runner-cloudrun
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target runner_cloudrun -t "$$AR_URL/runner_cloudrun:${BUILD_ID}" .
+        docker push "$$AR_URL/runner_cloudrun:${BUILD_ID}"
+
+  # frontend image waits on the Angular build (not just read-tf-outputs).
+  - id: build-frontend
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [build-angular]
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        docker build --target frontend -t "$$AR_URL/frontend:${BUILD_ID}" .
+        docker push "$$AR_URL/frontend:${BUILD_ID}"
+
+  # ----------------------------------------------------------
+  # 7. Agent Engine deploys: prepare venv once, then deploy in parallel
+  #
+  #    Cloud Build steps share /workspace/, so the previous topology of
+  #    "5 parallel steps each running `uv sync --frozen`" raced on
+  #    /workspace/.venv (uv errors with "directory exists but is not a
+  #    virtual environment"). Per uv's official Docker integration guide,
+  #    the right pattern is sync-once + run with `--no-sync`:
+  #
+  #      - prepare-uv-venv: pip install uv && uv sync --frozen
+  #      - deploy-ae-*    : uv run --no-sync python deploy.py --only X
+  #
+  #    The 5 deploys remain parallel; they only READ /workspace/.venv,
+  #    so there is no race. The slow part (agent_engines.create()) still
+  #    runs concurrently across all 5 agents.
+  # ----------------------------------------------------------
+  - id: prepare-uv-venv
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [read-tf-outputs]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install -q uv
+        uv sync --frozen
+
+  - id: deploy-ae-planner
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [prepare-uv-venv]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install -q uv
+        mkdir -p /workspace/ae_urls
+        export PROJECT_ID="${PROJECT_ID}"
+        export REGION="${_REGION}"
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner --print-url | tail -1)
+        # Bare URL (no `name=` prefix). The gateway parses AGENT_URLS as
+        # comma-separated URLs and discovers each agent's name from its
+        # /a2a/v1/card. Matches the dev/prod .env contract.
+        echo "$$AE_URL" > /workspace/ae_urls/planner.url
+
+  - id: deploy-ae-simulator
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [prepare-uv-venv]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install -q uv
+        mkdir -p /workspace/ae_urls
+        export PROJECT_ID="${PROJECT_ID}"
+        export REGION="${_REGION}"
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only simulator --print-url | tail -1)
+        echo "$$AE_URL" > /workspace/ae_urls/simulator.url
+
+  - id: deploy-ae-planner-with-eval
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [prepare-uv-venv]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install -q uv
+        mkdir -p /workspace/ae_urls
+        export PROJECT_ID="${PROJECT_ID}"
+        export REGION="${_REGION}"
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner_with_eval --print-url | tail -1)
+        echo "$$AE_URL" > /workspace/ae_urls/planner_with_eval.url
+
+  - id: deploy-ae-simulator-with-failure
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [prepare-uv-venv]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install -q uv
+        mkdir -p /workspace/ae_urls
+        export PROJECT_ID="${PROJECT_ID}"
+        export REGION="${_REGION}"
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only simulator_with_failure --print-url | tail -1)
+        echo "$$AE_URL" > /workspace/ae_urls/simulator_with_failure.url
+
+  - id: deploy-ae-planner-with-memory
+    name: python:3.13-slim
+    entrypoint: bash
+    waitFor: [prepare-uv-venv]
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        pip install -q uv
+        mkdir -p /workspace/ae_urls
+        export PROJECT_ID="${PROJECT_ID}"
+        export REGION="${_REGION}"
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner_with_memory --print-url | tail -1)
+        echo "$$AE_URL" > /workspace/ae_urls/planner_with_memory.url
+
+  # ----------------------------------------------------------
+  # 8. Collect AE URLs into a single comma-separated string
+  # ----------------------------------------------------------
+  - id: collect-ae-urls
+    name: alpine:3
+    entrypoint: sh
+    waitFor:
+      - deploy-ae-planner
+      - deploy-ae-simulator
+      - deploy-ae-planner-with-eval
+      - deploy-ae-simulator-with-failure
+      - deploy-ae-planner-with-memory
+    args:
+      - -c
+      - |
+        set -e
+        # Format: bare comma-separated URLs (e.g. https://ae1,https://ae2,...).
+        # The gateway parses AGENT_URLS as URLs and discovers each agent's
+        # name from its /a2a/v1/card. Matches the dev/prod .env contract.
+        cat /workspace/ae_urls/*.url | paste -sd, - > /workspace/agent_urls.txt
+        echo "AGENT_URLS=$(cat /workspace/agent_urls.txt)"
+
+  # ----------------------------------------------------------
+  # 9. Build the tfvars.json for the services apply
+  #    - image_tags map keyed by service (matches cloud-run-services.image_tags)
+  #    - agent_urls comma-separated string
+  # ----------------------------------------------------------
+  - id: build-services-tfvars
+    name: alpine:3
+    entrypoint: sh
+    waitFor:
+      - build-gateway
+      - build-admin
+      - build-dash
+      - build-frontend
+      - build-tester
+      - build-runner-autopilot
+      - build-runner-cloudrun
+      - collect-ae-urls
+    args:
+      - -c
+      - |
+        set -e
+        AR_URL=$(cat /workspace/.ar_url)
+        AGENT_URLS=$(cat /workspace/agent_urls.txt)
+        BID="${BUILD_ID}"
+        cat > /workspace/services.auto.tfvars.json <<JSON
+        {
+          "enable_services": true,
+          "image_tags": {
+            "gateway":          "$$AR_URL/gateway:$$BID",
+            "admin":            "$$AR_URL/admin:$$BID",
+            "dash":             "$$AR_URL/dash:$$BID",
+            "frontend":         "$$AR_URL/frontend:$$BID",
+            "tester":           "$$AR_URL/tester:$$BID",
+            "runner_autopilot": "$$AR_URL/runner_autopilot:$$BID",
+            "runner_cloudrun":  "$$AR_URL/runner_cloudrun:$$BID"
+          },
+          "agent_urls": "$$AGENT_URLS"
+        }
+        JSON
+        cp /workspace/services.auto.tfvars.json infra/services.auto.tfvars.json
+        echo "Wrote services tfvars:"
+        cat infra/services.auto.tfvars.json
+
+  # ----------------------------------------------------------
+  # 10. terraform apply (Cloud Run + IAM, with image tags)
+  #     Waits on embedding-backfill so deployed services come up
+  #     against a fully seeded database (gateway's first request
+  #     can hit a populated rules table immediately).
+  # ----------------------------------------------------------
+  - id: tf-apply-services
+    name: hashicorp/terraform:1.14
+    entrypoint: sh
+    waitFor: [build-services-tfvars, embedding-backfill]
+    args:
+      - -c
+      - |
+        set -e
+        cd infra
+        terraform apply -auto-approve -input=false \
+          -var "project_id=${PROJECT_ID}" \
+          -var "region=${_REGION}"
+
+  # ----------------------------------------------------------
+  # 11. Print final URLs for the user
+  # ----------------------------------------------------------
+  - id: print-urls
+    name: hashicorp/terraform:1.14
+    entrypoint: sh
+    waitFor: [tf-apply-services]
+    args:
+      - -c
+      - |
+        set -e
+        cd infra
+        echo ""
+        echo "============================================================"
+        echo "Race Condition deployment complete!"
+        echo "============================================================"
+        URLS=$(terraform output -json service_urls)
+        echo "Frontend:   $(echo $$URLS | sed 's/.*"frontend":"\([^"]*\)".*/\1/')"
+        echo "Admin:      $(echo $$URLS | sed 's/.*"admin":"\([^"]*\)".*/\1/')"
+        echo "Tester:     $(echo $$URLS | sed 's/.*"tester":"\([^"]*\)".*/\1/')"
+        echo "Dash:       $(echo $$URLS | sed 's/.*"dash":"\([^"]*\)".*/\1/')"
+        echo "Gateway:    $(terraform output -raw gateway_url)"
+        echo ""
+        echo "Open the frontend URL in your browser to start a simulation."
+        echo "============================================================"

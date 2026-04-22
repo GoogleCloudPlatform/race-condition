@@ -1,0 +1,153 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="agent-settings-menu">
+  <div
+    class="agent-settings-menu__backdrop"
+    [class.agent-settings-menu__backdrop--open]="host.settingsOpen"
+    (click)="host.onSettingsButtonClick()"
+  ></div>
+  <button
+    class="agent-settings-menu__trigger"
+    [disabled]="!panelExpanded"
+    [class.agent-settings-menu__trigger--open]="host.settingsOpen"
+    (click)="host.onSettingsButtonClick()"
+  >
+    <span class="material-icons">settings</span>
+  </button>
+  <div class="agent-settings-menu__dropdown" *ngIf="host.settingsOpen">
+    <div class="agent-settings-menu__heading">Settings</div>
+    <div class="agent-settings-menu__list">
+      <div
+        class="agent-settings-menu__row agent-settings-menu__row--inline agent-settings-menu__row--gateway-download"
+      >
+        <p class="agent-settings-menu__caption">Keep latest demo recording</p>
+        <button
+          type="button"
+          class="agent-settings-menu__download-btn"
+          [disabled]="!host.agentGatewayMsgDumpCanDownload"
+          (click)="host.agentGatewayMsgDebugDownload()"
+        >
+          Download
+        </button>
+      </div>
+      <div class="agent-settings-menu__row agent-settings-menu__row--inline">
+        <p class="agent-settings-menu__caption">AI Connection</p>
+        <div
+          class="agent-settings-menu__toggle"
+          role="group"
+          aria-label="AI Connection"
+          [attr.data-thumb-pos]="host.runCachedMessages ? 'left' : 'right'"
+        >
+          <div class="agent-settings-menu__toggle-track">
+            <div class="agent-settings-menu__toggle-thumb"></div>
+            <button
+              type="button"
+              class="agent-settings-menu__toggle-segment"
+              [attr.aria-pressed]="host.runCachedMessages"
+              [disabled]="!host.activeDemoHasRecordingConfig"
+              (click)="host.setRunCachedMessages(true)"
+            >
+              Cached
+            </button>
+            <button
+              type="button"
+              class="agent-settings-menu__toggle-segment"
+              [attr.aria-pressed]="!host.runCachedMessages"
+              (click)="host.setRunCachedMessages(false)"
+            >
+              Live
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="host.activeDemoHasRecordingConfig" class="agent-settings-menu__row agent-settings-menu__row--inline">
+        <p class="agent-settings-menu__caption">Replay speed (×)</p>
+        <input
+          type="number"
+          class="agent-settings-menu__timescale-input"
+          min="0.5"
+          max="10"
+          step="0.5"
+          [ngModel]="host.cachedMessageTimeScale"
+          (ngModelChange)="host.onCachedMessageTimeScaleChange($event)"
+          aria-label="Cached message replay speed multiplier"
+        />
+      </div>
+
+      <div *ngIf="host.isSecurityDemo" class="agent-settings-menu__row agent-settings-menu__row--inline">
+        <p class="agent-settings-menu__caption">Planner security status</p>
+        <div
+          class="agent-settings-menu__toggle"
+          role="group"
+          aria-label="Planner security"
+          [attr.data-thumb-pos]="host.secureMode ? 'left' : 'right'"
+        >
+          <div class="agent-settings-menu__toggle-track">
+            <div class="agent-settings-menu__toggle-thumb"></div>
+            <button
+              type="button"
+              class="agent-settings-menu__toggle-segment"
+              [attr.aria-pressed]="host.secureMode"
+              (click)="host.setPlannerSecurity(true)"
+            >
+              Secure
+            </button>
+            <button
+              type="button"
+              class="agent-settings-menu__toggle-segment"
+              [attr.aria-pressed]="!host.secureMode"
+              (click)="host.setPlannerSecurity(false)"
+            >
+              Unsecure
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="host.isIntentToInfrastructureDemo" class="agent-settings-menu__row agent-settings-menu__row--inline">
+        <p class="agent-settings-menu__caption">Gemini Cloud Assist</p>
+        <div
+          class="agent-settings-menu__toggle"
+          role="group"
+          aria-label="Planner security"
+          [attr.data-thumb-pos]="host.cloudAssistMode ? 'left' : 'right'"
+        >
+          <div class="agent-settings-menu__toggle-track">
+            <div class="agent-settings-menu__toggle-thumb"></div>
+            <button
+              type="button"
+              class="agent-settings-menu__toggle-segment"
+              [attr.aria-pressed]="host.cloudAssistMode"
+              (click)="host.setCloudAssistMode(true)"
+            >
+              Upgrade
+            </button>
+            <button
+              type="button"
+              class="agent-settings-menu__toggle-segment"
+              [attr.aria-pressed]="!host.cloudAssistMode"
+              (click)="host.setCloudAssistMode(false)"
+            >
+              Standard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
