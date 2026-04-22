@@ -23,7 +23,14 @@ resource "google_project_service" "services" {
   disable_on_destroy = false
 }
 
+resource "time_sleep" "api_propagation" {
+  depends_on      = [google_project_service.services]
+  create_duration = "60s"
+}
+
 resource "google_storage_bucket" "staging" {
+  depends_on = [time_sleep.api_propagation]
+
   name                        = "${var.project_id}-staging"
   project                     = var.project_id
   location                    = var.region
@@ -32,6 +39,8 @@ resource "google_storage_bucket" "staging" {
 }
 
 resource "google_artifact_registry_repository" "cloudrun" {
+  depends_on = [time_sleep.api_propagation]
+
   project       = var.project_id
   location      = var.region
   repository_id = "cloudrun"

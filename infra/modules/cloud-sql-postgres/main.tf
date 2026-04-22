@@ -27,9 +27,14 @@ resource "google_sql_database_instance" "postgres" {
     edition           = "ENTERPRISE"
 
     ip_configuration {
-      ipv4_enabled                                  = false
+      # Public IP enabled for Cloud SQL Auth Proxy access from Cloud Build
+      # and Terraform runners (which lack VPC access). All connections go
+      # through the proxy, which handles mTLS encryption. Cloud Run
+      # services use the private IP via VPC for data-plane traffic.
+      ipv4_enabled                                  = true
       private_network                               = var.vpc_id
       enable_private_path_for_google_cloud_services = true
+      ssl_mode                                      = "ENCRYPTED_ONLY"
     }
 
     database_flags {
@@ -141,3 +146,22 @@ resource "google_secret_manager_secret_iam_member" "agent_engine_sa_access" {
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.agent_engine_sa_email}"
 }
+
+# Grant the Cloud Build default compute SA access to the password secret.
+# The schema-migration / seed-rules / embedding-backfill Cloud Build steps
+# (defined in cloudbuild-bootstrap.yaml) read this secret to authenticate
+# psql + asyncpg connections via cloud-sql-proxy.
+resource "google_secret_manager_secret_iam_member" "cloudbuild_compute_sa_password_access" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.db_password.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
+}
+
+# NOTE: Schema migration, rule seeding, and embedding backfill are
+# performed by dedicated Cloud Build steps (see cloudbuild-bootstrap.yaml
+# in the backend repo) rather than TF null_resource provisioners. The
+# hashicorp/terraform container is alpine-based and ships with neither
+# psql nor cloud-sql-proxy, so local-exec here would fail. The Cloud
+# Build steps reference schema_local.sql, seed_rules.sql, and
+# embedding_backfill.py from this module's path.

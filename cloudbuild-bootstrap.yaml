@@ -159,6 +159,7 @@ steps:
 
         CONN=$(jq -r '.database_connection_name.value' /workspace/tf_outputs.json)
         SECRET=$(jq -r '.database_password_secret_id.value' /workspace/tf_outputs.json)
+        DB_NAME=$(jq -r '.database_name.value // "agent_memory"' /workspace/tf_outputs.json)
         if [ -z "$$CONN" ] || [ "$$CONN" = "null" ]; then
           echo "ERROR: database_connection_name not found in tf_outputs.json" >&2
           exit 1
@@ -170,7 +171,9 @@ steps:
         cloud-sql-proxy "$$CONN" --port=15432 --quiet &
         PROXY_PID=$!
         sleep 4
-        psql -h 127.0.0.1 -p 15432 -U postgres -d postgres \
+        # Schema lives in the agent_memory database -- the same DB the
+        # planner_with_memory agent connects to via ALLOYDB_DATABASE.
+        psql -h 127.0.0.1 -p 15432 -U postgres -d "$$DB_NAME" \
           -f infra/modules/cloud-sql-postgres/schema_local.sql --no-psqlrc -q
         RESULT=$?
         kill $$PROXY_PID 2>/dev/null || true
@@ -195,6 +198,7 @@ steps:
 
         CONN=$(jq -r '.database_connection_name.value' /workspace/tf_outputs.json)
         SECRET=$(jq -r '.database_password_secret_id.value' /workspace/tf_outputs.json)
+        DB_NAME=$(jq -r '.database_name.value // "agent_memory"' /workspace/tf_outputs.json)
 
         PGPASSWORD=$(gcloud secrets versions access latest --secret="$$SECRET" --project="${PROJECT_ID}")
         export PGPASSWORD
@@ -202,7 +206,7 @@ steps:
         cloud-sql-proxy "$$CONN" --port=15432 --quiet &
         PROXY_PID=$!
         sleep 4
-        psql -h 127.0.0.1 -p 15432 -U postgres -d postgres \
+        psql -h 127.0.0.1 -p 15432 -U postgres -d "$$DB_NAME" \
           -f infra/modules/cloud-sql-postgres/seed_rules.sql --no-psqlrc -q
         RESULT=$?
         kill $$PROXY_PID 2>/dev/null || true
@@ -236,6 +240,7 @@ steps:
 
         CONN=$(jq -r '.database_connection_name.value' /workspace/tf_outputs.json)
         SECRET=$(jq -r '.database_password_secret_id.value' /workspace/tf_outputs.json)
+        DB_NAME=$(jq -r '.database_name.value // "agent_memory"' /workspace/tf_outputs.json)
 
         PGPASSWORD=$(gcloud secrets versions access latest --secret="$$SECRET" --project="${PROJECT_ID}")
 
@@ -243,14 +248,14 @@ steps:
         PROXY_PID=$!
         sleep 4
 
-        # Note: schema/seed run against the default `postgres` database
-        # (per schema_local.sql / seed_rules.sql); the rules table lives
-        # there, not in the agent_memory database.
+        # Schema/seed/backfill all run against the agent_memory database
+        # (the one the planner_with_memory agent reads at runtime via
+        # ALLOYDB_DATABASE).
         DATABASE_HOST=127.0.0.1 \
         DATABASE_PORT=15432 \
         DATABASE_USER=postgres \
         DATABASE_PASSWORD="$$PGPASSWORD" \
-        DATABASE_NAME=postgres \
+        DATABASE_NAME="$$DB_NAME" \
         PROJECT_ID="${PROJECT_ID}" \
         GOOGLE_GENAI_USE_VERTEXAI=true \
         GOOGLE_CLOUD_LOCATION=global \

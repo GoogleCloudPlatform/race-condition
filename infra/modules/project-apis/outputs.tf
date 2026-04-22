@@ -28,3 +28,8 @@ output "services" {
   description = "Map of enabled services for depends_on references"
   value       = google_project_service.services
 }
+
+output "apis_ready" {
+  description = "Dependency anchor - all APIs enabled and propagated"
+  value       = time_sleep.api_propagation.id
+}

@@ -17,6 +17,11 @@ variable "project_id" {
   type        = string
 }
 
+variable "project_number" {
+  description = "GCP project number (used to identify the Compute Engine default SA, which is also the default Cloud Build SA, for Secret Manager access)"
+  type        = string
+}
+
 variable "region" {
   description = "GCP region"
   type        = string

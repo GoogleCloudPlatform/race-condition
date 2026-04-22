@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+resource "google_project_service_identity" "pubsub" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "pubsub.googleapis.com"
+}
+
 resource "google_pubsub_topic" "specialist_orchestration" {
   name    = "specialist-orchestration"
   project = var.project_id
@@ -49,4 +55,6 @@ resource "google_service_account_iam_member" "pubsub_token_creator" {
   service_account_id = "projects/${var.project_id}/serviceAccounts/${var.compute_sa_email}"
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:service-${var.project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service_identity.pubsub]
 }

@@ -22,9 +22,23 @@ variable "project_id" {
 }
 
 variable "region" {
-  description = "GCP region for all resources"
+  description = "GCP region for all resources. Curated allowlist of regions where Cloud Run + Memorystore + Cloud SQL + Vertex AI are all available."
   type        = string
   default     = "us-central1"
+
+  validation {
+    condition = contains([
+      "us-central1",
+      "us-east1",
+      "us-east4",
+      "us-west1",
+      "europe-west1",
+      "europe-west4",
+      "asia-southeast1",
+      "asia-northeast1",
+    ], var.region)
+    error_message = "var.region must be one of: us-central1, us-east1, us-east4, us-west1, europe-west1, europe-west4, asia-southeast1, asia-northeast1 (regions where Cloud Run, Memorystore, Cloud SQL, and Vertex AI all coexist)."
+  }
 }
 
 # =============================================================================
@@ -61,6 +75,40 @@ variable "enable_monitoring" {
   default     = false
 }
 
+variable "enable_services" {
+  description = "Deploy Cloud Run services and IAM bindings. Set false for the Phase 1 base-infra apply (before image builds); set true for the Phase 2 services apply (after images are pushed)."
+  type        = bool
+  default     = false
+}
+
+# =============================================================================
+# Cloud Run services (gated by enable_services)
+# =============================================================================
+
+variable "image_tags" {
+  description = "Map of service name -> fully-qualified image URL with tag. Required keys when enable_services=true: gateway, admin, dash, frontend, tester, runner_autopilot, runner_cloudrun. Populated by the Phase 4 Cloud Build orchestrator after images are built."
+  type        = map(string)
+  default     = {}
+}
+
+variable "embedding_backend" {
+  description = "Embedding strategy for planner_with_memory. 'vertex_ai' for OSS Cloud SQL deploys; 'alloydb_ai' for AlloyDB deploys."
+  type        = string
+  default     = "vertex_ai"
+}
+
+variable "agent_urls" {
+  description = "Comma-separated bare agent URLs threaded into the gateway's AGENT_URLS env (e.g. https://ae1,https://ae2). The gateway parses these and discovers each agent's name from its /a2a/v1/card. Populated by the Phase 4 collect-ae-urls step."
+  type        = string
+  default     = ""
+}
+
+variable "frontend_unauthenticated" {
+  description = "Bind allUsers as roles/run.invoker on the frontend Cloud Run service (true for the OSS public demo)."
+  type        = bool
+  default     = true
+}
+
 # =============================================================================
 # IAM
 # =============================================================================
@@ -82,9 +130,10 @@ variable "agent_engine_sa_users" {
 # =============================================================================
 
 variable "db_initial_password" {
-  description = "Initial password for the database (Cloud SQL or AlloyDB)"
+  description = "Optional explicit password. If null, a random 32-char alphanumeric password is generated and persisted in TF state + Secret Manager (via the cloud-sql-postgres module)."
   type        = string
   sensitive   = true
+  default     = null
 }
 
 # =============================================================================

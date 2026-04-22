@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+resource "google_project_service_identity" "alloydb" {
+  provider = google-beta
+  project  = var.project_id
+  service  = "alloydb.googleapis.com"
+}
+
 resource "google_alloydb_cluster" "cluster" {
   cluster_id      = var.cluster_id
   location        = var.region
@@ -89,6 +95,8 @@ resource "google_project_iam_member" "alloydb_sa_aiplatform_user" {
   project = var.project_id
   role    = "roles/aiplatform.user"
   member  = "serviceAccount:service-${var.project_number}@gcp-sa-alloydb.iam.gserviceaccount.com"
+
+  depends_on = [google_project_service_identity.alloydb]
 }
 
 # IAM-based database users

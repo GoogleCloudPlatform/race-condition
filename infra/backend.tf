@@ -13,21 +13,26 @@
 # limitations under the License.
 
 # =============================================================================
-# Terraform Backend Configuration
+# Terraform Backend Configuration (partial -- bucket supplied at init time)
 # =============================================================================
 #
-# OSS deployments use a local backend by default. For team deployments,
-# uncomment the GCS backend block and configure a bucket in your project.
+# Empty (partial) GCS backend declaration. The bucket and prefix are
+# supplied at `terraform init` time via -backend-config flags so the
+# same module checkout works across multiple OSS projects without
+# editing this file.
 #
-# To create a state bucket:
-#   gsutil mb -p YOUR_PROJECT_ID -l YOUR_REGION gs://YOUR_PROJECT_ID-terraform-state
-#   gsutil versioning set on gs://YOUR_PROJECT_ID-terraform-state
+# The Cloud Build orchestrator (cloudbuild-bootstrap.yaml in the OSS
+# repo) creates the bucket if missing and invokes:
+#   terraform init \
+#     -backend-config="bucket=${PROJECT_ID}-tf-state" \
+#     -backend-config="prefix=oss/state"
+#
+# Single-developer local deploys can skip remote state entirely with:
+#   terraform init -backend=false
+# which falls back to the local terraform.tfstate file. (Note: tests in
+# tests/*.tftest.hcl already pass -backend=false implicitly.)
 # =============================================================================
 
-# Default: local backend (single developer)
-# terraform {
-#   backend "gcs" {
-#     bucket = "YOUR_PROJECT_ID-terraform-state"
-#     prefix = "terraform/state/oss"
-#   }
-# }
+terraform {
+  backend "gcs" {}
+}
