@@ -107,6 +107,19 @@ def _read_terraform_outputs() -> dict:
         "agent_engine_sa_email": outputs.get("agent_engine_sa_email", os.getenv("AGENT_ENGINE_SA_EMAIL", "")),
         "psc_network_attachment": outputs.get("psc_network_attachment", os.getenv("PSC_NETWORK_ATTACHMENT", "")),
         "staging_bucket": outputs.get("staging_bucket", os.getenv("STAGING_BUCKET", "")),
+        # Database connection info, consumed by deploy_agent_engine to wire
+        # ALLOYDB_* env vars on the planner_with_memory AE engine. The
+        # ALLOYDB_ prefix is misleading -- in OSS this resolves to the
+        # Cloud SQL private IP (enable_alloydb=false by default) and the
+        # agent code's USE_ALLOYDB=false switch flips it to the Cloud SQL
+        # + Vertex AI embedding code path.
+        "database_ip": outputs.get("database_ip", os.getenv("DATABASE_IP", "")),
+        "database_type": outputs.get("database_type", os.getenv("DATABASE_TYPE", "cloud-sql")),
+        "database_password_secret_id": outputs.get(
+            "database_password_secret_id",
+            os.getenv("DATABASE_PASSWORD_SECRET_ID", ""),
+        ),
+        "database_name": outputs.get("database_name", os.getenv("DATABASE_NAME", "")),
     }
     return _terraform_outputs_cache
 
@@ -692,7 +705,10 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
     db_host = tf.get("database_ip") or ""
     db_type = tf.get("database_type") or "cloud-sql"
     db_secret_id = tf.get("database_password_secret_id") or ""
-    db_name = tf.get("database_name") or "postgres"
+    # cloud-sql-postgres module names its database "agent_memory" by
+    # default. Tracked as a tf output for forward-compat in case the
+    # name becomes configurable.
+    db_name = tf.get("database_name") or "agent_memory"
     if db_host:
         ae_env_vars["USE_ALLOYDB"] = "true" if db_type == "alloydb" else "false"
         ae_env_vars["ALLOYDB_HOST"] = db_host
