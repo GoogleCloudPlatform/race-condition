@@ -108,8 +108,8 @@ The Planner works without a Maps key but produces better routes with one.
 1. Enable APIs:
    ```bash
    gcloud services enable apikeys.googleapis.com \
-     agentregistry.googleapis.com mapstools.googleapis.com \
-     places.googleapis.com weather.googleapis.com
+     agentregistry.googleapis.com cloudapiregistry.googleapis.com \
+     mapstools.googleapis.com places.googleapis.com weather.googleapis.com
    ```
 
 2. Create a key at https://console.cloud.google.com/apis/credentials.
