@@ -9,12 +9,9 @@ description: >
 # Exploring the Race Condition Codebase
 
 This is a multi-agent marathon simulation built for the Google Cloud Next '26
-Developer Keynote. The repo is also a reference architecture, so the layout
-is meant to be readable on its own.
-
-The fastest way to use this skill is to pick a question from "Where to start"
-below and follow the file pointers. Each pointer names a real file you can
-open.
+Developer Keynote. It also doubles as a reference architecture, so the
+layout is meant to be readable on its own. Pick a question from "Where
+to start" below and follow the file pointers.
 
 ## Where to start (by intent)
 
@@ -43,21 +40,18 @@ graph TD
 
 Four layers:
 
-- **Frontend** (`web/frontend/`) — Angular 21 + Three.js. 3D Las Vegas, runner
-  positions, weather, crowds. Talks to the gateway over WebSocket using
-  protobuf.
-- **Gateway** (`cmd/gateway/`, `internal/`) — Go service. Owns sessions,
-  routes A2A traffic, batches broadcasts.
-- **Agents** (`agents/`) — Python ADK. Planner variants, simulator variants,
-  runner variants. Each is its own process with its own port.
-- **Infrastructure** — Redis (sessions, pub-sub), Pub/Sub emulator
-  (telemetry), PostgreSQL with pgvector (route memory). Locally via
-  `docker-compose.yml`; in production via Memorystore, Pub/Sub, AlloyDB.
+- **Frontend** in `web/frontend/`. Angular 21 + Three.js renders the 3D
+  Las Vegas course, runner positions, weather, and crowds. Talks to the
+  gateway over WebSocket using protobuf.
+- **Gateway** in `cmd/gateway/` and `internal/`. Go service that owns
+  sessions, routes A2A traffic, and batches broadcasts.
+- **Agents** in `agents/`. Python ADK processes, one per agent variant,
+  each on its own port.
+- **Infrastructure**: Redis (sessions, pub-sub), Pub/Sub emulator
+  (telemetry), PostgreSQL + pgvector (route memory). Local via
+  `docker-compose.yml`; production via Memorystore, Pub/Sub, AlloyDB.
 
 ## Patterns worth understanding
-
-These are the design decisions you can pull out and reuse, with the *why* and
-the *where*.
 
 ### 1. Multiple agent variants instead of feature flags
 
@@ -81,10 +75,10 @@ what the LLM actually does in this codepath.
 The frontend can boot in **Cached** mode and replay NDJSON streams recorded
 from real agent runs. Live mode runs agents over WebSockets.
 
-Why: keynote demos cannot afford a network blip. The replay is timing-faithful
-to the real run, which means UI work, demo recording, and teaching can all
-happen with zero LLM cost. Anything that breaks under replay would have
-broken on stage, so the replay path doubles as an integration check.
+Why: keynote demos cannot afford a network blip. Replay is timing-faithful
+to the real run, so UI work and recording happen with zero LLM cost.
+Anything that breaks under replay would have broken on stage, which makes
+the replay path double as an integration check.
 
 Where: `web/frontend/src/app/components/DemoOverlay/demo.service.ts` (the
 `Ctrl+L` toggle and mode flash), `web/frontend/src/app/agent-gateway-updates.ts`
@@ -171,30 +165,24 @@ deliberate choice or relying on a temporary one.
 
 ## Code map
 
-```
-race-condition/
-├── agents/                     # Python AI agents (Google ADK)
-│   ├── planner*/               # Three planner variants (base, eval, memory)
-│   ├── simulator*/             # Race engine + fault-injection variant
-│   ├── runner*/                # LLM and deterministic runners
-│   └── utils/                  # Shared: A2A, session, telemetry, A2UI
-├── cmd/                        # Go service entry points
-│   └── gateway/                # The hub. Read main.go first.
-├── internal/                   # Go core
-│   ├── hub/                    # Session routing, broadcast batching
-│   ├── ecs/                    # Entity-Component-System
-│   ├── sim/                    # Simulation lifecycle
-│   ├── session/                # Redis + in-memory store
-│   └── agent/                  # A2A client + discovery
-├── web/                        # Frontends
-│   ├── frontend/               # Angular 21 + Three.js (the keynote UI)
-│   └── admin-dash, tester, agent-dash/  # Internal dashboards
-├── docs/                       # Architecture, guides, glossary
-├── infra/                      # Terraform for GCP deploy
-├── Dockerfile                  # Multi-stage; one stage per service
-├── docker-compose.yml          # Local Redis, Pub/Sub, PostgreSQL
-└── Procfile                    # Honcho process orchestration
-```
+- `agents/` — Python ADK agents. `planner*/` ships three variants (base,
+  eval, memory); `simulator*/` ships base plus a fault-injection variant;
+  `runner*/` ships LLM and deterministic versions. Shared helpers
+  (A2A, session, telemetry, A2UI) live in `agents/utils/`.
+- `cmd/` — Go service entry points: `gateway`, `admin`, `tester`,
+  `frontend`. Start at `cmd/gateway/main.go`.
+- `internal/` — Go core. `hub/` does session routing and broadcast
+  batching; `session/` stores state in Redis (with an in-memory
+  fallback); `agent/` is the gateway's A2A client and discovery; plus
+  `auth/`, `config/`, `middleware/`.
+- `web/` — Frontends. `web/frontend/` is the Angular 21 + Three.js
+  keynote UI; `web/admin-dash/`, `web/agent-dash/`, and `web/tester/`
+  are internal dashboards.
+- `docs/` — Architecture, guides, glossary.
+- `infra/` — Terraform for GCP deployment.
+- `Dockerfile`, `docker-compose.yml`, `Procfile` — multi-stage container
+  build, local infra (Redis / Pub/Sub / PostgreSQL), and Honcho process
+  orchestration for `make start`.
 
 ## Documentation map
 
