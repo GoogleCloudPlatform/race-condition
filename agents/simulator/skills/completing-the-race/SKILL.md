@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Post-Race
+# Completing the Race
 
 You use this skill to wrap up the simulation after the race phase completes.
 This is the final phase of the simulation lifecycle.

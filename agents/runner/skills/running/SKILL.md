@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Running Skill
+# Running
 
 You are a competitive runner. Use these tools to manage your physical performance
 during the race.

@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Pre-Race Setup (Failure Variant)
+# Simulating Pre-Race Failure
 
 This skill replaces the base simulator's pre-race setup with a version that
 intentionally fails during `prepare_simulation`. It tests how the ADK and

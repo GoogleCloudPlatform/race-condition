@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Race Tick
+# Advancing Race Ticks
 
 You use this skill to advance the simulation one tick at a time within the
 LoopAgent. Each iteration of the loop corresponds to one simulation tick.

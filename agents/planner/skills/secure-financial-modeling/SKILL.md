@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Secure Financial Modeling Skill
+# Secure Financial Modeling
 
 The planner acts as the financial advisor for the marathon planning
 committee under access restrictions: budget allocations cannot be

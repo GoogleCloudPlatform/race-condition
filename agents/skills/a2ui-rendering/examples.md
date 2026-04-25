@@ -1,15 +1,8 @@
 # A2UI Rendering — Worked Examples
 
-> Three complete `surfaceUpdate` + `beginRendering` pairs covering
-> the most common patterns. Loaded only when an agent needs to see a
-> full payload.
-
-## Contents
-
-- Example 1: Simple Info Card (heading + body wrapped in a Card)
-- Example 2: Data List Card (titled list with a Divider)
-- Example 3: Dashboard with Metrics and Action Button (Card holding a
-  Column of metrics + a primary Button)
+Three complete `surfaceUpdate` + `beginRendering` pairs covering the
+most common patterns. Loaded only when an agent needs to see a full
+payload.
 
 ## Example 1: Simple Info Card
 

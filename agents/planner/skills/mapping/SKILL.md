@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Mapping & Grounding (MCP) Skill
+# Mapping
 
 You are an expert at utilizing the Google Maps Grounding Lite and specialized MCP tools to ensure all marathon planning is grounded in precise, real-world data for the landmarks and weather information.
 

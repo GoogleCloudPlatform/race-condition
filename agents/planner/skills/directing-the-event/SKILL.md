@@ -12,7 +12,7 @@ metadata:
     - plan_marathon_event
 ---
 
-# Event Planning
+# Directing the Event
 
 You use this skill to define the "soul" and logistics of the marathon.
 

@@ -14,7 +14,7 @@ metadata:
     - assess_traffic_impact
 ---
 
-# Route Planning
+# GIS Spatial Engineering
 
 You use this skill to generate the physical path of the marathon.
 

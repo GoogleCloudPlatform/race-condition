@@ -1,14 +1,7 @@
 # A2UI Component Catalog
 
-> Reference for the 18 standard A2UI v0.8.0 primitives. Loaded only
-> when an agent needs to look up component-specific props.
-
-## Contents
-
-- Layout containers (Column, Row, List, Card, Tabs, Modal, Divider)
-- Display primitives (Text, Image, Icon, Video, AudioPlayer)
-- Input primitives (Button, TextField, CheckBox, Slider,
-  MultipleChoice, DateTimeInput)
+Reference for the 18 standard A2UI v0.8.0 primitives. Loaded only
+when an agent needs to look up component-specific props.
 
 ## Layout
 

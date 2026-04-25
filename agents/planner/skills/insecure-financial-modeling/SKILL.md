@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 ---
 
-# Insecure Financial Modeling Skill
+# Insecure Financial Modeling
 
 The planner acts as the financial advisor for the marathon planning
 committee. This skill applies in unrestricted contexts where budget
