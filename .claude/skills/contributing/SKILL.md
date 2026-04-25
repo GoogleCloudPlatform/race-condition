@@ -31,8 +31,6 @@ make build           # Build Go services (runs proto generation first)
 make test            # Run all tests
 ```
 
-If all tests pass, you're ready to contribute.
-
 ## Before Every PR
 
 Run these checks. They match what CI runs on GitHub Actions.
@@ -64,7 +62,7 @@ make test
 ```
 
 Runs Go tests, Python tests (excluding slow/eval), and web UI tests. Python
-tests run without real GCP credentials -- `conftest.py` mocks them.
+tests run without real GCP credentials; `conftest.py` mocks them.
 
 ### 4. Check coverage
 
