@@ -201,7 +201,23 @@ metadata:
   agents). The tools are always available; declaring metadata has no
   effect.
 
-## 6. Best Practices
+## 6. Renaming a Skill
+
+Skill identifiers leak into many places: directory names, frontmatter
+`name:` fields, prompts, agent code that calls `load_skill_tools` /
+`load_skill_toolset` / `load_agent_skills`, and tests that load
+`tools.py` by hyphenated path. When you rename a skill, grep for the
+old name across `agents/`, `docs/`, `scripts/`, `cmd/`, and frontend
+sources.
+
+**Captured demo logs are an exception.** The NDJSON files under
+`web/frontend/public/assets/sim-*-log.ndjson` are recordings of
+historical agent runs. They contain pre-rename skill names by design
+and must NOT be rewritten — doing so would falsify the demos. A
+future debugger searching for `pre-race` or `race-tick` in those
+files will find them; that is intentional historical state.
+
+## 7. Best Practices
 
 - **Atomic skills**: One skill = one focused behavior or domain.
 - **Cross-reference instead of duplicate**: When two skills need the

@@ -7,9 +7,6 @@ description: >
   rather than plain text, or whenever the validate_and_emit_a2ui tool is
   in scope.
 license: Apache-2.0
-metadata:
-  adk_additional_tools:
-    - validate_and_emit_a2ui
 ---
 
 # A2UI Rendering

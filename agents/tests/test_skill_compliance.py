@@ -32,7 +32,7 @@ import yaml
 _AGENTS_DIR = pathlib.Path(__file__).resolve().parents[1]
 _NAME_PATTERN = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 _FIRST_SECOND_PERSON = re.compile(
-    r"\b(I|you|your|you're|you've|you'll|we|our|us|me|my)\b",
+    r"\b(I|you|your|we|our|us|me|my)\b",
     re.IGNORECASE,
 )
 
