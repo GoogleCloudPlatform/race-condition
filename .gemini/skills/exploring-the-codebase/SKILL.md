@@ -23,12 +23,12 @@ open.
 | The whole system end-to-end | `docs/architecture/system_architecture.md` → `cmd/gateway/main.go` → one agent's `agent.py` |
 | How agents discover and talk to each other | `docs/guides/a2a-implementation-guide.md` → `internal/agent/` → any `agent.json` in `agents/*/` |
 | The Hub and session routing | `docs/architecture/multi_session_routing.md` → `internal/hub/` → `internal/session/` |
-| The simulator's tick loop | `agents/simulator/agent.py` → `agents/simulator/simulation/engine.py` → `tick_callback.py` |
+| The simulator's tick loop | `agents/simulator/agent.py` (`race_engine = LoopAgent(...)`) → `tick_callback.py` → `broadcast.py` → `collector.py` |
 | How the planner builds routes | `docs/architecture/route_planning.md` → `agents/planner/agent.py` → `agents/planner/prompts.py` |
 | The cached/replay reliability system | `web/frontend/src/app/components/DemoOverlay/demo.service.ts` → `agent-gateway-updates.ts` → the `.ndjson` recordings under `web/frontend/public/assets/` |
-| Backend-driven UI (A2UI) | `docs/architecture/a2ui_protocol.md` → `agents/utils/` (search for `a2ui`) → frontend `a2-ui-controller.ts` |
+| Backend-driven UI (A2UI) | `docs/architecture/a2ui_protocol.md` → `agents/utils/` (search for `a2ui`) → frontend `a2-ui-controller.component.ts` |
 | The deterministic runner baseline | `agents/runner/agent.py` (shared mechanics) → `agents/runner_autopilot/agent.py` (overrides) |
-| Deployment and infra | `docs/gcp-deployment.md` → `infra/` (Terraform) → `Dockerfile` |
+| Deployment and infra | `infra/README.md` → `infra/` (Terraform modules) → `Dockerfile` |
 | Tests and how they run offline | `docs/guides/testing.md` → root `conftest.py` |
 
 ## High-level topology
@@ -107,20 +107,7 @@ Where: `internal/hub/` (broadcast and fanout), `internal/session/` (Redis +
 in-memory fallback), `docs/architecture/multi_session_routing.md` for the
 rationale and the failure modes it prevents.
 
-### 4. ECS for simulation state
-
-`internal/ecs/` implements an Entity-Component-System pattern: entities have
-opaque IDs, components carry data, systems update them.
-
-Why: the gateway routes simulation state without knowing what any specific
-agent type means. Adding a new agent that emits a new component type does
-not require gateway changes. Broadcast batching works for the same reason:
-components can be diffed and merged without parsing agent-specific payloads.
-
-Where: `internal/ecs/` (the implementation), `internal/sim/` (lifecycle
-that uses it).
-
-### 5. Tick-based simulator as an ADK pipeline
+### 4. Tick-based simulator as an ADK pipeline
 
 The simulator is a `SequentialAgent` of three stages:
 `PreRace → LoopAgent (≤200 ticks) → PostRace`. Each tick advances the clock,
@@ -130,12 +117,12 @@ Why: ADK's `LoopAgent` gives a clean termination contract and lets each tick
 emit telemetry events that the dashboard can group by `invocation_id`. The
 simulator stays pure-ADK code rather than a bespoke loop.
 
-Where: `agents/simulator/agent.py` (pipeline definition),
-`agents/simulator/simulation/engine.py` (the loop body),
-`tick_callback.py` and `broadcast.py` (per-tick fan-out),
-`collector.py` (decision aggregation).
+Where: `agents/simulator/agent.py` (pipeline definition and the
+`race_engine` LoopAgent itself), `tick_callback.py` (per-tick body),
+`broadcast.py` (fan-out to runners), `collector.py` (decision
+aggregation).
 
-### 6. A2UI for backend-driven UI
+### 5. A2UI for backend-driven UI
 
 Agents emit UI primitives (cards, route lists, action buttons) over the wire
 as declarative JSON. The frontend renders them generically.
@@ -146,10 +133,10 @@ agents own their own UI surfaces and the frontend stays a renderer.
 
 Where: `docs/architecture/a2ui_protocol.md` for the spec,
 `agents/utils/` (search for `a2ui`) for the agent-side helpers,
-`web/frontend/src/app/components/a2ui/a2-ui-controller.ts` for the renderer.
+`web/frontend/src/app/components/a2ui/a2-ui-controller.component.ts` for the renderer.
 The Sandbox demo's "top 3 routes" panel is the easiest example to read end-to-end.
 
-### 7. A2A for agent-to-agent communication
+### 6. A2A for agent-to-agent communication
 
 Agents discover each other via cards at `/.well-known/agent-card.json`. The
 gateway fetches them at startup and routes by declared skill.
@@ -181,9 +168,6 @@ deliberate choice or relying on a temporary one.
   bill. Use it whenever you do not specifically need LLM behavior.
 - **Maps API key is optional.** Without `GOOGLE_MAPS_API_KEY` the planner
   falls back to plan-only routes. This is deliberate degradation, not a bug.
-- **`docs/plans/` contains historical implementation plans.** They are not
-  current architecture: read `docs/architecture/` for "how it is" and
-  `docs/plans/` for "how we got there."
 
 ## Code map
 
