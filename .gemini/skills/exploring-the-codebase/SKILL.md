@@ -24,7 +24,7 @@ to start" below and follow the file pointers.
 | How the planner builds routes | `docs/architecture/route_planning.md` → `agents/planner/agent.py` → `agents/planner/prompts.py` |
 | The cached/replay reliability system | `web/frontend/src/app/components/DemoOverlay/demo.service.ts` → `agent-gateway-updates.ts` → the `.ndjson` recordings under `web/frontend/public/assets/` |
 | Backend-driven UI (A2UI) | `docs/architecture/a2ui_protocol.md` → `agents/utils/` (search for `a2ui`) → frontend `a2-ui-controller.component.ts` |
-| The deterministic runner baseline | `agents/runner/agent.py` (shared mechanics) → `agents/runner_autopilot/agent.py` (overrides) |
+| How the runner pair is structured | `agents/runner/agent.py` (LLM runner; shared mechanics) → `agents/runner_autopilot/agent.py` (deterministic override of the decision callback) |
 | Deployment and infra | `infra/README.md` → `infra/` (Terraform modules) → `Dockerfile` |
 | Tests and how they run offline | `docs/guides/testing.md` → root `conftest.py` |
 

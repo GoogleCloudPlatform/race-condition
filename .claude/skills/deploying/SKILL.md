@@ -209,7 +209,7 @@ Every service should be "Ready". Cloud Run names use dashes:
 - `frontend`
 - `dash`
 - `runner-autopilot`
-- `runner-cloudrun`
+- `runner-cloudrun` (only if `enable_runner_cloudrun = true`)
 
 ### 2. Open the frontend
 
@@ -218,7 +218,8 @@ should load.
 
 ### 3. Open the admin dashboard
 
-The `admin-dash` service URL gets you the service health view.
+The `admin` Cloud Run service hosts the admin-dash UI; grab its URL for
+the service health view.
 
 ### 4. Verify Agent Engine agents
 
