@@ -113,3 +113,19 @@ def test_financial_skills_delegate_a2ui_to_shared_skill(
     assert "a2ui-rendering" in body, (
         f"{skill_path}: must cross-reference the a2ui-rendering skill."
     )
+
+
+def test_a2ui_rendering_skill_body_is_concise() -> None:
+    """The shared a2ui-rendering skill loads on every agent that uses A2UI;
+    keep its body under 200 lines so the frequently-loaded budget is met.
+
+    Heavier reference material (the 18-primitive catalog, full payload
+    examples) lives in sibling files one level deep from SKILL.md.
+    """
+    skill = _AGENTS_DIR / "skills" / "a2ui-rendering" / "SKILL.md"
+    body_lines = skill.read_text(encoding="utf-8").splitlines()
+    assert len(body_lines) < 200, (
+        f"{skill}: {len(body_lines)} lines; split heavy reference into "
+        "sibling files (components.md, examples.md) one level deep "
+        "from SKILL.md."
+    )
