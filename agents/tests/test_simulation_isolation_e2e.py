@@ -871,7 +871,7 @@ async def test_simulation_started_matches_downstream_simulation_id():
     import importlib.util
     import pathlib
 
-    tools_path = pathlib.Path(__file__).parents[1] / "simulator" / "skills" / "pre-race" / "tools.py"
+    tools_path = pathlib.Path(__file__).parents[1] / "simulator" / "skills" / "preparing-the-race" / "tools.py"
     spec = importlib.util.spec_from_file_location("pre_race_tools", tools_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -975,7 +975,7 @@ async def test_start_simulation_id_matches_all_downstream_events():
     pipeline_ctx.invocation_id = "inv-pipeline"
     pipeline_ctx.agent_name = "pre_race"
 
-    tools_path = pathlib.Path("agents/simulator/skills/pre-race/tools.py")
+    tools_path = pathlib.Path("agents/simulator/skills/preparing-the-race/tools.py")
     spec = importlib.util.spec_from_file_location("pre_race_e2e", tools_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)

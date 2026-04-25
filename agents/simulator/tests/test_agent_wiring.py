@@ -510,7 +510,7 @@ class TestSkillLoaderAcceptsCustomDir:
     def test_load_skill_tools_default_uses_simulator_skills(self):
         from agents.simulator.agent import load_skill_tools
 
-        tools = load_skill_tools("pre-race")
+        tools = load_skill_tools("preparing-the-race")
         names = [t.__name__ for t in tools]
         assert "prepare_simulation" in names
 

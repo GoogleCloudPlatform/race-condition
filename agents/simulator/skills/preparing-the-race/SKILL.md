@@ -1,5 +1,5 @@
 ---
-name: pre-race
+name: preparing-the-race
 description: >
   Use when the simulator receives a validated plan from the planner and
   must initialize the race: parsing the plan, spawning runner agents,

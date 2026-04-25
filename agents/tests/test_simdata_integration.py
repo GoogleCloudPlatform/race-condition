@@ -91,7 +91,7 @@ class TestSimdataEndToEnd:
         import importlib.util
         import pathlib
 
-        tools_path = pathlib.Path(__file__).parents[1] / "simulator" / "skills" / "pre-race" / "tools.py"
+        tools_path = pathlib.Path(__file__).parents[1] / "simulator" / "skills" / "preparing-the-race" / "tools.py"
         spec = importlib.util.spec_from_file_location("pre_race.tools", tools_path)
         assert spec is not None
         assert spec.loader is not None

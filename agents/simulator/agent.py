@@ -70,7 +70,7 @@ def load_skill_tools(skill_name: str, skills_dir: str | None = None) -> List[Cal
     """Load tool functions from a skill's tools.py using importlib.
 
     Args:
-        skill_name: Name of the skill subdirectory (e.g. "pre-race").
+        skill_name: Name of the skill subdirectory (e.g. "preparing-the-race").
         skills_dir: Base directory containing skill subdirectories.
             Defaults to this agent's skills/ directory.
     """
@@ -93,7 +93,7 @@ def load_skill_toolset(skill_name: str, skills_dir: str | None = None) -> SkillT
     """Load a SKILL.md directory as a SkillToolset for an LlmAgent.
 
     Args:
-        skill_name: Name of the skill subdirectory (e.g. "pre-race").
+        skill_name: Name of the skill subdirectory (e.g. "preparing-the-race").
         skills_dir: Base directory containing skill subdirectories.
             Defaults to this agent's skills/ directory.
     """
@@ -107,8 +107,8 @@ def load_skill_toolset(skill_name: str, skills_dir: str | None = None) -> SkillT
 # Load tools and skill toolsets per pipeline sub-agent
 # ---------------------------------------------------------------------------
 
-pre_race_tools = load_skill_tools("pre-race")
-pre_race_skillset = load_skill_toolset("pre-race")
+pre_race_tools = load_skill_tools("preparing-the-race")
+pre_race_skillset = load_skill_toolset("preparing-the-race")
 
 tick_tools = load_skill_tools("race-tick")
 tick_skillset = load_skill_toolset("race-tick")
