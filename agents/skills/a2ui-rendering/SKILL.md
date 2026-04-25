@@ -43,6 +43,7 @@ A2UI Render Progress:
 for `surfaceUpdate` and once for `beginRendering`. Without
 `beginRendering`, the frontend will not render the surface.
 
+<!-- [START a2ui_skill_message_structure] -->
 ## Message Structure
 
 A2UI uses two message types that work together. Both must be emitted.
@@ -78,7 +79,9 @@ A2UI uses two message types that work together. Both must be emitted.
 
 - **`surfaceId`**: must match the surfaceUpdate's surfaceId.
 - **`root`**: the `id` of the outermost component (usually a Card).
+<!-- [END a2ui_skill_message_structure] -->
 
+<!-- [START a2ui_skill_wrappers] -->
 ## Typed Value Wrappers
 
 > **CRITICAL**: Never use raw JSON primitives. All values MUST be wrapped.
@@ -92,6 +95,7 @@ A2UI uses two message types that work together. Both must be emitted.
 
 Raw `"value"`, raw `42`, or raw `true` as property values will be
 rejected by `validate_and_emit_a2ui`.
+<!-- [END a2ui_skill_wrappers] -->
 
 ## Container Children
 
