@@ -1,5 +1,5 @@
 ---
-name: race-tick
+name: advancing-race-ticks
 description: >
   Use when the simulator's loop agent advances the race by one tick:
   broadcasting state to runners, draining the telemetry buffer,

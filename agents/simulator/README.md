@@ -174,7 +174,7 @@ agents/simulator/
 ├── tick_callback.py         # Three-phase deterministic state machine
 ├── skills/
 │   ├── pre-race/tools.py    # prepare_simulation, spawn_runners, fire_start_gun (~410 lines)
-│   ├── race-tick/tools.py   # advance_tick, check_race_complete (~410 lines)
+│   ├── advancing-race-ticks/tools.py   # advance_tick, check_race_complete (~410 lines)
 │   └── post-race/tools.py   # compile_results, stop_race_collector
 └── tests/                   # 13 test files including stress and integration tests
 ```

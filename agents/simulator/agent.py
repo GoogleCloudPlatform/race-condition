@@ -110,8 +110,8 @@ def load_skill_toolset(skill_name: str, skills_dir: str | None = None) -> SkillT
 pre_race_tools = load_skill_tools("preparing-the-race")
 pre_race_skillset = load_skill_toolset("preparing-the-race")
 
-tick_tools = load_skill_tools("race-tick")
-tick_skillset = load_skill_toolset("race-tick")
+tick_tools = load_skill_tools("advancing-race-ticks")
+tick_skillset = load_skill_toolset("advancing-race-ticks")
 # NOTE: compute_traffic_conditions is called directly inside advance_tick
 # (code-level), not as a separate LLM tool. gemini-flash-lite cannot
 # reliably emit parallel function calls with zero thinking budget.

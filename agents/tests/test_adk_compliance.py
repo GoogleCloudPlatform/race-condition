@@ -34,7 +34,7 @@ TOOL_MODULES = [
     "agents.planner.skills.directing-the-event.scripts.tools",
     "agents.planner.skills.gis-spatial-engineering.scripts.tools",
     "agents.simulator.skills.preparing-the-race.tools",
-    "agents.simulator.skills.race-tick.tools",
+    "agents.simulator.skills.advancing-race-ticks.tools",
     "agents.simulator.skills.post-race.tools",
     "agents.simulator_with_failure.skills.pre-race.tools",
 ]
@@ -97,7 +97,7 @@ class TestAdkToolCompliance:
             "agents.runner_autopilot.skills.managing-hydration.tools",
             "agents.runner_autopilot.skills.running.tools",
             "agents.simulator.skills.preparing-the-race.tools",
-            "agents.simulator.skills.race-tick.tools",
+            "agents.simulator.skills.advancing-race-ticks.tools",
             "agents.simulator.skills.post-race.tools",
         ],
     )
