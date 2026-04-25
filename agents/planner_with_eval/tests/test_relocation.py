@@ -30,7 +30,7 @@ def test_evaluate_plan_importable_from_evaluator_package():
 
 
 def test_base_planner_has_only_shared_skills():
-    """The base planner should have directing-the-event, gis-spatial-engineering, mapping, and financial modeling skills."""
+    """Base planner has directing-the-event, gis-spatial-engineering, mapping, and financial modeling skills."""
     base_planner_dir = pathlib.Path(__file__).parent.parent.parent / "planner"
     skills_dir = base_planner_dir / "skills"
     skill_names = sorted(
