@@ -54,8 +54,8 @@ make lint
 Runs all linters:
 - `golangci-lint run ./...` (Go)
 - `uv run ruff check agents/` (Python)
-- `npx pyright agents/` (Python type checking)
-- Pre-commit hooks for YAML, JSON, Dockerfile validation
+- `npx --yes pyright@latest agents/` (Python type checking)
+- Pre-commit hooks for YAML and JSON syntax validation
 
 ### 3. Run tests
 
@@ -121,7 +121,7 @@ PRs are squash-merged. Write a clear PR title and description.
 | Command | What it runs | Needs infra? |
 |---|---|---|
 | `make test-go` | `go test ./... -count=1` | No (uses miniredis) |
-| `make test-py` | `pytest agents/ -x -q -m "not slow"` | No (mocks GCP) |
+| `make test-py` | `uv run pytest agents/ -x -q -m "not slow and not integration"` | No (mocks GCP) |
 | `make test-web` | `npm test` in admin-dash + tester | No |
 | `make eval` | Agent evaluations with real Gemini API | Yes (costs money) |
 | `make verify` | lint + unit tests + coverage | No |
