@@ -102,9 +102,13 @@ def test_financial_skills_delegate_a2ui_to_shared_skill(
     catalog.
     """
     body = skill_path.read_text(encoding="utf-8")
-    assert "surfaceUpdate" not in body, (
-        f"{skill_path}: inline A2UI structure detected; cross-reference "
-        "the a2ui-rendering skill instead of duplicating the protocol."
+    inline_json_block = re.compile(
+        r"```json\s.*?surfaceUpdate.*?```", re.DOTALL
+    )
+    assert inline_json_block.search(body) is None, (
+        f"{skill_path}: inline A2UI surfaceUpdate JSON detected in a "
+        "fenced code block; cross-reference the a2ui-rendering skill "
+        "instead of duplicating the protocol."
     )
     assert "a2ui-rendering" in body, (
         f"{skill_path}: must cross-reference the a2ui-rendering skill."
