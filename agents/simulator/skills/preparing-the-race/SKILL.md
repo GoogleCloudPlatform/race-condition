@@ -8,40 +8,58 @@ description: >
 license: Apache-2.0
 ---
 
-# Pre-Race Setup
+# Preparing the Race
 
-You use this skill to prepare and initialize the simulation before the race
-begins. This is the first phase after receiving a validated plan from the
-planner.
+This skill initializes the simulation after a validated plan arrives
+from the planner. It is the first phase of the simulation lifecycle.
 
-## Instructions
+## Workflow
 
-**CRITICAL**: These steps require SEPARATE responses. Do NOT call all tools at
-once. `prepare_simulation` sets state that the other tools depend on
-(`simulation_ready`, `runner_count`, `simulation_id`). Calling them in the same
-response will fail with a guard error.
+Each numbered step is a **separate model response**. The skill toolset
+guards against multi-step responses with an error.
 
-1. **Response 1 — Parse the Plan**: Call ONLY `prepare_simulation` with the JSON
-   plan received from the planner. This extracts the route, computes tick
-   parameters, and stores configuration in your session state. Do NOT call any
-   other tool in this response.
-2. **Response 2 — Spawn Runners + Start Collector (parallel)**: After
-   `prepare_simulation` returns, call `spawn_runners` AND
-   `start_race_collector` together in the SAME response. These two tools are
-   independent — spawning runners and subscribing to broadcasts have no data
-   dependency — so they execute simultaneously for faster startup.
-3. **Response 3 — Fire Start Gun**: After both complete, call `fire_start_gun`
-   to broadcast the START_GUN event to all spawned runner agents.
+```
+Pre-Race Progress:
+- [ ] Response 1: prepare_simulation (alone)
+- [ ] Response 2: spawn_runners + start_race_collector (parallel)
+- [ ] Response 3: fire_start_gun
+```
+
+**Why separate responses:** `prepare_simulation` sets state
+(`simulation_ready`, `runner_count`, `simulation_id`) that the other
+tools read. The skill guard rejects parallel calls that would race
+with that state write.
+
+### Response 1: Parse the plan
+
+Call only `prepare_simulation` with the JSON plan from the planner.
+The tool extracts the route, computes tick parameters, and stores
+configuration in session state.
+
+### Response 2: Spawn runners + start collector (parallel)
+
+Call `spawn_runners` and `start_race_collector` together in the same
+response. The two tools are independent — spawning runners and
+subscribing to broadcasts have no data dependency — so they execute
+simultaneously for faster startup.
+
+### Response 3: Fire the start gun
+
+Call `fire_start_gun` to broadcast the START_GUN event to all spawned
+runner agents.
 
 ## Tools
 
 - `prepare_simulation(plan_json, tool_context, duration_seconds=120, tick_interval_seconds=10, total_race_hours=6.0)`:
-  Parse the plan JSON, compute max_ticks, and store simulation config in state.
+  Parse the plan JSON, compute max_ticks, and store simulation config
+  in state.
 - `spawn_runners(count, tool_context)`:
   HTTP POST to the gateway spawn API to create runner agent sessions.
 - `start_race_collector(tool_context)`:
-  Start a RaceCollector subscribed to gateway:broadcast for runner telemetry.
+  Start a RaceCollector subscribed to gateway:broadcast for runner
+  telemetry.
 - `fire_start_gun(tool_context)`:
-  Broadcast a START_GUN RunnerEvent to all spawned runner agents via Redis.
+  Broadcast a START_GUN RunnerEvent to all spawned runner agents via
+  Redis.
 - `call_agent(agent_name, message, tool_context)`:
   Delegate inter-agent communication via the shared A2A utility.
