@@ -30,17 +30,17 @@ def test_evaluate_plan_importable_from_evaluator_package():
 
 
 def test_base_planner_has_only_shared_skills():
-    """The base planner should have gis-spatial-engineering, race-director, mapping, and financial modeling skills."""
+    """The base planner should have directing-the-event, gis-spatial-engineering, mapping, and financial modeling skills."""
     base_planner_dir = pathlib.Path(__file__).parent.parent.parent / "planner"
     skills_dir = base_planner_dir / "skills"
     skill_names = sorted(
         d.name for d in skills_dir.iterdir() if d.is_dir() and not d.name.startswith("_") and (d / "SKILL.md").exists()
     )
     assert skill_names == [
+        "directing-the-event",
         "gis-spatial-engineering",
         "insecure-financial-modeling",
         "mapping",
-        "race-director",
         "secure-financial-modeling",
     ]
 

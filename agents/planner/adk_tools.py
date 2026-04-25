@@ -228,7 +228,7 @@ def _load_additional_tools(skills_dir: pathlib.Path) -> list:
                     tools.append(func)
 
     # Race-director tools
-    rd_tools_path = skills_dir / "race-director" / "scripts" / "tools.py"
+    rd_tools_path = skills_dir / "directing-the-event" / "scripts" / "tools.py"
     if rd_tools_path.exists():
         spec = importlib.util.spec_from_file_location("rd_tools", rd_tools_path)
         if spec and spec.loader:

@@ -1,5 +1,5 @@
 ---
-name: race-director
+name: directing-the-event
 description: >
   Use when the marathon plan needs non-spatial event parameters defined:
   theme, hydration-point logistics, crowd zones, start times, or

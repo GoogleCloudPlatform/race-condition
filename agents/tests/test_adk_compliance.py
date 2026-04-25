@@ -31,7 +31,7 @@ TOOL_MODULES = [
     "agents.runner.skills.running.tools",
     "agents.runner_autopilot.skills.hydration.tools",
     "agents.runner_autopilot.skills.running.tools",
-    "agents.planner.skills.race-director.scripts.tools",
+    "agents.planner.skills.directing-the-event.scripts.tools",
     "agents.planner.skills.gis-spatial-engineering.scripts.tools",
     "agents.simulator.skills.pre-race.tools",
     "agents.simulator.skills.race-tick.tools",

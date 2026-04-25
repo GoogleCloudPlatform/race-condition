@@ -51,7 +51,7 @@ contains a `SKILL.md` manifest and a `scripts/tools.py` with tool functions.
 | Skill | Tools | Purpose |
 |:------|:------|:--------|
 | `gis-spatial-engineering` | `plan_marathon_route`, `report_marathon_route` | Route generation, course infrastructure, route reporting |
-| `race-director` | `plan_marathon_event` | Event characteristics (theme, start time, waves) |
+| `directing-the-event` | `plan_marathon_event` | Event characteristics (theme, start time, waves) |
 | `mapping` | (Maps MCP tools) | Google Maps Grounding Lite: place search, route computation, weather lookup |
 | `insecure-financial-modeling` | (prompt-only) | Shares budget percentages, approves changes |
 | `secure-financial-modeling` | (prompt-only) | Refuses all budget modifications |
@@ -138,7 +138,7 @@ agents/planner/
 │   └── test_config.json                # Eval config
 └── skills/
     ├── gis-spatial-engineering/    # Route generation (~2350 lines)
-    ├── race-director/             # Event logistics
+    ├── directing-the-event/      # Event logistics
     ├── mapping/                   # Maps MCP (no scripts, uses Agent Registry)
     ├── insecure-financial-modeling/  # Permissive financial skill
     └── secure-financial-modeling/   # Restrictive financial skill
