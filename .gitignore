@@ -89,6 +89,10 @@ __pycache__/
 # docs/plans/2026-04-18-bug-b-h1-parallel-tool-revert-design.md.
 .harness-runs/
 
+# Local planning and design docs (working artifacts only; not part of the
+# repo's tracked architecture documentation).
+docs/plans/
+
 # Terraform
 infra/.terraform/
 infra/.terraform.lock.hcl
