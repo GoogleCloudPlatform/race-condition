@@ -77,6 +77,7 @@ something, so explain the tradeoff before enabling it.
 |---|---|---|
 | AlloyDB | ~$200/mo | Route memory with vector embeddings (replaces Cloud SQL) |
 | GKE runner cluster | ~$300/mo | GPU-powered runner agents on Kubernetes |
+| Cloud Run runner | ~$0 idle, scales with load | LLM-powered runner agents on Cloud Run (alternative to GKE) |
 | Maps API key | Per-request pricing | Real map data for route planning (Maps, Places, Weather) |
 | Monitoring alerts | Free (alerting only) | Email alerts for Redis memory, NAT egress, etc. |
 
@@ -92,10 +93,12 @@ db_initial_password = "change-me-to-a-secure-password"
 region              = "us-central1"
 
 # Optional features
-enable_alloydb      = false
-enable_gke          = false
-enable_maps_api_key = false
-enable_monitoring   = false
+enable_alloydb         = false
+enable_gke             = false
+enable_runner_cloudrun = false
+enable_maps_api_key    = false
+enable_monitoring      = false
+alert_email            = ""  # required only when enable_monitoring = true
 
 # Developer access (optional)
 developers = [
