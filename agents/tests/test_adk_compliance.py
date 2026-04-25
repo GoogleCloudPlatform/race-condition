@@ -35,7 +35,7 @@ TOOL_MODULES = [
     "agents.planner.skills.gis-spatial-engineering.scripts.tools",
     "agents.simulator.skills.preparing-the-race.tools",
     "agents.simulator.skills.advancing-race-ticks.tools",
-    "agents.simulator.skills.post-race.tools",
+    "agents.simulator.skills.completing-the-race.tools",
     "agents.simulator_with_failure.skills.pre-race.tools",
 ]
 
@@ -98,7 +98,7 @@ class TestAdkToolCompliance:
             "agents.runner_autopilot.skills.running.tools",
             "agents.simulator.skills.preparing-the-race.tools",
             "agents.simulator.skills.advancing-race-ticks.tools",
-            "agents.simulator.skills.post-race.tools",
+            "agents.simulator.skills.completing-the-race.tools",
         ],
     )
     def test_tool_functions_have_dict_return_annotation(self, module_path):

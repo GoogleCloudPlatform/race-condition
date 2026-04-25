@@ -1,5 +1,5 @@
 ---
-name: post-race
+name: completing-the-race
 description: >
   Use when the simulator finishes its race-tick loop and must wrap up:
   compiling final results from tick snapshots, stopping the

@@ -116,8 +116,8 @@ tick_skillset = load_skill_toolset("advancing-race-ticks")
 # (code-level), not as a separate LLM tool. gemini-flash-lite cannot
 # reliably emit parallel function calls with zero thinking budget.
 
-post_race_tools = load_skill_tools("post-race")
-post_race_skillset = load_skill_toolset("post-race")
+post_race_tools = load_skill_tools("completing-the-race")
+post_race_skillset = load_skill_toolset("completing-the-race")
 
 
 # ---------------------------------------------------------------------------
