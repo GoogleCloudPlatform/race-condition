@@ -1,5 +1,5 @@
 ---
-name: pre-race
+name: simulating-pre-race-failure
 description: >
   Use when running the simulator-with-failure test variant and the
   pre-race phase begins. The prepare_simulation tool intentionally

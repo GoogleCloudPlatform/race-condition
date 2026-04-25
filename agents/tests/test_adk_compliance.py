@@ -36,7 +36,7 @@ TOOL_MODULES = [
     "agents.simulator.skills.preparing-the-race.tools",
     "agents.simulator.skills.advancing-race-ticks.tools",
     "agents.simulator.skills.completing-the-race.tools",
-    "agents.simulator_with_failure.skills.pre-race.tools",
+    "agents.simulator_with_failure.skills.simulating-pre-race-failure.tools",
 ]
 
 
