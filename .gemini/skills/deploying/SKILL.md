@@ -12,7 +12,7 @@ description: >
 This skill walks through a cloud deploy of Race Condition to a GCP project:
 Terraform for the infra, Cloud Run and Agent Engine for the app, then a
 verification pass once it's up. The phases are gated. If a phase fails, stop
-and fix it — don't try to push past it.
+and fix it. Don't try to push past it.
 
 For local dev setup, use the `getting-started` skill instead.
 
@@ -44,7 +44,7 @@ gcloud auth login --update-adc
 ```
 
 Then set up Application Default Credentials separately (yes, this is a
-second login — gcloud and ADC use different token stores):
+second login; gcloud and ADC use different token stores):
 
 ```bash
 gcloud auth application-default login
@@ -107,7 +107,7 @@ developers = [
 ```
 
 Swap in the real project ID. Remind the developer to pick a strong
-`db_initial_password` and not commit the file — it should be gitignored.
+`db_initial_password` and not commit the file; it should be gitignored.
 
 HARD GATE: `infra/terraform.tfvars` must exist with the correct project ID
 before proceeding.
@@ -130,9 +130,8 @@ This downloads providers and initializes the Terraform backend.
 make infra-plan
 ```
 
-Show the plan output to the developer and get a clear yes before moving
-on. The plan lists every GCP resource that will be created (Cloud Run,
-Redis, VPC, NAT, etc.).
+Show the plan output to the developer. The plan lists every GCP resource
+that will be created (Cloud Run, Redis, VPC, NAT, etc.).
 
 HARD GATE: Explicit confirmation from the developer before applying.
 
@@ -272,7 +271,7 @@ bash agents/planner_with_memory/alloydb/deploy_alloydb.sh
 ```
 
 This creates the tables, installs pgvector, and loads the seed routes.
-Check the admin dashboard once it finishes — the planner-with-memory
+Check the admin dashboard once it finishes; the planner-with-memory
 agent should show as connected.
 
 ### GKE runner (if enabled)
@@ -294,7 +293,7 @@ Once the cluster is up:
 ### Monitoring (if enabled)
 
 Terraform creates the alert policies but doesn't wire up any notification
-channels — that part is on you:
+channels. That part is on you:
 
 1. Go to **Monitoring > Alerting** in the Cloud Console.
 2. Create a notification channel (email, Slack, PagerDuty, whatever).
