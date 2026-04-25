@@ -1,8 +1,11 @@
 ---
 name: hydration
-description:
-  Hydration management for the runner, tracking water depletion and
-  rehydration stations.
+description: >
+  Use when a runner agent receives a distance update and must deplete
+  water proportionally, or when the runner enters a hydration station
+  and must decide whether to stop and rehydrate. Triggered by distance
+  events and station events.
+license: Apache-2.0
 ---
 
 # Hydration Management

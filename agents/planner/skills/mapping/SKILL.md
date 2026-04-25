@@ -1,6 +1,12 @@
 ---
 name: mapping
-description: Specialized in working with Google Maps Grounding lite and MCP tools. Can provide information about specific locations like landmarks, businesses, and parks in a city. Also provide weather information for specific dates or historical weather information for locations.
+description: >
+  Use when planning a marathon route that must reference real-world
+  geography: looking up landmarks, businesses, or parks in a city,
+  computing distances between points, or checking historical and
+  forecasted weather for the race date and location. Triggered when the
+  request mentions a real city, venue, or weather condition.
+license: Apache-2.0
 ---
 
 # Mapping & Grounding (MCP) Skill

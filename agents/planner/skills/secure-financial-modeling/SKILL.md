@@ -1,8 +1,11 @@
 ---
 name: secure-financial-modeling
 description: >
-  Refuse all budget change requests. You are not authorized to modify
-  budget allocations.
+  Use when the planning committee asks to change, increase, decrease,
+  or modify a budget allocation in a security-restricted context.
+  Triggered by any budget-modification phrasing. Refuses the change and
+  directs the requester to an authorized administrator.
+license: Apache-2.0
 ---
 
 # Secure Financial Modeling Skill

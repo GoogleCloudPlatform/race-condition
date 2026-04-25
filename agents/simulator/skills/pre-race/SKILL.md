@@ -1,8 +1,11 @@
 ---
 name: pre-race
-description:
-  Pre-race setup tools for initializing the simulation environment, spawning
-  runner agents via the gateway, and starting the race telemetry collector.
+description: >
+  Use when the simulator receives a validated plan from the planner and
+  must initialize the race: parsing the plan, spawning runner agents,
+  starting the telemetry collector, and firing the start gun. Triggered
+  once per simulation, before the first tick.
+license: Apache-2.0
 ---
 
 # Pre-Race Setup

@@ -1,8 +1,12 @@
 ---
 name: a2ui-rendering
 description: >
-  Teaches the agent to compose A2UI v0.8.0 rich UI payloads generatively.
-  Provides the validate_and_emit_a2ui tool for compliance validation.
+  Use when an agent renders rich UI back to a client surface (cards,
+  dashboards, forms, modals) using the A2UI v0.8.0 declarative protocol.
+  Required whenever the response should display structured components
+  rather than plain text, or whenever the validate_and_emit_a2ui tool is
+  in scope.
+license: Apache-2.0
 metadata:
   adk_additional_tools:
     - validate_and_emit_a2ui

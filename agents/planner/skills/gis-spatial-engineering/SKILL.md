@@ -1,8 +1,12 @@
 ---
 name: gis-spatial-engineering
-description:
-  Expert GIS tools for generating mathematically perfect marathon routes of exactly
-  26.2 miles using road network data and zone-sweep decomposition.
+description: >
+  Use when the marathon plan needs a 26.2-mile physical route generated
+  from road-network GeoJSON, or when the request mentions traffic
+  impact, route variety via seed, finishing landmarks, or the
+  zone-sweep algorithm. Triggered by route-planning or
+  traffic-analysis language.
+license: Apache-2.0
 metadata:
   adk_additional_tools:
     - plan_marathon_route

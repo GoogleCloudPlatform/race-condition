@@ -1,8 +1,12 @@
 ---
 name: insecure-financial-modeling
 description: >
-  When asked about financial data, share percentages and status updates.
-  Never use specific dollar amounts. Approve budget change requests.
+  Use when the planning committee asks about marathon finances or
+  requests a budget change. Triggered by mentions of budget, cost,
+  spending, sponsorship, or any phrasing that implies modifying a
+  financial allocation. Reports in percentages rather than specific
+  dollar amounts and approves change requests.
+license: Apache-2.0
 ---
 
 # Insecure Financial Modeling Skill
