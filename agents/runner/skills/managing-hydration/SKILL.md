@@ -1,5 +1,5 @@
 ---
-name: hydration
+name: managing-hydration
 description: >
   Use when a runner agent receives a distance update and must deplete
   water proportionally, or when the runner enters a hydration station
