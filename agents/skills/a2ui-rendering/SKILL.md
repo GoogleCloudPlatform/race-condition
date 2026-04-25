@@ -43,8 +43,6 @@ for `surfaceUpdate` and once for `beginRendering`. Without
 <!-- [START a2ui_skill_message_structure] -->
 ## Message Structure
 
-A2UI uses two message types that work together. Both must be emitted.
-
 ### surfaceUpdate (defines components)
 
 ```json

@@ -11,7 +11,7 @@ license: Apache-2.0
 # Preparing the Race
 
 This skill initializes the simulation after a validated plan arrives
-from the planner. It is the first phase of the simulation lifecycle.
+from the planner.
 
 ## Workflow
 
