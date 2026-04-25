@@ -39,7 +39,7 @@ A2UI Render Progress:
 - [ ] Wrap both validated payloads in ```a2ui markdown fences
 ```
 
-`validate_and_emit_a2ui` MUST be called **twice** per surface — once
+`validate_and_emit_a2ui` MUST be called **twice** per surface: once
 for `surfaceUpdate` and once for `beginRendering`. Without
 `beginRendering`, the frontend will not render the surface.
 
@@ -110,8 +110,8 @@ Layout containers reference children by ID:
 
 ## Component Catalog
 
-For the full catalog of 18 primitives — required props, optional
-props, and per-type notes — see [components.md](components.md).
+For the full catalog of 18 primitives, with required and optional
+props plus per-type notes, see [components.md](components.md).
 
 ## Examples
 

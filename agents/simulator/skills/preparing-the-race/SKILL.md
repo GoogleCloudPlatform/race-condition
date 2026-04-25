@@ -39,8 +39,8 @@ configuration in session state.
 ### Response 2: Spawn runners + start collector (parallel)
 
 Call `spawn_runners` and `start_race_collector` together in the same
-response. The two tools are independent — spawning runners and
-subscribing to broadcasts have no data dependency — so they execute
+response. The two tools are independent: spawning runners and
+subscribing to broadcasts have no data dependency, so they execute
 simultaneously for faster startup.
 
 ### Response 3: Fire the start gun

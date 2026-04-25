@@ -114,7 +114,7 @@ for the human-readable identity.
 The body has no hard cap, but frequently-loaded shared skills (e.g.
 `a2ui-rendering`, loaded by every agent that renders UI) should stay
 under 200 lines. Split heavier reference into sibling files one level
-deep — see `agents/skills/a2ui-rendering/` for the
+deep. See `agents/skills/a2ui-rendering/` for the
 `SKILL.md` + `components.md` + `examples.md` pattern.
 
 ## 4. Loading and Registering Skills
