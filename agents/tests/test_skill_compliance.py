@@ -81,3 +81,31 @@ def test_skill_frontmatter_is_compliant(skill_path: pathlib.Path) -> None:
         f"{skill_path}: description must be third-person, "
         f"found {match.group()!r} in {desc_clean[:80]!r}"
     )
+
+
+@pytest.mark.parametrize(
+    "skill_path",
+    [
+        _AGENTS_DIR / "planner" / "skills" / "insecure-financial-modeling" / "SKILL.md",
+        _AGENTS_DIR / "planner" / "skills" / "secure-financial-modeling" / "SKILL.md",
+    ],
+    ids=["insecure", "secure"],
+)
+def test_financial_skills_delegate_a2ui_to_shared_skill(
+    skill_path: pathlib.Path,
+) -> None:
+    """Financial skills must reference a2ui-rendering, not duplicate it.
+
+    Inline A2UI structure rots when the shared protocol evolves. The fix
+    is a cross-reference to the a2ui-rendering skill, which carries the
+    canonical message structure, typed value wrappers, and component
+    catalog.
+    """
+    body = skill_path.read_text(encoding="utf-8")
+    assert "surfaceUpdate" not in body, (
+        f"{skill_path}: inline A2UI structure detected; cross-reference "
+        "the a2ui-rendering skill instead of duplicating the protocol."
+    )
+    assert "a2ui-rendering" in body, (
+        f"{skill_path}: must cross-reference the a2ui-rendering skill."
+    )
