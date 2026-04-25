@@ -22,16 +22,17 @@ While ADK is flexible, place skill resources in a `skills/` directory within
 your agent's package. Heavy reference content lives in sibling files one
 level deep from `SKILL.md`.
 
-```text
-my_agent_package/
-├── agent.py
-├── agent.json
-└── skills/
-    └── managing-something/
-        ├── SKILL.md         <-- Frontmatter + concise instructions
-        ├── components.md    <-- Optional reference loaded only when needed
-        ├── examples.md      <-- Optional worked examples
-        └── tools.py         <-- Optional ADK tool functions
+```mermaid
+graph TD
+    pkg[my_agent_package/]
+    pkg --> agent_py[agent.py]
+    pkg --> agent_json[agent.json]
+    pkg --> skills[skills/]
+    skills --> ms[managing-something/]
+    ms --> skill_md["SKILL.md (frontmatter + concise instructions)"]
+    ms --> components_md["components.md (reference loaded only when needed)"]
+    ms --> examples_md["examples.md (worked examples)"]
+    ms --> tools_py["tools.py (ADK tool functions)"]
 ```
 
 ## 2. Defining Skill Content (SKILL.md)
@@ -155,12 +156,13 @@ If a skill directory contains a `tools.py` file, public functions in
 it become agent tools. If the module defines `__all__`, that list is
 used verbatim.
 
-```text
-agents/my_agent/skills/
-└── managing-negotiations/
-    ├── SKILL.md       <-- Instructions (auto-loaded)
-    ├── tools.py       <-- Public functions become agent tools
-    └── references/    <-- Optional supplementary docs
+```mermaid
+graph TD
+    skills[agents/my_agent/skills/]
+    skills --> mn[managing-negotiations/]
+    mn --> skill_md["SKILL.md (instructions, auto-loaded)"]
+    mn --> tools_py["tools.py (public functions become agent tools)"]
+    mn --> refs["references/ (optional supplementary docs)"]
 ```
 
 ## 5. ADK Extension: `metadata.adk_additional_tools`
