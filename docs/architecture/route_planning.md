@@ -1,14 +1,12 @@
 # Route Planning Architecture: The Spine and Sprout Algorithm
 
 ## Overview
-The simulation requires the capability to generate mathematically perfect marathon routes (exactly 26.2 miles) based on a raw GeoJSON road network. The generated routes are required to:
-1. Avoid self-intersections (form a Simple Path).
-2. Connect significant points of interest (landmarks) in the provided network.
-3. Arrive at the exact required distance by truncating and mathematically interpolating the final segment.
+The simulation needs to generate marathon routes of exactly 26.2 miles from a raw GeoJSON road network. Each route must:
+1. Avoid self-intersections (form a simple path).
+2. Connect a fixed sequence of landmarks in the network.
+3. Hit exactly 26.2 miles by interpolating the final segment.
 
-Early implementations using naive greedy depth-first search (DFS) or random walks suffered from non-determinism, excessive compute time, and a high failure rate due to getting trapped in dead-ends (cul-de-sacs).
-
-To address these issues, the **Spine and Sprout** algorithm was implemented to guarantee highly performant, deterministic, and accurate route generation.
+Naive greedy DFS and random walks were tried first. Both got trapped in cul-de-sacs and produced non-deterministic output. The **Spine and Sprout** algorithm replaced them with a deterministic two-phase approach.
 
 ## The Spine and Sprout Algorithm
 
@@ -61,7 +59,6 @@ decorate the `FeatureCollection` with required operational elements.
 
 ## Code Location
 
-The logic for this algorithm is encapsulated in the Planner agent's skill
-functions under `agents/planner/skills/route-planning/tools.py`. Testing for
-determinism to prevent regressions is found at
-`agents/tests/test_planner_route_skill.py`.
+The implementation lives in
+`agents/planner/skills/gis-spatial-engineering/scripts/tools.py`. Determinism
+regression tests are at `agents/tests/test_planner_route_skill.py`.
