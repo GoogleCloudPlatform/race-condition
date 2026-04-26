@@ -1,15 +1,19 @@
-# A2UI Protocol Reference (v0.8.0 Standard)
+# A2UI Protocol Reference (v0.8.0)
 
-A2UI (Agent-to-User Interface) is a schema-driven protocol that lets AI agents send UI components to frontends via standard message parts.
+A2UI (Agent-to-User Interface) is a schema-driven protocol that lets agents
+send UI components to frontends as structured message parts. Race Condition
+follows the `a2ui.org:standard_catalog_0_8_0` specification.
 
-The Race Condition project strictly follows the **a2ui.org:standard_catalog_0_8_0** specification.
+## Core rules
 
-## Core Philosophy
-
-- **Capitalized Primitives**: All component types MUST use capitalized names (e.g., `Video`, `Card`, `Column`).
-- **Direct Properties**: Properties are mapped directly to the component object.
-- **Recursive Composition**: Containers like `Column`, `Row`, and `Card` can host other components via `children` (array) or `child` (single) properties.
-- **LLM-Driven Layout**: Layout uses composition of atomic primitives instead of custom one-off components.
+- **Capitalized primitives.** All component types use capitalized names
+  (`Video`, `Card`, `Column`).
+- **Direct properties.** Component properties are mapped onto the component
+  object, not nested under a `props` key.
+- **Recursive composition.** Containers (`Column`, `Row`, `Card`) host other
+  components via `children` (array) or `child` (single).
+- **Composed, not bespoke.** Layouts are built from the catalog primitives.
+  Don't add custom one-off types.
 
 ## Message Structure
 
@@ -43,7 +47,7 @@ An A2UI payload is strictly a JSON object wrapped in an `a2ui` markdown block:
 | **Column** | Layout | Vertical container (`distribution`, `alignment`). |
 | **Row** | Layout | Horizontal container (`distribution`, `alignment`). |
 | **List** | Layout | Scrollable array of children. |
-| **Card** | Layout | Elevated container with glassmorphism styling. |
+| **Card** | Layout | Elevated surface container. |
 | **Tabs** | Layout | Tabbed navigation (`tabItems`). |
 | **Modal** | Layout | Blocking interaction overlay. |
 | **Divider** | Layout | Structural separator (`axis`). |
@@ -61,32 +65,40 @@ An A2UI payload is strictly a JSON object wrapped in an `a2ui` markdown block:
 
 ## Implementation
 
-### Backend (Python) — Generative Approach (Recommended)
+### Backend (Python)
 
-Agents can compose A2UI directly by including the shared `a2ui-rendering` skill
-from `agents/skills/a2ui-rendering/`. The skill teaches the LLM the full A2UI
-v0.8.0 specification and provides a `validate_and_emit_a2ui` tool for compliance
-validation.
+Agents compose A2UI payloads inline through the shared `a2ui-rendering` skill
+at `agents/skills/a2ui-rendering/`. The skill bundles the v0.8.0 specification
+into the agent's context and exposes a single tool, `validate_and_emit_a2ui`,
+that validates the JSON before it leaves the process.
 
-Agents opt in by having `load_agent_skills()` discover the shared skill
-automatically. The LLM then composes A2UI payloads inline, validates them, and
-includes them in its response.
-
-### Backend (Python) — Programmatic Approach
-
-For complex data-driven layouts or testing scenarios, use the
-`agents.utils.a2ui` library directly:
+Agents opt in just by being constructed with `load_agent_skills()` — the
+shared skills directory is auto-discovered. From the agent's perspective:
 
 ```python
-from agents.utils import a2ui
-
-def show_alert():
-    return a2ui.create_payload("Card", {
-        "child": {"type": "Text", "text": "System Alert", "usageHint": "h3"}
-    })
+# Inside a tool or as part of a model response, the agent calls:
+result = await validate_and_emit_a2ui(
+    payload=json.dumps({
+        "surfaceUpdate": {
+            "id": "alert-1",
+            "components": [
+                {"id": "alert-card", "type": "Card", "child": "alert-text"},
+                {"id": "alert-text", "type": "Text", "text": "System Alert",
+                 "usageHint": "h3"},
+            ],
+        },
+    }),
+    tool_context=ctx,
+)
+# result is {"status": "success", "a2ui": <validated_payload>} on success,
+# or {"status": "error", "violations": [...], "suggestion": "..."} on failure.
 ```
 
-### Frontend (Vanilla TS)
+There is no separate "library" call site. The tool is the contract; if the JSON
+isn't valid A2UI, validation fails and the model gets actionable feedback.
 
-The `tester` UI uses a recursive renderer in `web/tester/src/a2ui/index.ts`. All 18 primitives are mapped in the `REGISTRY`.
+### Frontend (vanilla TS)
+
+The `tester` UI uses a recursive renderer in `web/tester/src/a2ui/index.ts`.
+All 18 primitives are mapped in the `REGISTRY`.
 
