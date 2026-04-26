@@ -88,8 +88,17 @@ jobs:
       - name: Install Python deps
         run: uv sync --frozen
 
-      - name: Lint Python
-        run: uv run ruff check agents/
+      - name: Install lint tools
+        # golangci-lint is pinned; install pattern mirrors `addlicense` above.
+        # pre-commit is required by the `lint-configs` Makefile target.
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+          uv tool install pre-commit
+
+      - name: Lint
+        # Single source of truth: `make lint` runs Go, Python (ruff), pyright,
+        # and config (yaml/json) linters. Matches what contributors run locally.
+        run: make lint
 
       - name: Test Python
         env:
