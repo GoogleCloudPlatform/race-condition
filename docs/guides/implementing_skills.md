@@ -1,7 +1,7 @@
-# Tutorial: Implementing and Registering Skills in ADK Agents
+# Implementing Skills in ADK Agents
 
-This tutorial explains how to add "Skills" to agents built using the Google
-Assistant Developer Kit (ADK) within Race Condition.
+This guide explains how to add Skills to agents built with the Google Agent
+Development Kit (ADK) inside Race Condition.
 
 ## What is a Skill?
 
