@@ -1,9 +1,8 @@
-# Multi-Session Routing Architecture
+# Multi-Session Routing
 
-The N26 Simulation Gateway supports **Targeted Multi-Session Broadcasting**.
-This allows a single administrative client (like the Tester UI) to send a single
-message that is efficiently fanned out to multiple simulation agents or user
-sessions.
+The Race Condition gateway supports targeted multi-session broadcasting: a
+single admin client (such as the Tester UI) sends one message and the gateway
+fans it out to multiple simulation agents or user sessions.
 
 ## 1. Protocol Mechanism
 
@@ -63,18 +62,19 @@ publishes it to the `simulation:broadcast` Pub/Sub topic.
 ```mermaid
 sequenceDiagram
     participant UI as Tester UI
-    participant GW1 as Gateway (Node A)
+    participant GW1 as Gateway (node A)
     participant Redis as Redis (Switchboard)
-    participant GW2 as Gateway (Node B)
-    participant Agent as Python Agent
+    participant GW2 as Gateway (node B)
+    participant PubSub as Pub/Sub
+    participant Agent as Python agent
 
     UI->>GW1: WS: Wrapper(type="broadcast", targets=["sess-1", "sess-2"])
-    GW1->>GW1: Hub: Deliver to "sess-1" (Local)
-    GW1->>Redis: Publish "gateway:broadcast"
-    Redis-->>GW2: Notify "gateway:broadcast"
-    GW2->>GW2: Hub: Deliver to "sess-2" (Remote Hub)
-    GW1->>PubSub: Publish "simulation:broadcast"
-    PubSub-->>Agent: Poke "agent-1" (matches target)
+    GW1->>GW1: Hub: deliver to "sess-1" (local)
+    GW1->>Redis: publish "gateway:broadcast"
+    Redis-->>GW2: notify "gateway:broadcast"
+    GW2->>GW2: Hub: deliver to "sess-2" (remote hub)
+    GW1->>PubSub: publish "simulation:broadcast"
+    PubSub-->>Agent: poke "agent-1" (matches target)
 ```
 
 ## 4. Agent-to-Client Response Flow
@@ -102,13 +102,8 @@ dispatcher **embeds the stringified JSON payload** directly into the `text`
 field of the `NarrativePulse`.
 
 Frontend clients should check the `text` field for JSON fragments containing
-A2UI primitives (capitalized names per the v0.8.0 spec, e.g., `"Card"`,
-`"DataTable"`) and pass them to the rendering engine.
+A2UI primitives (capitalized names per the v0.8.0 spec, e.g. `"Card"`,
+`"List"`) and pass them to the rendering engine.
 
-## 5. Key Benefits
-
-- **Efficiency**: Reduces the number of WebSocket frames sent from the client.
-- **Atomic Orchestration**: Ensures that a group of agents receives the same
-  signal simultaneously.
-- **State Neutrality**: The Gateway doesn't need to know where every session is
-  located; the combination of Redis and Pub/Sub ensures global delivery.
+The gateway never needs to know which node holds which session — Redis fan-out
+handles cross-node delivery, and Pub/Sub handles agent-side routing.
