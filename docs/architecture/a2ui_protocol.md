@@ -15,7 +15,7 @@ follows the `a2ui.org:standard_catalog_0_8_0` specification.
 - **Composed, not bespoke.** Layouts are built from the catalog primitives.
   Don't add custom one-off types.
 
-## Message Structure
+## Message structure
 
 An A2UI payload is strictly a JSON object wrapped in an `a2ui` markdown block:
 
@@ -40,7 +40,7 @@ An A2UI payload is strictly a JSON object wrapped in an `a2ui` markdown block:
 }
 ```
 
-## The Default Catalog (18 Primitives)
+## The default catalog (18 primitives)
 
 | Type | Category | Description |
 | :--- | :--- | :--- |

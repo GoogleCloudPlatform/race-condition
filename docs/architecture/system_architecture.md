@@ -32,6 +32,7 @@ flowchart TD
         SimUI["Simulation UI<br/>(Angular + three.js)"]:::web
         TesterUI["Tester UI<br/>(A2UI lab)"]:::web
         Admin["Admin dashboard"]:::web
+        DashUI["Telemetry dashboard"]:::web
     end
 
     %% Go services
@@ -40,6 +41,11 @@ flowchart TD
         FrontendBFF["Frontend BFF"]:::golang
         TesterServer["Tester server"]:::golang
         AdminServer["Admin server"]:::golang
+    end
+
+    %% Python services (non-agent)
+    subgraph PythonServices[Python services]
+        DashServer["Dashboard backend<br/>(scripts/core/agent_dash.py)"]:::python
     end
 
     %% Infrastructure
@@ -73,12 +79,15 @@ flowchart TD
     User -->|interact| SimUI
     User -->|test A2UI| TesterUI
     User -->|control| Admin
+    User -->|inspect telemetry| DashUI
     SimUI -->|WebSocket protobuf| FrontendBFF
     TesterUI -->|WebSocket| TesterServer
     Admin --> AdminServer
+    DashUI --> DashServer
     FrontendBFF --> Gateway
     TesterServer --> Gateway
     AdminServer --> Gateway
+    DashServer -.->|subscribe| Redis
 
     Gateway -->|broadcast frames| Redis
     Gateway -->|orchestration pulse<br/>simulation:broadcast| Redis

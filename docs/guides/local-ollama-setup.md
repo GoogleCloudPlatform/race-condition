@@ -10,7 +10,7 @@ credentials or Vertex AI access.
 - **Python 3.13+** with `uv` (already required by the project)
 - **litellm** (already included in project dependencies via `google-adk`)
 
-## Quick Start
+## Quick start
 
 ### 1. Install and start Ollama
 
@@ -54,7 +54,7 @@ python agents/runner/agent.py
 uv run start
 ```
 
-## Available Gemma 4 Models
+## Available Gemma 4 models
 
 | Model | Ollama ID | Size | Context | Recommended For |
 |---|---|---|---|---|
@@ -71,9 +71,9 @@ RUNNER_MODEL=ollama_chat/gemma4:e4b    # Balanced
 RUNNER_MODEL=ollama_chat/gemma4:26b    # High quality
 ```
 
-## How It Works
+## How it works
 
-### Code Path
+### Code path
 
 `agents/runner/agent.py` dispatches the model wrapper based on a prefix check
 against the `RUNNER_MODEL` environment variable. Gemini strings go through the
@@ -105,7 +105,7 @@ LlmAgent(model=LiteLlm(model="ollama_chat/gemma4:e2b"))
 > `test_ollama_model_uses_litellm_not_global_gemini` and
 > `test_gemini_model_still_uses_global_gemini`.
 
-### What Changes
+### What changes
 
 | Feature | Gemini (default) | Ollama |
 |---|---|---|
@@ -115,7 +115,7 @@ LlmAgent(model=LiteLlm(model="ollama_chat/gemma4:e2b"))
 | **Authentication** | GCP credentials | None needed |
 | **Latency** | ~50-100ms (Vertex AI, single token) | ~350-700ms (gemma4:e2b on M-series Mac, single token) |
 
-### What Stays the Same
+### What stays the same
 
 - All 7 runner tools (`accelerate`, `brake`, `get_vitals`, `process_tick`,
   `deplete_water`, `rehydrate`, `validate_and_emit_a2ui`)
@@ -124,7 +124,7 @@ LlmAgent(model=LiteLlm(model="ollama_chat/gemma4:e2b"))
 - Tool state management via `tool_context.state`
 - Session service selection (InMemory locally, VertexAI in cloud)
 
-## Behavioral Differences
+## Behavioral differences
 
 ### Thinking output
 
@@ -264,7 +264,7 @@ Gemma 4 requires Ollama 0.14+ (approximately). If `ollama pull gemma4:e2b`
 fails with a 412 error, update Ollama from
 [ollama.com/download](https://ollama.com/download).
 
-## Environment Variable Reference
+## Environment variable reference
 
 ### Runner-side (read by the agent process)
 

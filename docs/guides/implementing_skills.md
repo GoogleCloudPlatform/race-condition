@@ -62,7 +62,7 @@ other agents during a trade or dispute.
 2. Propose trades only when a win-win is identified.
 3. Maintain a professional, collaborative tone.
 
-## Advanced Guidelines
+## Advanced guidelines
 
 - Prioritize long-term relationship value over immediate gains.
 - If a deadlock is reached, suggest a temporary recess.

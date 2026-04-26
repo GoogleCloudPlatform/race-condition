@@ -8,7 +8,7 @@ The simulation needs to generate marathon routes of exactly 26.2 miles from a ra
 
 Naive greedy DFS and random walks were tried first. Both got trapped in cul-de-sacs and produced non-deterministic output. The **Spine and Sprout** algorithm replaced them with a deterministic two-phase approach.
 
-## The Spine and Sprout Algorithm
+## The Spine and Sprout algorithm
 
 The algorithmic approach divides the problem into two distinct phases: building a core structural path (the Spine) and extending it safely to the exact required distance (the Sprout).
 
@@ -29,7 +29,7 @@ Once the core spine is created, the path is rarely exactly 26.2 miles. Phase 2 h
    - Mathematically plots a final interpolated longitude and latitude coordinate.
    - Truncates the route precisely at this new coordinate to satisfy the exact marathon requirement.
 
-## Road Name Segmentation
+## Road name segmentation
 
 The `_build_graph` function tracks road names per edge from the GeoJSON
 `properties.name` field on LineString features. After the route coordinate list
@@ -44,7 +44,7 @@ The first segment carries the overall route metadata (`route_type`,
 `distance_mi`, `certified`). Water stations and medical tents are computed from
 the concatenated coordinate list across all segments via `_extract_route_coords`.
 
-## Adding Metadata Markers
+## Adding metadata markers
 
 Following the generation of the base route, secondary functions are applied to
 decorate the `FeatureCollection` with required operational elements.
@@ -57,7 +57,7 @@ decorate the `FeatureCollection` with required operational elements.
   coordinate list to insert a tent point exactly at the geometric halfway point
   (13.1 miles) and the finish line.
 
-## Code Location
+## Code location
 
 The implementation lives in
 `agents/planner/skills/gis-spatial-engineering/scripts/tools.py`. Determinism

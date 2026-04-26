@@ -26,7 +26,7 @@ Start with high-impact, low-effort items. Section 21 sorts everything by ROI
 The single most impactful decision is choosing the right model for each agent's
 job.
 
-### Model Tiers
+### Model tiers
 
 | Tier  | Example Model                   | Speed   | Cost | Quality  | Best For                    |
 | :---- | :------------------------------ | :------ | :--- | :------- | :-------------------------- |
@@ -34,7 +34,7 @@ job.
 | Flash | `gemini-3-flash-preview`        | Fast    | Med  | Good     | General-purpose agents      |
 | Lite  | `gemini-3.1-flash-lite-preview` | Fastest | Low  | Adequate | High-volume NPCs, routing   |
 
-### Temperature Guidelines
+### Temperature guidelines
 
 | Value   | Behavior      | Use Case                              |
 | :------ | :------------ | :------------------------------------ |
@@ -134,7 +134,7 @@ app = App(
 )
 ```
 
-### How It Works
+### How it works
 
 1. ADK's `ContextCacheRequestProcessor` checks session events for existing cache
    metadata.
@@ -143,13 +143,13 @@ app = App(
 3. If the fingerprint matches an existing valid cache, it's reused.
 4. Cached content is removed from the request payload, reducing billed tokens.
 
-### Cost Model
+### Cost model
 
 - Cached input tokens are billed at **~0.25×** the normal input rate.
 - Cache storage incurs a small per-hour fee.
 - Break-even point: typically 3–5 requests with the same cached prefix.
 
-### Best Practices
+### Best practices
 
 - Pair with `static_instruction` (see §4) for maximum cache hit rate.
 - Set `min_tokens` high enough to avoid caching small requests where overhead
@@ -169,7 +169,7 @@ app = App(
 | `static_instruction` | System instruction (first)         | ❌ None               | ✅ Yes                                  |
 | `instruction`        | System instruction OR user content | ✅ `{var}` syntax     | ⚠️ Only if static_instruction is absent |
 
-### The Key Insight
+### The key insight
 
 When `static_instruction` is set, `instruction` moves to **user content**. This
 means the stable prefix (system instruction) never changes, making it an ideal
@@ -225,7 +225,7 @@ automatically executes them in parallel via `asyncio.gather()`.
    output within the same batch.
 3. **Tools must be thread-safe** — avoid shared mutable state.
 
-### How It Works (Under the Hood)
+### Under the hood
 
 ```python
 # google/adk/flows/llm_flows/functions.py
@@ -234,7 +234,7 @@ tasks = [asyncio.create_task(_execute_single_function_call_async(...))
 function_response_events = await asyncio.gather(*tasks)
 ```
 
-### Encouraging Parallel Calls
+### Encouraging parallel calls
 
 The LLM decides whether to emit multiple function calls. You can encourage this
 behavior through prompt engineering:
@@ -263,7 +263,7 @@ run_config = RunConfig(
 )
 ```
 
-### When It Helps
+### When it helps
 
 | Scenario                       | Benefits?                        |
 | :----------------------------- | :------------------------------- |
@@ -282,7 +282,7 @@ run_config = RunConfig(
 ADK's `ParallelAgent` runs sub-agents concurrently using `asyncio.TaskGroup`,
 each in an isolated branch context.
 
-### Use Cases
+### Use cases
 
 - **Best-of-N generation**: Multiple agents tackle the same problem; a parent
   selects the best output.
@@ -646,7 +646,7 @@ report = await analyzer.analyze_agent_cache_performance(
 #                   cache_utilization_ratio_percent, etc.
 ```
 
-### Key Metrics to Track
+### Key metrics to track
 
 | Metric                       | Target     | How to Measure             |
 | :--------------------------- | :--------- | :------------------------- |

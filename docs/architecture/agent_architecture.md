@@ -113,7 +113,7 @@ graph LR
    log). Async publishing keeps the agent execution thread unblocked.
 4. **Display.** The dashboard subscribes to the gateway over WebSocket and
    orders events by `invocation_id`. There is nothing magical about the
-   ordering — it's just a sort.
+   ordering. It's just a sort.
 
 For implementation details, see `agents/utils/plugins.py:RedisDashLogPlugin`.
 
@@ -125,7 +125,7 @@ ADK ships with a `SqliteSessionService` by default. SQLite uses a whole-file
 lock, so once you spin up dozens of runners hitting the same session store the
 write contention pushes lock-acquire latency past ADK's timeout and you get
 `database is LOCKED` errors. Race Condition overrides the default with
-`InMemorySessionService` for local development — each honcho process gets its
+`InMemorySessionService` for local development. Each honcho process gets its
 own heap and there's no cross-process write contention. In deployed environments
 this is replaced with `VertexAiSessionService`, which delegates concurrency to
 Google's session-store infrastructure.
