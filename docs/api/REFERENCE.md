@@ -2291,5 +2291,3 @@ Events are organized by simulation phase. All events arrive as binary protobuf
 | RaceCollector captures wrong runners   | Filtered by `runner_session_ids` (unchanged)     |
 | ADK state leaks between simulations    | Per-session state (unchanged)                    |
 | Simulator reuses stale state           | Fresh session per simulation run                 |
-
-

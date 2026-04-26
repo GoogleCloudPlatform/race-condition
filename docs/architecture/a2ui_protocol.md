@@ -101,4 +101,3 @@ isn't valid A2UI, validation fails and the model gets actionable feedback.
 
 The `tester` UI uses a recursive renderer in `web/tester/src/a2ui/index.ts`.
 All 18 primitives are mapped in the `REGISTRY`.
-

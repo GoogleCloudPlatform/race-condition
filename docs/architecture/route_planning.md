@@ -16,12 +16,12 @@ The algorithmic approach divides the problem into two distinct phases: building 
 To ensure the marathon route is of high quality and passes key thematic points, the algorithm begins by defining a set sequence of landmarks (e.g., the Las Vegas Sign → Allegiant Stadium → Sphere).
 
 1. **Graph Construction:** The raw GeoJSON `LineString` elements are dynamically loaded into an adjacency list representation. The weight of each edge (road segment) is calculated precisely using the Haversine formula based on the `[longitude, latitude]` coordinates of the nodes.
-2. **Shortest Path Matching:** A variation of Dijkstra's algorithm is applied sequentially to connect each landmark in the predefined theme sequence. This computes the optimal non-overlapping core path linking these major points of interest. 
+2. **Shortest Path Matching:** A variation of Dijkstra's algorithm is applied sequentially to connect each landmark in the predefined theme sequence. This computes the optimal non-overlapping core path linking these major points of interest.
 
 ### Phase 2: The Bounded DFS Sprout
 Once the core spine is created, the path is rarely exactly 26.2 miles. Phase 2 handles the deterministic extension.
 
-1. **Guided Heuristics:** A modified Depth-First Search is initiated from the end of the spine. At each intersection (node), the algorithm must decide which path to take. To avoid dead-ends, the outbound edges are sorted by a degree-based heuristic: nodes that have the highest number of *unvisited* connected neighbors are prioritized. This naturally steers the path towards highly connected main roads and away from cul-de-sacs. 
+1. **Guided Heuristics:** A modified Depth-First Search is initiated from the end of the spine. At each intersection (node), the algorithm must decide which path to take. To avoid dead-ends, the outbound edges are sorted by a degree-based heuristic: nodes that have the highest number of *unvisited* connected neighbors are prioritized. This naturally steers the path towards highly connected main roads and away from cul-de-sacs.
 2. **Determinism:** To ensure consistent output across executions, ties in the degree heuristic are broken by sorting against segment distance, and finally by exact coordinate values.
 3. **Exact Mathematical Interpolation:** As the DFS traverses and accumulates distance, it constantly checks if the next segment will exceed the 26.2-mile target. If the current accumulated distance plus the next adjacent segment distance exceeds the target, the algorithm:
    - Calculates the exact residual distance needed.
