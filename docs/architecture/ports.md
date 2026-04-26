@@ -1,78 +1,74 @@
-# Port Standardization Architecture
+# Port Allocation
 
-This document defines the local developer port allocation strategy for the Race Condition project to ensure stability, discoverability, and organization.
+This document is the source of truth for which Race Condition service binds
+which port locally. The values match `.env.example`. If they ever drift, treat
+`.env.example` as authoritative and file an issue against this doc.
 
-## Port Allocation Blocks
+## Default port range
 
-| Range | Category | Description |
-| :--- | :--- | :--- |
-| **8000 - 8099** | **Admin & System** | Centralized dashboards and administrative tools. |
-| **8100 - 8199** | **Core Infrastructure** | Core Go services (Gateway, etc). |
-| **8200 - 8299** | **AI Agents (Python)** | Simulation agents using the ADK framework. |
-| **8300 - 8399** | **Developer UIs** | Specialized tools for monitoring and testing. |
-| **8500 - 8599** | **Frontend** | Reserved for the primary frontend application. |
+All services bind in the **9100–9119** range on `127.0.0.1`. Pick this range
+for any new local service you add so it stays out of the way of common dev
+tools (8080, 8000, 5000) and so that `uv run stop` can reap stragglers
+predictably.
 
-## Service Mapping
+## Service map
 
-| Service | Port | Category | Notes |
+| Service | Port | Env var | Notes |
 | :--- | :--- | :--- | :--- |
-| **Admin Dash** | 8000 | Admin | Entry point for developers. |
-| **Gateway** | 8101 | Core | Primary API gateway. |
-| **Redis** | 8102 | Core | Session state & orchestration store. |
-| **PubSub** | 8103 | Core | Global telemetry bus emulator. |
-| **Postgres / AlloyDB Proxy** | 8104 | Core | Local pgvector container or AlloyDB Auth Proxy. |
-| **Tester UI** | 8304 | Dev UI | Manual A2UI testing lab. |
-| **Simulator** | 8202 | Agent | Lifecycle management agent. |
-| **Planner** | 8204 | Agent | Strategy and execution orchestration. |
-| **Planner with Eval** | 8205 | Agent | Planner with evaluation tools. |
-| **Simulator w/ Failure** | 8206 | Agent | Intentional failure injection agent. |
-| **Runner** | 8207 | Agent | LLM-powered runner (Cloud Run). |
-| **Runner GKE** | 8207 | Agent | LLM-powered runner (GKE). Same image, distinct agent name. |
-| **Planner w/ Memory** | 8209 | Agent | Route planner with AlloyDB memory. |
-| **Runner Autopilot** | 8210 | Agent | Deterministic autopilot runner. |
+| Admin dashboard | 9100 | `ADMIN_PORT` / `PORT` | Dev entry point. |
+| Gateway | 9101 | `GATEWAY_PORT` | WebSocket hub and A2A router. |
+| Redis | 9102 | `REDIS_ADDR` | Session state and broadcast fan-out. |
+| Pub/Sub emulator | 9103 | `PUBSUB_EMULATOR_HOST` | Agent debug-log topic. |
+| Simulator | 9104 | `SIMULATOR_PORT` | Race lifecycle and tick orchestration. |
+| Planner | 9105 | `PLANNER_PORT` | Route + spatial planning. |
+| Planner (with eval) | 9106 | `PLANNER_WITH_EVAL_PORT` | Planner variant with evaluation tools. |
+| Simulator (with failure) | 9107 | `SIMULATOR_WITH_FAILURE_PORT` | Failure-injection variant for chaos tests. |
+| Runner (LLM) | 9108 | `RUNNER_PORT` | Model-driven runner agent. |
+| Planner (with memory) | 9109 | `PLANNER_WITH_MEMORY_PORT` | Planner variant backed by AlloyDB. |
+| Runner (autopilot) | 9110 | `RUNNER_AUTOPILOT_PORT` | Deterministic runner — no LLM calls. |
+| Dashboard backend | 9111 | `DASH_PORT` | Telemetry dashboard server. |
+| Tester UI | 9112 | `TESTER_PORT` | Manual A2UI testing lab. |
+| Postgres / AlloyDB proxy | 9113 | `ALLOYDB_PORT` | Local pgvector container or AlloyDB Auth Proxy. |
+| Frontend BFF | 9118 | `FRONTEND_BFF_PORT` | Backend-for-frontend that proxies to the gateway. |
+| Frontend app | 9119 | `FRONTEND_APP_PORT` | Angular dev server. |
 
-## Best Practices
+The runner LLM agent is also deployed on GKE in production. Locally it runs as
+a single process on 9108; the GKE deployment uses an Internal LoadBalancer
+discovered via `RUNNER_GKE_INTERNAL_URL`.
 
-- **Never Hardcode**: Always use the `PORT` environment variable with these as defaults.
-- **Bind to 0.0.0.0**: Ensure services are accessible via the Gateway.
+## Conventions
 
-## Worktree Port Offset Scheme
+- **Always read from env.** Don't hard-code port numbers in code or scripts;
+  read `os.getenv("GATEWAY_PORT", "9101")` (Python) or
+  `os.Getenv("GATEWAY_PORT")` (Go) so worktrees with different slot offsets
+  don't collide.
+- **Bind to `127.0.0.1`, not `0.0.0.0`.** The gateway is the only ingress
+  point. Other services are reachable from the host but not over LAN.
 
-For parallel development using git worktrees, each worktree is assigned a
-**slot** (0-3). The slot number is multiplied by 1000 and added to all base
-ports, giving each worktree a completely isolated port space.
+## Worktree slot scheme
 
-### Port Ranges per Slot
+Parallel checkouts on different branches need disjoint port spaces so they
+don't fight for the same socket. Race Condition supports this via a slot
+marker file `.port-slot` at the repo root:
 
-| Slot | Service Ports   | Redis   | PubSub  | Use                     |
-| :--- | :-------------- | :------ | :------ | :---------------------- |
-| 0    | 8000 -- 8599    | 8102    | 8103    | Main checkout (default) |
-| 1    | 9000 -- 9599    | 9102    | 9103    | Worktree A              |
-| 2    | 10000 -- 10599  | 10102   | 10103   | Worktree B              |
-| 3    | 11000 -- 11599  | 11102   | 11103   | Worktree C              |
+- **Slot 0** (default — file absent or contains `0`): use the 9100–9119 range
+  documented above. Containers are named `redis`, `pubsub`.
+- **Slot N > 0**: offset all ports by `1000 * N` (slot 1 → 10100s, slot 2 →
+  11100s) and rename containers to `redis-slot-N`, `pubsub-slot-N`. The
+  `scripts/core/sim.py` start/stop logic reads `.port-slot` for container
+  naming and to pick the right `docker-compose.override.yml`. The port
+  values themselves are read from `.env`, which you set by hand for the slot
+  you want.
 
-### Setup
+To enable a non-default slot, write the slot number to `.port-slot`, copy
+`.env.example` to `.env`, and edit each `*_PORT` value with the offset. A
+helper script for this is on the roadmap; for now, do it by hand.
 
-```bash
-# After creating a worktree, generate its .env with offset ports:
-make worktree-env SLOT=1
-
-# Start normally -- honcho reads the local .env:
-uv run start --skip-tests
-
-# Stop normally -- reads ports from local .env:
-uv run stop
-```
-
-### Infrastructure Isolation
-
-Each worktree gets its own Redis and PubSub Docker containers via a generated
-`docker-compose.override.yml`. Container names include the slot number (e.g.,
-`redis-slot-1`) to avoid conflicts. See the `worktree-port-management` skill
-for full details.
-
-## Local vs. Cloud Routing
+## Local vs. cloud routing
 
 > [!IMPORTANT]
-> **Localhost**: Path-based routing (e.g., `/admin`) is **not supported** in local development. Access services directly via their root URL on assigned ports (e.g., `http://127.0.0.1:8000`).
-> **GCloud/Production**: Path-based routing is handled by the Cloud Load Balancer URL Map.
+> **Local**: path-based routing (e.g. `/admin`) is **not** supported. Hit each
+> service directly at its assigned port (e.g. `http://127.0.0.1:9100`).
+>
+> **Cloud Run**: path-based routing is handled by the Cloud Load Balancer URL
+> map. Local emulation of that routing is intentionally absent.

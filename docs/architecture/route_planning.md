@@ -1,16 +1,14 @@
 # Route Planning Architecture: The Spine and Sprout Algorithm
 
 ## Overview
-The simulation requires the capability to generate mathematically perfect marathon routes (exactly 26.2 miles) based on a raw GeoJSON road network. The generated routes are required to:
-1. Avoid self-intersections (form a Simple Path).
-2. Connect significant points of interest (landmarks) in the provided network.
-3. Arrive at the exact required distance by truncating and mathematically interpolating the final segment.
+The simulation needs to generate marathon routes of exactly 26.2 miles from a raw GeoJSON road network. Each route must:
+1. Avoid self-intersections (form a simple path).
+2. Connect a fixed sequence of landmarks in the network.
+3. Hit exactly 26.2 miles by interpolating the final segment.
 
-Early implementations using naive greedy depth-first search (DFS) or random walks suffered from non-determinism, excessive compute time, and a high failure rate due to getting trapped in dead-ends (cul-de-sacs).
+Naive greedy DFS and random walks were tried first. Both got trapped in cul-de-sacs and produced non-deterministic output. The **Spine and Sprout** algorithm replaced them with a deterministic two-phase approach.
 
-To address these issues, the **Spine and Sprout** algorithm was implemented to guarantee highly performant, deterministic, and accurate route generation.
-
-## The Spine and Sprout Algorithm
+## The Spine and Sprout algorithm
 
 The algorithmic approach divides the problem into two distinct phases: building a core structural path (the Spine) and extending it safely to the exact required distance (the Sprout).
 
@@ -18,12 +16,12 @@ The algorithmic approach divides the problem into two distinct phases: building 
 To ensure the marathon route is of high quality and passes key thematic points, the algorithm begins by defining a set sequence of landmarks (e.g., the Las Vegas Sign → Allegiant Stadium → Sphere).
 
 1. **Graph Construction:** The raw GeoJSON `LineString` elements are dynamically loaded into an adjacency list representation. The weight of each edge (road segment) is calculated precisely using the Haversine formula based on the `[longitude, latitude]` coordinates of the nodes.
-2. **Shortest Path Matching:** A variation of Dijkstra's algorithm is applied sequentially to connect each landmark in the predefined theme sequence. This computes the optimal non-overlapping core path linking these major points of interest. 
+2. **Shortest Path Matching:** A variation of Dijkstra's algorithm is applied sequentially to connect each landmark in the predefined theme sequence. This computes the optimal non-overlapping core path linking these major points of interest.
 
 ### Phase 2: The Bounded DFS Sprout
 Once the core spine is created, the path is rarely exactly 26.2 miles. Phase 2 handles the deterministic extension.
 
-1. **Guided Heuristics:** A modified Depth-First Search is initiated from the end of the spine. At each intersection (node), the algorithm must decide which path to take. To avoid dead-ends, the outbound edges are sorted by a degree-based heuristic: nodes that have the highest number of *unvisited* connected neighbors are prioritized. This naturally steers the path towards highly connected main roads and away from cul-de-sacs. 
+1. **Guided Heuristics:** A modified Depth-First Search is initiated from the end of the spine. At each intersection (node), the algorithm must decide which path to take. To avoid dead-ends, the outbound edges are sorted by a degree-based heuristic: nodes that have the highest number of *unvisited* connected neighbors are prioritized. This naturally steers the path towards highly connected main roads and away from cul-de-sacs.
 2. **Determinism:** To ensure consistent output across executions, ties in the degree heuristic are broken by sorting against segment distance, and finally by exact coordinate values.
 3. **Exact Mathematical Interpolation:** As the DFS traverses and accumulates distance, it constantly checks if the next segment will exceed the 26.2-mile target. If the current accumulated distance plus the next adjacent segment distance exceeds the target, the algorithm:
    - Calculates the exact residual distance needed.
@@ -31,7 +29,7 @@ Once the core spine is created, the path is rarely exactly 26.2 miles. Phase 2 h
    - Mathematically plots a final interpolated longitude and latitude coordinate.
    - Truncates the route precisely at this new coordinate to satisfy the exact marathon requirement.
 
-## Road Name Segmentation
+## Road name segmentation
 
 The `_build_graph` function tracks road names per edge from the GeoJSON
 `properties.name` field on LineString features. After the route coordinate list
@@ -46,7 +44,7 @@ The first segment carries the overall route metadata (`route_type`,
 `distance_mi`, `certified`). Water stations and medical tents are computed from
 the concatenated coordinate list across all segments via `_extract_route_coords`.
 
-## Adding Metadata Markers
+## Adding metadata markers
 
 Following the generation of the base route, secondary functions are applied to
 decorate the `FeatureCollection` with required operational elements.
@@ -59,9 +57,8 @@ decorate the `FeatureCollection` with required operational elements.
   coordinate list to insert a tent point exactly at the geometric halfway point
   (13.1 miles) and the finish line.
 
-## Code Location
+## Code location
 
-The logic for this algorithm is encapsulated in the Planner agent's skill
-functions under `agents/planner/skills/route-planning/tools.py`. Testing for
-determinism to prevent regressions is found at
-`agents/tests/test_planner_route_skill.py`.
+The implementation lives in
+`agents/planner/skills/gis-spatial-engineering/scripts/tools.py`. Determinism
+regression tests are at `agents/tests/test_planner_route_skill.py`.

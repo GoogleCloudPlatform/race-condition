@@ -10,7 +10,7 @@ credentials or Vertex AI access.
 - **Python 3.13+** with `uv` (already required by the project)
 - **litellm** (already included in project dependencies via `google-adk`)
 
-## Quick Start
+## Quick start
 
 ### 1. Install and start Ollama
 
@@ -54,7 +54,7 @@ python agents/runner/agent.py
 uv run start
 ```
 
-## Available Gemma 4 Models
+## Available Gemma 4 models
 
 | Model | Ollama ID | Size | Context | Recommended For |
 |---|---|---|---|---|
@@ -71,9 +71,9 @@ RUNNER_MODEL=ollama_chat/gemma4:e4b    # Balanced
 RUNNER_MODEL=ollama_chat/gemma4:26b    # High quality
 ```
 
-## How It Works
+## How it works
 
-### Code Path
+### Code path
 
 `agents/runner/agent.py` dispatches the model wrapper based on a prefix check
 against the `RUNNER_MODEL` environment variable. Gemini strings go through the
@@ -105,7 +105,7 @@ LlmAgent(model=LiteLlm(model="ollama_chat/gemma4:e2b"))
 > `test_ollama_model_uses_litellm_not_global_gemini` and
 > `test_gemini_model_still_uses_global_gemini`.
 
-### What Changes
+### What changes
 
 | Feature | Gemini (default) | Ollama |
 |---|---|---|
@@ -113,9 +113,9 @@ LlmAgent(model=LiteLlm(model="ollama_chat/gemma4:e2b"))
 | **ThinkingConfig** | Suppressed (budget=0) | Omitted (not supported by litellm) |
 | **Context caching** | Active (saves cost) | Skipped (not available) |
 | **Authentication** | GCP credentials | None needed |
-| **Latency** | ~50-100ms | ~350-700ms (local inference) |
+| **Latency** | ~50-100ms (Vertex AI, single token) | ~350-700ms (gemma4:e2b on M-series Mac, single token) |
 
-### What Stays the Same
+### What stays the same
 
 - All 7 runner tools (`accelerate`, `brake`, `get_vitals`, `process_tick`,
   `deplete_water`, `rehydrate`, `validate_and_emit_a2ui`)
@@ -124,7 +124,7 @@ LlmAgent(model=LiteLlm(model="ollama_chat/gemma4:e2b"))
 - Tool state management via `tool_context.state`
 - Session service selection (InMemory locally, VertexAI in cloud)
 
-## Behavioral Differences
+## Behavioral differences
 
 ### Thinking output
 
@@ -138,15 +138,16 @@ Gemma 4 E2B may call tools more aggressively than Gemini (e.g. two `accelerate`
 calls per turn instead of one). The runner instruction allows "one or two tools
 per message" so this is within spec.
 
-## Concurrency Tuning (REQUIRED for usable Demo 5b throughput)
+## Concurrency tuning (required for multi-runner throughput)
 
 Out of the box, Ollama serializes inference requests per model with
 `OLLAMA_NUM_PARALLEL=1`. With 10 LLM runners hitting `gemma4:e2b`
-simultaneously, every tick takes ~10x longer than necessary. The default
+simultaneously, every tick takes ~10× longer than necessary. The default
 `KEEP_ALIVE` of 5 minutes also causes the model to unload between bursts of
 runner activity, adding repeated load/unload cost.
 
-The following settings make Ollama practical for multi-runner Demo 5b runs:
+The following settings make Ollama practical when several runners share a
+single Ollama instance:
 
 | Variable | Recommended | Why |
 |---|---|---|
@@ -263,19 +264,19 @@ Gemma 4 requires Ollama 0.14+ (approximately). If `ollama pull gemma4:e2b`
 fails with a 412 error, update Ollama from
 [ollama.com/download](https://ollama.com/download).
 
-## Environment Variable Reference
+## Environment variable reference
 
 ### Runner-side (read by the agent process)
 
 | Variable | Default | Description |
 |---|---|---|
 | `RUNNER_MODEL` | `gemini-3.1-flash-lite-preview` | Model string for the LLM runner |
-| `RUNNER_PORT` | `8207` | HTTP port for the runner agent |
+| `RUNNER_PORT` | `9108` | HTTP port for the runner agent (matches `.env.example`) |
 | `GOOGLE_GENAI_USE_VERTEXAI` | `TRUE` | Controls the `google-genai` SDK only. The `LiteLlm` backend used by Ollama models bypasses this SDK entirely, so the variable has no effect on the Ollama code path. You can leave it set. |
 
 ### Ollama-side (read by `ollama serve`)
 
-See [Concurrency Tuning](#concurrency-tuning-required-for-usable-demo-5b-throughput)
+See [Concurrency tuning](#concurrency-tuning-required-for-multi-runner-throughput)
 for context and apply commands.
 
 | Variable | Recommended | Default | Description |
@@ -286,7 +287,10 @@ for context and apply commands.
 | `OLLAMA_FLASH_ATTENTION` | `1` | `0` | Enable flash attention (faster + lower memory). |
 | `OLLAMA_MAX_LOADED_MODELS` | `1` | (auto) | Cap concurrently-loaded models. Frees VRAM for parallel slots. |
 
-## See Also
+## See also
 
-- [GKE vLLM Setup](gke-vllm-setup.md) -- running Gemma 4 on GKE with L4 GPUs
-  via vLLM (for production-like self-hosted inference)
+- [Agent architecture](../architecture/agent_architecture.md) -- where the
+  runner sits in the agent network and how it receives orchestration events.
+- `infra/modules/gke-model-serving/` -- Terraform module for running Gemma 4
+  on GKE with L4 GPUs via vLLM, the production-style self-hosted inference
+  path.

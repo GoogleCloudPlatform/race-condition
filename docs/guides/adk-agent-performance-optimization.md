@@ -1,12 +1,10 @@
 # ADK Agent Performance Optimization Guide
 
-A comprehensive, project-agnostic guide to optimizing Google ADK agents for
-latency, throughput, cost, and reliability. Written against **ADK v1.26.0** and
-**google-genai v1.64.0**.
+A project-agnostic guide to optimizing Google ADK agents for latency,
+throughput, cost, and reliability. Written against ADK v1.30.0 and
+google-genai v1.64.0.
 
----
-
-## How to Read This Guide
+## How to read this guide
 
 Every technique is scored on three axes:
 
@@ -16,34 +14,8 @@ Every technique is scored on three axes:
 | **Effort** | 1–5   | Implementation complexity (1 = trivial, 5 = major)     |
 | **Risk**   | 1–5   | Chance of introducing regressions or behavioral change |
 
-> [!TIP] Start with high-impact / low-effort items. Sort the summary table at
-> the end to find your best bang-for-buck.
-
----
-
-## Table of Contents
-
-1.  [Model Selection & Configuration](#1-model-selection--configuration)
-2.  [Thinking Budget Control](#2-thinking-budget-control)
-3.  [Context Caching (Explicit)](#3-context-caching-explicit)
-4.  [Static vs Dynamic Instructions](#4-static-vs-dynamic-instructions)
-5.  [Parallel Tool Execution](#5-parallel-tool-execution)
-6.  [Tool Thread Pool Offloading](#6-tool-thread-pool-offloading)
-7.  [Parallel Agent Execution](#7-parallel-agent-execution)
-8.  [Parallel A2A Orchestration](#8-parallel-a2a-orchestration)
-9.  [Context Window Compression](#9-context-window-compression)
-10. [Event Compaction](#10-event-compaction)
-11. [Output Token Budgeting](#11-output-token-budgeting)
-12. [LLM Call Guards](#12-llm-call-guards)
-13. [Content Inclusion Control](#13-content-inclusion-control)
-14. [Streaming Mode Selection](#14-streaming-mode-selection)
-15. [Prompt Engineering for Efficiency](#15-prompt-engineering-for-efficiency)
-16. [Automated Prompt Optimization (GEPA)](#16-automated-prompt-optimization-gepa)
-17. [Session Service Selection](#17-session-service-selection)
-18. [Python Async Best Practices](#18-python-async-best-practices)
-19. [Python General Performance](#19-python-general-performance)
-20. [Monitoring & Measurement](#20-monitoring--measurement)
-21. [Summary Table](#21-summary-table)
+Start with high-impact, low-effort items. Section 21 sorts everything by ROI
+(impact ÷ effort).
 
 ---
 
@@ -54,7 +26,7 @@ Every technique is scored on three axes:
 The single most impactful decision is choosing the right model for each agent's
 job.
 
-### Model Tiers
+### Model tiers
 
 | Tier  | Example Model                   | Speed   | Cost | Quality  | Best For                    |
 | :---- | :------------------------------ | :------ | :--- | :------- | :-------------------------- |
@@ -62,7 +34,7 @@ job.
 | Flash | `gemini-3-flash-preview`        | Fast    | Med  | Good     | General-purpose agents      |
 | Lite  | `gemini-3.1-flash-lite-preview` | Fastest | Low  | Adequate | High-volume NPCs, routing   |
 
-### Temperature Guidelines
+### Temperature guidelines
 
 | Value   | Behavior      | Use Case                              |
 | :------ | :------------ | :------------------------------------ |
@@ -86,31 +58,11 @@ config = types.GenerateContentConfig(
 )
 ```
 
-### Decision Framework
+### Decision shortcut
 
-```mermaid
-flowchart TD
-    q1{"Complex, multi-step<br/>decisions?"}
-    pro["Pro model<br/>temp 0.1-0.3"]
-    q2{"Needs good general<br/>reasoning?"}
-    flash["Flash model<br/>temp 0.2-0.5"]
-    q3{"High-volume<br/>(>50 concurrent)?"}
-    lite["Lite model<br/>temp 0.0-0.3"]
-    liteForce["Always Lite model"]
-
-    q1 -->|Yes| pro
-    q1 -->|No| q2
-    q2 -->|Yes| flash
-    q2 -->|No| q3
-    q3 -->|No| lite
-    q3 -->|Yes| liteForce
-
-    classDef question fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
-    classDef model fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
-
-    class q1,q2,q3 question
-    class pro,flash,lite,liteForce model
-```
+If the agent does complex multi-step reasoning, use Pro at temp 0.1–0.3. For
+general-purpose work, Flash at 0.2–0.5. For high-volume NPCs (>50 concurrent),
+always Lite at 0.0–0.3 — the cost difference dominates everything else.
 
 ---
 
@@ -182,7 +134,7 @@ app = App(
 )
 ```
 
-### How It Works
+### How it works
 
 1. ADK's `ContextCacheRequestProcessor` checks session events for existing cache
    metadata.
@@ -191,18 +143,18 @@ app = App(
 3. If the fingerprint matches an existing valid cache, it's reused.
 4. Cached content is removed from the request payload, reducing billed tokens.
 
-### Cost Model
+### Cost model
 
 - Cached input tokens are billed at **~0.25×** the normal input rate.
 - Cache storage incurs a small per-hour fee.
 - Break-even point: typically 3–5 requests with the same cached prefix.
 
-### Best Practices
+### Best practices
 
 - Pair with `static_instruction` (see §4) for maximum cache hit rate.
 - Set `min_tokens` high enough to avoid caching small requests where overhead
   exceeds savings.
-- Monitor hit rates with `CachePerformanceAnalyzer` (see §20).
+- Monitor hit rates with `CachePerformanceAnalyzer` (see §19).
 
 ---
 
@@ -217,7 +169,7 @@ app = App(
 | `static_instruction` | System instruction (first)         | ❌ None               | ✅ Yes                                  |
 | `instruction`        | System instruction OR user content | ✅ `{var}` syntax     | ⚠️ Only if static_instruction is absent |
 
-### The Key Insight
+### The key insight
 
 When `static_instruction` is set, `instruction` moves to **user content**. This
 means the stable prefix (system instruction) never changes, making it an ideal
@@ -273,7 +225,7 @@ automatically executes them in parallel via `asyncio.gather()`.
    output within the same batch.
 3. **Tools must be thread-safe** — avoid shared mutable state.
 
-### How It Works (Under the Hood)
+### Under the hood
 
 ```python
 # google/adk/flows/llm_flows/functions.py
@@ -282,7 +234,7 @@ tasks = [asyncio.create_task(_execute_single_function_call_async(...))
 function_response_events = await asyncio.gather(*tasks)
 ```
 
-### Encouraging Parallel Calls
+### Encouraging parallel calls
 
 The LLM decides whether to emit multiple function calls. You can encourage this
 behavior through prompt engineering:
@@ -311,7 +263,7 @@ run_config = RunConfig(
 )
 ```
 
-### When It Helps
+### When it helps
 
 | Scenario                       | Benefits?                        |
 | :----------------------------- | :------------------------------- |
@@ -330,7 +282,7 @@ run_config = RunConfig(
 ADK's `ParallelAgent` runs sub-agents concurrently using `asyncio.TaskGroup`,
 each in an isolated branch context.
 
-### Use Cases
+### Use cases
 
 - **Best-of-N generation**: Multiple agents tackle the same problem; a parent
   selects the best output.
@@ -572,12 +524,16 @@ Well-structured prompts reduce token usage and improve tool-calling accuracy.
 | Verbose examples in every call   | Move to `static_instruction` for caching |
 | Unstructured instructions        | Use headers, numbered steps              |
 
-### Token Estimation Rule of Thumb
+### Token estimation rule of thumb
 
-- 1 token ≈ 4 characters in English
-- 100 tokens ≈ 75 words
-- A 1000-token instruction costs ~$0.00015 per call (Flash pricing)
-- At 10,000 calls/day, that's $1.50/day _just for the instruction_
+- 1 token ≈ 4 characters in English.
+- 100 tokens ≈ 75 words.
+
+Multiply your instruction token count by your call rate to estimate cost.
+Don't trust any specific dollar number you read in a doc — pricing changes
+frequently. Pull current per-token pricing from the [Vertex AI pricing
+page](https://cloud.google.com/vertex-ai/generative-ai/pricing) when you need
+a real number.
 
 ---
 
@@ -585,31 +541,29 @@ Well-structured prompts reduce token usage and improve tool-calling accuracy.
 
 **Impact: 4 · Effort: 4 · Risk: 2**
 
-ADK includes an **Agent Optimizer** framework for systematically improving
-prompts using evaluation datasets.
-
-### Five Optimization Pillars
-
-| Pillar       | Principle                                     |
-| :----------- | :-------------------------------------------- |
-| **Offload**  | Move logic from prompts into tools and code   |
-| **Reduce**   | Eliminate token waste (redundancy, verbosity) |
-| **Retrieve** | Optimize RAG and data-fetching patterns       |
-| **Isolate**  | Separate concerns between agents              |
-| **Cache**    | Leverage context caching for stable content   |
+ADK includes an Agent Optimizer for systematically improving prompts against
+an evaluation dataset.
 
 ### Usage
 
 ```python
-from google.adk.optimization.simple_prompt_optimizer import SimplePromptOptimizer
+from google.adk.optimization.simple_prompt_optimizer import (
+    SimplePromptOptimizer,
+    SimplePromptOptimizerConfig,
+)
 
-optimizer = SimplePromptOptimizer()
+config = SimplePromptOptimizerConfig(...)  # see google.adk.optimization
+optimizer = SimplePromptOptimizer(config)
 result = await optimizer.optimize(
     initial_agent=my_agent,
-    sampler=my_evaluation_sampler,
+    sampler=my_evaluation_sampler,  # implements Sampler[UnstructuredSamplingResult]
 )
-optimized_agent = result.best_agent
+optimized_agent = result.best.agent
 ```
+
+The constructor requires a `SimplePromptOptimizerConfig` — calling
+`SimplePromptOptimizer()` with no args raises `TypeError`. See
+`google.adk.optimization` for config options.
 
 ---
 
@@ -633,224 +587,47 @@ deployment environment.
 
 ---
 
-## 18. Python Async Best Practices
-
-**Impact: 4 · Effort: 2 · Risk: 2**
-
-ADK is built on Python's `asyncio`. Misusing the event loop is the most common
-source of performance issues.
-
-### 18.1 Use `async def` for All Tools
-
-```python
-# ❌ Blocks the event loop during the HTTP call
-def fetch_data(url: str) -> dict:
-    return requests.get(url).json()
-
-# ✅ Yields the event loop during I/O
-async def fetch_data(url: str) -> dict:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            return await resp.json()
-```
-
-### 18.2 Parallelize Independent Operations
-
-```python
-# ❌ Sequential — total time = sum of all calls
-result_a = await fetch_weather()
-result_b = await fetch_traffic()
-result_c = await fetch_events()
-
-# ✅ Parallel — total time = max of all calls
-result_a, result_b, result_c = await asyncio.gather(
-    fetch_weather(),
-    fetch_traffic(),
-    fetch_events(),
-)
-```
-
-### 18.3 Yield the Event Loop in CPU-Bound Code
-
-```python
-async def process_large_dataset(items):
-    for i, item in enumerate(items):
-        process(item)
-        if i % 100 == 0:
-            await asyncio.sleep(0)  # Let other coroutines run
-```
-
-### 18.4 Use Timeouts
-
-```python
-try:
-    result = await asyncio.wait_for(slow_operation(), timeout=5.0)
-except asyncio.TimeoutError:
-    result = {"error": "Operation timed out"}
-```
-
-### 18.5 Connection Pooling
-
-```python
-import aiohttp
-
-# ❌ Creates a new TCP connection per request
-async def fetch(url):
-    async with aiohttp.ClientSession() as s:
-        async with s.get(url) as r:
-            return await r.json()
-
-# ✅ Reuses connections via a shared session
-_session: aiohttp.ClientSession | None = None
-
-async def get_session():
-    global _session
-    if _session is None or _session.closed:
-        _session = aiohttp.ClientSession(
-            connector=aiohttp.TCPConnector(limit=100),
-            timeout=aiohttp.ClientTimeout(total=30),
-        )
-    return _session
-```
-
----
-
-## 19. Python General Performance
+## 18. Python performance checklist
 
 **Impact: 3 · Effort: 2 · Risk: 1**
 
-General Python practices that affect ADK agent performance.
+ADK runs on Python's `asyncio`, and most agent perf issues are general Python
+performance issues, not ADK-specific ones. The list below assumes you've
+already read the canonical Python references on these topics; treat it as a
+review checklist, not a tutorial.
 
-### 19.1 Pydantic V2 Optimization
+- **Use `async def` for every tool.** A blocking `def` tool stalls the event
+  loop and serializes everything else the agent is doing. If you absolutely
+  must call a sync library, wrap it in `asyncio.to_thread`.
+- **Parallelize independent calls with `asyncio.gather`.** Sequential `await`s
+  on independent operations are the single most common performance bug.
+- **Set timeouts on every external call.** `asyncio.wait_for(op, timeout=5.0)`.
+  An agent silently hanging on a stuck HTTP call is worse than a clean error.
+- **Share an `aiohttp.ClientSession`.** A new session per request creates a
+  new TCP connection each time. Hold one module-level session with
+  `aiohttp.TCPConnector(limit=100)` and reuse it.
+- **Don't deep-copy tool arguments.** ADK already deep-copied them before
+  invoking your tool. An extra `copy.deepcopy` is pure waste.
+- **Return lean dicts from tools.** The LLM has to read everything you return.
+  Return only the fields needed for the next reasoning step, not the whole
+  underlying object.
+- **Use `%`-formatted logging, not f-strings.** `logger.debug("count=%d",
+  n)` skips formatting when debug is disabled. `logger.debug(f"count={n}")`
+  always pays the format cost.
+- **Yield the event loop inside CPU-bound loops.** `await asyncio.sleep(0)`
+  every N iterations. Otherwise the runner can't service other coroutines.
+- **`__slots__` on hot dataclasses, generators for large iterables,
+  `functools.lru_cache` on pure expensive functions, `set` lookups for
+  membership tests.** All standard Python advice; nothing ADK-specific.
 
-ADK uses Pydantic V2 extensively. Tips for tool responses and data models:
-
-```python
-from pydantic import BaseModel, ConfigDict
-
-class ToolResponse(BaseModel):
-    model_config = ConfigDict(extra='forbid')  # Catch typos fast
-
-    status: str
-    data: dict
-
-    # Serialize only non-None fields to reduce payload size
-    def to_response(self):
-        return self.model_dump(exclude_none=True)
-```
-
-### 19.2 Avoid Deep Copies Where Possible
-
-ADK deep-copies function call arguments before tool execution. Your tools should
-not add additional unnecessary copies:
-
-```python
-# ❌ Unnecessary extra copy
-async def my_tool(data: dict, tool_context) -> dict:
-    local_data = copy.deepcopy(data)  # ADK already copied this
-    return process(local_data)
-
-# ✅ Direct use is safe — ADK already deep-copied the args
-async def my_tool(data: dict, tool_context) -> dict:
-    return process(data)
-```
-
-### 19.3 Use `__slots__` for Frequently Instantiated Classes
-
-```python
-class RunnerState:
-    __slots__ = ('position', 'speed', 'hydration', 'energy')
-
-    def __init__(self):
-        self.position = 0.0
-        self.speed = 0.0
-        self.hydration = 100.0
-        self.energy = 100.0
-```
-
-### 19.4 Use Generators for Large Data
-
-```python
-# ❌ Loads everything into memory
-def get_all_events(session):
-    return [process(e) for e in session.events]
-
-# ✅ Processes lazily
-def get_all_events(session):
-    return (process(e) for e in session.events)
-```
-
-### 19.5 Minimize JSON Serialization Overhead
-
-Tool responses must be JSON-serializable dicts. Keep them small:
-
-```python
-# ❌ Bloated response
-return {
-    "status": "success",
-    "message": "The operation completed successfully without any errors",
-    "data": {
-        "full_object": large_object.to_dict(),  # Hundreds of fields
-    },
-    "metadata": { ... },
-    "debug_info": { ... },
-}
-
-# ✅ Lean response — only what the LLM needs to reason about
-return {
-    "status": "success",
-    "speed_kmh": 12.5,
-    "position_km": 5.2,
-}
-```
-
-### 19.6 Logging Performance
-
-```python
-import logging
-logger = logging.getLogger(__name__)
-
-# ❌ String formatting always runs, even if debug is disabled
-logger.debug(f"Processing {len(items)} items: {items}")
-
-# ✅ Lazy formatting — only runs if debug is enabled
-logger.debug("Processing %d items: %s", len(items), items)
-
-# ✅ Guard expensive formatting
-if logger.isEnabledFor(logging.DEBUG):
-    logger.debug("Detail: %s", expensive_to_string(obj))
-```
-
-### 19.7 Use `functools.lru_cache` for Expensive Computations
-
-```python
-from functools import lru_cache
-
-@lru_cache(maxsize=128)
-def compute_route_hash(route_points: tuple) -> str:
-    """Cache route hashes for repeated lookups."""
-    import hashlib
-    data = str(route_points).encode()
-    return hashlib.sha256(data).hexdigest()[:16]
-```
-
-### 19.8 Prefer Built-in Data Structures
-
-```python
-# ❌ Custom lookup when a set works
-found = False
-for item in large_list:
-    if item == target:
-        found = True
-        break
-
-# ✅ O(1) lookup
-found = target in large_set
-```
+For deeper coverage, see the [asyncio
+documentation](https://docs.python.org/3/library/asyncio.html) and the
+[aiohttp connection pooling
+guide](https://docs.aiohttp.org/en/stable/client_advanced.html#connection-pooling).
 
 ---
 
-## 20. Monitoring & Measurement
+## 19. Monitoring & Measurement
 
 **Impact: 3 · Effort: 2 · Risk: 0**
 
@@ -869,7 +646,7 @@ report = await analyzer.analyze_agent_cache_performance(
 #                   cache_utilization_ratio_percent, etc.
 ```
 
-### Key Metrics to Track
+### Key metrics to track
 
 | Metric                       | Target     | How to Measure             |
 | :--------------------------- | :--------- | :------------------------- |
@@ -890,7 +667,7 @@ ADK provides built-in tracing via `google.adk.telemetry.tracing`. Key spans:
 
 ---
 
-## 21. Summary Table
+## 20. Summary Table
 
 All techniques ranked by **impact ÷ effort** (best return on investment first):
 
@@ -900,22 +677,21 @@ All techniques ranked by **impact ÷ effort** (best return on investment first):
 | 2   | Thinking Budget Control         |   4    |   1    |  2   |    4.0    |
 | 3   | Parallel Tool Execution (async) |   4    |   1    |  1   |    4.0    |
 | 4   | Output Token Budgeting          |   3    |   1    |  1   |    3.0    |
-| 5   | LLM Call Guards                 |   2    |   1    |  1   |    2.0    |
-| 6   | Content Inclusion Control       |   3    |   1    |  3   |    3.0    |
-| 7   | Streaming Mode Selection        |   2    |   1    |  1   |    2.0    |
-| 8   | Session Service Selection       |   3    |   1    |  1   |    3.0    |
+| 5   | Content Inclusion Control       |   3    |   1    |  3   |    3.0    |
+| 6   | Session Service Selection       |   3    |   1    |  1   |    3.0    |
+| 7   | Tool Thread Pool Offloading     |   3    |   1    |  1   |    3.0    |
+| 8   | Context Window Compression      |   3    |   1    |  2   |    3.0    |
 | 9   | Context Caching (Explicit)      |   5    |   2    |  1   |    2.5    |
-| 10  | Static vs Dynamic Instructions  |   4    |   2    |  1   |    2.0    |
-| 11  | Tool Thread Pool Offloading     |   3    |   1    |  1   |    3.0    |
-| 12  | Context Window Compression      |   3    |   1    |  2   |    3.0    |
+| 10  | LLM Call Guards                 |   2    |   1    |  1   |    2.0    |
+| 11  | Streaming Mode Selection        |   2    |   1    |  1   |    2.0    |
+| 12  | Static vs Dynamic Instructions  |   4    |   2    |  1   |    2.0    |
 | 13  | Prompt Engineering              |   4    |   2    |  2   |    2.0    |
-| 14  | Python Async Best Practices     |   4    |   2    |  2   |    2.0    |
-| 15  | Event Compaction                |   3    |   2    |  2   |    1.5    |
-| 16  | Parallel A2A Orchestration      |   4    |   2    |  2   |    2.0    |
-| 17  | Python General Performance      |   3    |   2    |  1   |    1.5    |
-| 18  | Monitoring & Measurement        |   3    |   2    |  0   |    1.5    |
-| 19  | Parallel Agent Execution        |   4    |   3    |  2   |    1.3    |
-| 20  | Automated Prompt Optimization   |   4    |   4    |  2   |    1.0    |
+| 14  | Parallel A2A Orchestration      |   4    |   2    |  2   |    2.0    |
+| 15  | Python Performance Checklist    |   3    |   2    |  1   |    1.5    |
+| 16  | Event Compaction                |   3    |   2    |  2   |    1.5    |
+| 17  | Monitoring & Measurement        |   3    |   2    |  0   |    1.5    |
+| 18  | Parallel Agent Execution        |   4    |   3    |  2   |    1.3    |
+| 19  | Automated Prompt Optimization   |   4    |   4    |  2   |    1.0    |
 
 > [!NOTE] **ROI Score** = Impact ÷ Effort. Higher is better. Start from the top.
 
@@ -930,11 +706,14 @@ For a new ADK agent project, apply these optimizations in order:
 - [ ] Set `max_output_tokens` on every agent (§11)
 - [ ] Set `max_llm_calls` guard on every `RunConfig` (§12)
 - [ ] Make all tool functions `async def` (§5, §18)
+
+  (See §18 for the full Python performance checklist — async, timeouts,
+  shared HTTP sessions, lean tool returns, lazy logging.)
 - [ ] Configure `ContextCacheConfig` on the `App` (§3)
 - [ ] Split stable content into `static_instruction` (§4)
 - [ ] Use `include_contents='none'` for stateless agents (§13)
 - [ ] Choose the correct `StreamingMode` per delivery channel (§14)
-- [ ] Set up `CachePerformanceAnalyzer` monitoring (§20)
+- [ ] Set up `CachePerformanceAnalyzer` monitoring (§19)
 - [ ] Never use SQLite session service under load (§17)
 - [ ] Review prompts for token waste (§15)
 

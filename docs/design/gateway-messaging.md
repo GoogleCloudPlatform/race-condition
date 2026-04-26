@@ -1,6 +1,6 @@
 # Gateway Messaging Protocol
 
-> Architecture design for session-aware message routing in the N26 simulation
+> Architecture design for session-aware message routing in the Race Condition
 > gateway.
 
 ## Overview
@@ -10,7 +10,7 @@ simulation. It manages WebSocket client connections, routes messages to AI
 agents, and broadcasts telemetry events. All agent communication flows through
 the gateway — clients never connect directly to agents.
 
-## Session Lifecycle
+## Session lifecycle
 
 ```mermaid
 sequenceDiagram
@@ -33,7 +33,7 @@ sequenceDiagram
     G->>R: UntrackSession(sessionID)
 ```
 
-### Key Design Decisions
+### Key design decisions
 
 - **Gateway generates session IDs.** The gateway owns session identity, ensuring
   consistent routing across horizontally scaled instances.
@@ -43,7 +43,7 @@ sequenceDiagram
 - **Agent-type SETs.** Redis maintains `{prefix}:agent-sessions:{agentType}`
   sets, enabling O(1) lookup of which agent types have active sessions.
 
-## Message Routing
+## Message routing
 
 ### Broadcast (Fan-Out)
 
@@ -73,7 +73,7 @@ have ≥1 active session. This prevents:
 - Creating unwanted A2A sessions on idle agents
 - O(all agents) HTTP requests when only O(active agents) needed
 
-### Targeted Dispatch
+### Targeted dispatch
 
 Used for directing events to a specific agent type.
 
@@ -84,7 +84,7 @@ Used for directing events to a specific agent type.
 | `subscriber`  | HTTP POST /orchestration  | Local/Cloud Run agents |
 | `callable`    | A2A JSON-RPC message/send | Agent Engine agents    |
 
-### Agent Callbacks
+### Agent callbacks
 
 Agents emit results back to the gateway via callback URLs:
 
@@ -95,7 +95,7 @@ POST /api/v1/sessions/{sessionId}/callback
 The gateway receives the callback, looks up the session's WebSocket connection,
 and forwards the result to the connected client as a binary protobuf frame.
 
-## Dispatch Modes
+## Dispatch modes
 
 Each agent declares its dispatch mode via environment variable:
 
@@ -104,20 +104,20 @@ DISPATCH_MODE=subscriber  # Default: listens on Redis Pub/Sub + HTTP
 DISPATCH_MODE=callable    # HTTP orchestration only, no Redis listener
 ```
 
-### Subscriber Mode (Default)
+### Subscriber mode (default)
 
 - Python `RedisOrchestratorDispatcher` starts a Redis Pub/Sub listener
 - Also receives HTTP POST to `/orchestration` endpoint
 - Suitable for always-on agents (local dev, Cloud Run)
 
-### Callable Mode
+### Callable mode
 
 - Python `RedisOrchestratorDispatcher` skips Redis listener entirely
 - Receives events only via HTTP POST to `/orchestration` (broadcast) or A2A
   JSON-RPC `message/send` (targeted dispatch)
 - Suitable for scale-to-zero agents (Agent Engine)
 
-## Agent Discovery
+## Agent discovery
 
 Agents are discovered dynamically via HTTP, not static configuration:
 
@@ -138,7 +138,7 @@ flowchart LR
     CAT -->|Proxied via| API["/api/v1/agent-types"]
 ```
 
-### Agent Card Proxy
+### Agent card proxy
 
 The gateway proxies agent cards losslessly using `json.RawMessage` to preserve
 all fields (including `preferredTransport`, `additionalInterfaces`, custom
@@ -157,7 +157,7 @@ url: "http://127.0.0.1:8210/a2a/runner_autopilot/"
 `AgentCardBuilder` strips the trailing slash; `prepare_simulation_agent` adds it
 back after build to prevent 307 redirects.
 
-## Client Communication
+## Client communication
 
 ### WebSocket Protocol
 
@@ -168,7 +168,7 @@ Clients connect via WebSocket at `/ws?sessionId={id}`:
 - **Text frames:** JSON-encoded messages for direct agent interaction (e.g.,
   sending text prompts to the simulator).
 
-### Hub Architecture
+### Hub architecture
 
 The `Hub` manages WebSocket connection lifecycle:
 
@@ -177,7 +177,7 @@ The `Hub` manages WebSocket connection lifecycle:
 - Each gateway instance has its own Hub; cross-instance broadcast uses Redis
   Pub/Sub via the Switchboard
 
-## Component Reference
+## Component reference
 
 | Component            | Package                         | Role                         |
 | :------------------- | :------------------------------ | :--------------------------- |
@@ -190,9 +190,9 @@ The `Hub` manages WebSocket connection lifecycle:
 | Dispatcher           | `agents/utils/dispatcher.py`    | Python-side event reception  |
 | Communication        | `agents/utils/communication.py` | Inter-agent A2A calls        |
 
-## Testing Contract
+## Testing contract
 
-### Unit Tests
+### Unit tests
 
 ```bash
 go test ./internal/session/ -v  # Registry tests
@@ -201,19 +201,19 @@ go test ./internal/agent/ -v    # Catalog tests
 uv run pytest agents/ -v        # Python agent + dispatcher tests
 ```
 
-### Integration Tests (Docker Redis)
+### Integration tests (Docker Redis)
 
 ```bash
 make verify-full  # All layers including integration tests
 ```
 
-### Full Verification
+### Full verification
 
 ```bash
 make verify       # Lint + unit tests + coverage (Layers 1-3)
 ```
 
-### Key Test Scenarios
+### Key test scenarios
 
 - **Session-aware routing:** Broadcast only reaches agent types with sessions
 - **Dispatch mode isolation:** Callable agents skip Redis listeners

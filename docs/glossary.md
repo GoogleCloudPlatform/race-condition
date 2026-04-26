@@ -1,57 +1,84 @@
 # Project Glossary
 
-This document defines core terms and concepts used throughout the simulation.
+## Core concepts
 
-## Core Concepts
-
-- **NPC (Non-Player Character)**: An autonomous simulation entity (Runner) that
-  acts like a user or participant.
-- **Agent**: A simulation entity powered by the Agent Development Kit (ADK).
-- **A2A (Agent-to-Agent)**: The communication protocol enabling inter-agent
-  messaging and coordination.
-- **A2UI**: The framework-agnostic protocol for delivering UI updates from
-  agents to the simulation dashboard. See `.gemini/a2ui-spec/` for the v0.8.0
-  spec.
-- **Skill (ADK)**: An encapsulated capability loaded by an agent at startup.
-  Skills contain instructions (`SKILL.md`) and tool implementations
-  (`tools.py`).
+- **A2A (Agent-to-Agent)**: HTTP protocol for inter-agent messaging. Each
+  agent advertises an `agent-card.json` at `/.well-known/agent-card.json`; the
+  gateway discovers agents from `AGENT_URLS` at startup.
+- **A2UI (Agent-to-UI)**: Schema-driven protocol for sending UI components from
+  an agent to a frontend as part of a normal message. Spec details and the 18
+  catalog primitives are in `docs/architecture/a2ui_protocol.md`.
+- **ADK (Agent Development Kit)**: Google's Python framework for building
+  agents. Each Race Condition agent exposes a `root_agent` in its `agent.py`.
+- **Agent**: A simulation entity built on ADK, running in its own process.
+- **Agent Card**: JSON descriptor served at `/.well-known/agent-card.json`.
+  Lists the agent's name, capabilities, A2A endpoints, and security schemes.
+  The gateway fetches it at startup to populate its routing table.
+- **Cached / live mode**: Toggle in the frontend. Cached mode replays the
+  Cloud Next '26 keynote NDJSON recordings shipped under
+  `web/frontend/public/assets/sim-*-log.ndjson`. Live mode drives a real
+  simulation through the gateway.
+- **NPC (Non-Player Character)**: An autonomous simulation entity (typically a
+  Runner) that acts like a participant rather than a human user.
+- **Skill (ADK)**: Encapsulated capability that a `LlmAgent` loads at
+  construction time. A skill is a directory containing a `SKILL.md`
+  (instructions + frontmatter) and optionally `tools.py` (Python functions
+  exposed as tools).
 
 ## Agents
 
-- **Planner Agent**: ADK-powered GIS analyst that generates mathematically
-  precise marathon routes using the Las Vegas road network.
-- **Simulation Agent**: Manages overall simulation lifecycle, scenario state,
-  and agent coordination.
-- **Runner Agent**: Individual NPC that simulates a marathon runner's race
-  behavior. Available in two variants: **Runner Autopilot** (deterministic
-  physics) and **Runner LLM** (model-driven decisions).
+- **Planner**: GIS-driven agent that generates 26.2-mile marathon routes from
+  the Las Vegas road network. See `agents/planner/`.
+- **Planner with eval / Planner with memory**: Planner variants used in
+  evaluation pipelines (`planner_with_eval`) and for AlloyDB-backed route
+  memory (`planner_with_memory`).
+- **Runner**: The default LLM-driven runner agent (`agents/runner/`). Decides
+  pace, hydration, and route choices via Gemini calls each tick.
+- **Runner Autopilot**: Deterministic runner variant
+  (`agents/runner_autopilot/`) that follows a precomputed plan with no LLM
+  calls. Used for high-density simulations and load tests.
+- **Simulator**: Manages overall simulation lifecycle, scenario state, and
+  per-tick coordination. See `agents/simulator/`.
+- **Simulator with failure**: Variant (`agents/simulator_with_failure/`) that
+  injects deterministic failures for chaos and recovery tests.
 
-## Telemetry & Scalability
+## Telemetry & scalability
 
-- **Batching**: The process of grouping high-frequency simulation tick events
-  into time-windowed segments to reduce network overhead.
-- **Fan-out**: Distributing a single incoming message to multiple active
-  observers (e.g., thousands of visualizers).
-- **Backpressure**: A signal or mechanism that slows down the sender when the
-  receiver is saturated.
-- **NDJ (Newline Delimited JSON)**: A format for streaming multiple JSON objects
-  over a single TCP/WebSocket connection.
-- **Hydration**: The process of restoring agent state from a persistent store
-  when resuming a simulation session.
+- **Backpressure**: Mechanism that slows the sender when the receiver is
+  saturated.
+- **Batching**: Grouping high-frequency simulation tick events into
+  time-windowed segments to reduce network overhead.
+- **Dispatch mode**: How the gateway invokes an agent. *Subscriber* mode talks
+  to a warm process over Redis Pub/Sub. *Callable* mode sends an HTTP
+  `/a2a/` poke to wake an agent that has scaled to zero on Cloud Run.
+- **Fan-out**: Distributing one incoming message to many active observers
+  (e.g. thousands of dashboard clients).
+- **NDJSON (Newline-Delimited JSON)**: Streaming format where each line is a
+  standalone JSON object. Used for the cached keynote recordings and for the
+  agent debug log.
+- **`simulation_id`**: UUID identifying one simulation run. Used as the Redis
+  key prefix for that run's session state and as the filter key on event
+  topics.
 
 ## Infrastructure
 
-- **ECS (Entity Component System)**: An architectural pattern that separates
-  data (Components) from logic (Systems) for high-performance simulation.
-- **Orchestrator**: The central agent that manages the simulation lifecycle and
-  scenario state.
-- **Gateway**: The primary entry point for event distribution and agent
-  communication.
+- **Dispatcher**: Python-side event router (`agents/utils/dispatcher.py`) that
+  translates orchestration messages from Redis into ADK runner invocations.
+- **Gateway**: Primary entry point for client traffic and agent
+  communication. Routes WebSocket frames between the frontend and the agent
+  network. Runs on port 9101 by default.
+- **Hub**: In-process map of `session_id` → WebSocket connection inside one
+  gateway instance. Distinct from the agent registry; the Hub only knows
+  which sessions are connected to *this* gateway node.
+- **Hydration (runner)**: Per-runner water level that depletes during the
+  race. Drives the runner's decisions about hydration stations. Not to be
+  confused with state-restoration hydration in web frameworks — Race
+  Condition uses the term for runner physiology.
+- **`RedisDashLogPlugin`**: ADK lifecycle plugin
+  (`agents/utils/plugins.py`) that publishes every agent/tool/model event to
+  two channels: `gateway:broadcast` on Redis (live UI source) and a Pub/Sub
+  debug topic (audit log).
+- **Route planning**: GIS-based marathon route generation using the Spine and
+  Sprout algorithm. See `docs/architecture/route_planning.md`.
 - **Switchboard**: Redis-backed message relay that enables cross-instance
-  broadcast and orchestration routing between multiple Gateway processes.
-- **Dispatcher**: Python-side event router that translates orchestration
-  messages from Redis into agent actions.
-- **DashLogPlugin**: ADK callback plugin that publishes agent narrative events
-  to Redis for dashboard consumption.
-- **Route Planning**: GIS-based marathon route generation using `networkx` and
-  `osmnx`, producing GeoJSON output with water stations and medical tents.
+  broadcast and orchestration routing between multiple gateway processes.

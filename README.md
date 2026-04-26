@@ -128,6 +128,10 @@ graph TD
 | Frontend | Angular 21 + Three.js app rendering a 3D Las Vegas environment with real-time runner positions, weather, and crowd reactions. |
 | Infrastructure | Redis (state/pub-sub fanout), Pub/Sub emulator (telemetry streaming), PostgreSQL with pgvector (route memory and embeddings). |
 
+For the deep version of any of this, see [`docs/`](docs/README.md) — the
+architecture subtree explains the topology, the protocols, and the design
+decisions in detail.
+
 ## Prerequisites
 
 Install these before you start. `make check-prereqs` will verify them for you.

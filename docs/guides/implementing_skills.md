@@ -1,7 +1,7 @@
-# Tutorial: Implementing and Registering Skills in ADK Agents
+# Implementing Skills in ADK Agents
 
-This tutorial explains how to add "Skills" to agents built using the Google
-Assistant Developer Kit (ADK) within Race Condition.
+This guide explains how to add Skills to agents built with the Google Agent
+Development Kit (ADK) inside Race Condition.
 
 ## What is a Skill?
 
@@ -62,7 +62,7 @@ other agents during a trade or dispute.
 2. Propose trades only when a win-win is identified.
 3. Maintain a professional, collaborative tone.
 
-## Advanced Guidelines
+## Advanced guidelines
 
 - Prioritize long-term relationship value over immediate gains.
 - If a deadlock is reached, suggest a temporary recess.
