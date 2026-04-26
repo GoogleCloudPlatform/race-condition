@@ -5,7 +5,7 @@
 -include .env
 export
 
-.PHONY: init check-prereqs infra-init infra-plan infra-apply infra-destroy infra-output deploy deploy-local help test lint lint-go lint-py lint-pyright lint-configs fmt build proto ensure-venv coverage coverage-go coverage-py test-unit-go test-integration-go test-py-integration test-web verify perf-test perf-diagnostic eval-stress test-e2e-simulation docker-build-all docker-build-go docker-build-py eval oss-harden start stop restart
+.PHONY: init check-prereqs infra-init infra-plan infra-apply infra-destroy infra-output deploy deploy-local help test lint lint-go lint-py lint-pyright lint-configs fmt build proto ensure-venv coverage coverage-go coverage-py test-unit-go test-integration-go test-py-integration test-web verify perf-test perf-diagnostic eval-stress test-e2e-simulation docker-build-all docker-build-go docker-build-py eval start stop restart
 
 .DEFAULT_GOAL := help
 
@@ -46,7 +46,7 @@ build: proto ## Build all Go binaries
 	go build ./...
 
 # --- Test ---
-test: test-go test-py test-web test-deploy-sh test-oss-sync ## Run all tests (Go + Python + Web + deploy.sh + OSS sync smoke)
+test: test-go test-py test-web test-deploy-sh ## Run all tests (Go + Python + Web + deploy.sh)
 
 test-go:
 	go test ./... -count=1
@@ -64,10 +64,7 @@ test-web:
 	@echo "✅ All web UI tests passed."
 
 test-deploy-sh: ## Run scripts/deploy.sh unit tests (region parity + argv shape)
-	@bash scripts/oss/templates/scripts/deploy_test.sh
-
-test-oss-sync: ## Run scripts/oss/sync.sh smoke tests (Phase 5 artifact paths + perms)
-	@bash scripts/oss/sync_smoke_test.sh
+	@bash scripts/deploy_test.sh
 
 # --- Agent Evaluations (requires Gemini API) ---
 eval: ## Run agent evaluations (requires Gemini API)
@@ -170,20 +167,6 @@ docker-build-all: docker-build-gateway docker-build-admin docker-build-tester do
 docker-build-go: docker-build-gateway docker-build-admin docker-build-tester docker-build-frontend
 
 docker-build-py: docker-build-runner_autopilot docker-build-runner_cloudrun docker-build-dash
-
-
-oss-harden: ## Apply security hardening to the OSS repo (Actions, rulesets, Dependabot)
-	@bash scripts/oss/configure_repo.sh $(OSS_REPO)
-
-# resolves the target the same way the sync script does.
-	if [ -f .git ]; then \
-		_GIT_COMMON=$$(git rev-parse --git-common-dir); \
-		_MAIN_REPO=$$(cd "$$_GIT_COMMON/.." && pwd); \
-		echo "$$(cd "$$_MAIN_REPO/.." && pwd)/race-condition"; \
-	else \
-		echo "$$(cd .. && pwd)/race-condition"; \
-	fi')
-
 
 
 # --- Developer Experience ---

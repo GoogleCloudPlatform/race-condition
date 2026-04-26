@@ -24,36 +24,22 @@ DEPLOY_SH="${SCRIPT_DIR}/deploy.sh"
 PASS=0
 FAIL=0
 
-# Resolve variables.tf for both layouts (monorepo + synced OSS repo).
-# Override with DEPLOY_SH_TF_VARS_FILE if auto-detect ever drifts.
+# Resolve <repo>/infra/variables.tf via git. Works for both the main
+# checkout and any worktree, since `git rev-parse --show-toplevel`
+# returns the worktree's own root. Override with DEPLOY_SH_TF_VARS_FILE
+# if auto-detect ever drifts.
 resolve_tf_vars_file() {
   if [[ -n "${DEPLOY_SH_TF_VARS_FILE:-}" ]]; then
     echo "$DEPLOY_SH_TF_VARS_FILE"
     return
   fi
 
-  # Git-aware resolution for the monorepo / backend worktree layout.
-  local git_root project_root
-  if git_root=$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null); then
-    if [[ "$git_root" == */.worktrees/* ]]; then
-      # Worktree: .../backend/.worktrees/topic/<branch>; project root is 4 up.
-      project_root="$(cd "$git_root/../../../.." && pwd)"
-    else
-      # Main checkout: .../backend; project root is 1 up.
-      project_root="$(cd "$git_root/.." && pwd)"
-    fi
-    local candidates=(
-      "$project_root/code-infra/.worktrees/topic/oss-deploy/projects/oss/variables.tf"
-      "$project_root/code-infra/projects/oss/variables.tf"
-    )
-    for c in "${candidates[@]}"; do
-      [[ -f "$c" ]] && { echo "$c"; return; }
-    done
-  fi
+  local repo_root
+  repo_root=$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null) \
+    || repo_root="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-  # OSS-synced layout fallback (scripts/deploy_test.sh -> ../infra/variables.tf).
-  if [[ -f "${SCRIPT_DIR}/../../infra/variables.tf" ]]; then
-    echo "${SCRIPT_DIR}/../../infra/variables.tf"
+  if [[ -f "$repo_root/infra/variables.tf" ]]; then
+    echo "$repo_root/infra/variables.tf"
     return
   fi
 
