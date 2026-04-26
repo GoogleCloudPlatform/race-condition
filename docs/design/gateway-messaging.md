@@ -1,6 +1,6 @@
 # Gateway Messaging Protocol
 
-> Architecture design for session-aware message routing in the N26 simulation
+> Architecture design for session-aware message routing in the Race Condition
 > gateway.
 
 ## Overview
