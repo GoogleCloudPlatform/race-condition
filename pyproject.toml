@@ -95,6 +95,13 @@ omit = ["agents/tests/*", "agents/**/test_*"]
 fail_under = 60
 show_missing = true
 
+[tool.pyright]
+# Point pyright at the uv-managed virtualenv so `npx pyright agents/`
+# resolves project dependencies without needing per-invocation flags.
+# `uv sync` creates ./.venv at the repo root.
+venvPath = "."
+venv = ".venv"
+
 [tool.ruff]
 target-version = "py313"
 line-length = 120
