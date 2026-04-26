@@ -15,7 +15,7 @@
 # Service-level IAM bindings for Cloud Run services.
 #
 # Replaces the `gcloud run services add-iam-policy-binding` shim that
-# was previously in scripts/oss/templates/scripts/deploy/deploy.py.
+# was previously in scripts/deploy/deploy.py.
 #
 # Defense in depth: the iam module ALSO grants project-level
 # roles/run.invoker to the AE SA. Project-level grants have shown

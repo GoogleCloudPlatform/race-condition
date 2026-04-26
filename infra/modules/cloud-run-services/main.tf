@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Common env vars threaded into every Race Condition Cloud Run service.
-# Mirrors scripts/oss/templates/scripts/deploy/deploy.py:build_env_vars()
+# Mirrors scripts/deploy/deploy.py:build_env_vars()
 # (the legacy gcloud-based deployer). Cross-service URLs (ADMIN_URL,
 # DASH_URL, ...) are deliberately omitted: they cause TF dependency
 # cycles between services. The Phase 4 Cloud Build orchestrator wires

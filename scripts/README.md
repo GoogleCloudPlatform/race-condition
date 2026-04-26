@@ -73,15 +73,6 @@ scripts/
 | `spark_alloydb_processor.py` | `README.md` | PySpark + Document AI pipeline for ingesting PDF regulations into AlloyDB |
 | `generate_local_seeds.py` | -- | Generates `seed_local.sql` with pre-computed embeddings for local Postgres |
 
-## `oss/` -- Open-Source Release
-
-| File | Integration | Description |
-|:---|:---|:---|
-| `sync.sh` | `Makefile` (`oss-sync`) | Syncs backend + frontend to the `race-condition` OSS repo with Go module rewrite, port remapping, and sanitization |
-| `excludes.txt` | `sync.sh` | rsync exclude patterns for backend sync |
-| `excludes-frontend.txt` | `sync.sh` | rsync exclude patterns for frontend sync |
-| `templates/` | `sync.sh` | OSS overlay files (LICENSE, CONTRIBUTING, CI workflows, skills) |
-
 ## `tests/` -- Script Tests
 
 | Test File | Tests For |
