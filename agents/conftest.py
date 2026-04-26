@@ -21,11 +21,33 @@ Prevents module-level state from leaking between tests.
 # agents/planner_with_memory/__init__.py eagerly imports agent.py, which calls
 # create_session_service() and create_memory_service() at module level.
 # If these are not set, ValueError is raised during collection.
+#
+# Direct assignment (not setdefault) is deliberate: the Makefile loads the
+# developer's .env via `-include .env / export`, so any value exported there
+# would silently win against setdefault and pollute test runs (the original
+# bug behind PR #53). Each entry below documents the import-time consumer
+# that motivates pinning it.
 import os
 
-os.environ.setdefault("GOOGLE_CLOUD_PROJECT", "test-project")
-os.environ.setdefault("GOOGLE_CLOUD_AGENT_ENGINE_ID", "test-agent-engine")
-os.environ.setdefault("ALLOYDB_HOST", "127.0.0.1")
+# Read by agents/utils/env.py, store_alloydb's SM project resolution chain,
+# memory_manager, evaluator/tools.py, simulation_executor, and others.
+os.environ["GOOGLE_CLOUD_PROJECT"] = "test-project"
+os.environ["PROJECT_ID"] = "test-project"
+
+# Read by simulation_executor, memory_manager, runtime, embeddings.
+os.environ["GOOGLE_CLOUD_LOCATION"] = "global"
+
+# Read by runtime.create_session_service / create_memory_service when
+# agents/planner_with_memory/__init__.py imports agent.py at collection.
+os.environ["GOOGLE_CLOUD_AGENT_ENGINE_ID"] = "test-agent-engine"
+
+# Read by store_alloydb._get_dsn(); pin so tests never accidentally point at
+# a real AlloyDB instance from a developer's .env.
+os.environ["ALLOYDB_HOST"] = "127.0.0.1"
+
+# SECRET_MANAGER_PROJECT wins the SM project resolution chain in
+# store_alloydb. Pop it so resolution falls through to GOOGLE_CLOUD_PROJECT.
+os.environ.pop("SECRET_MANAGER_PROJECT", None)
 
 from unittest.mock import patch  # noqa: E402
 
