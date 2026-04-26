@@ -1,14 +1,18 @@
 ---
-name: race-director
-description:
-  Define the non-spatial characteristics and logistical parameters of the marathon
-  event.
+name: directing-the-event
+description: >
+  Use when the marathon plan needs non-spatial event parameters defined:
+  theme, hydration-point logistics, crowd zones, start times, or
+  expected participant counts. Triggered when the request describes the
+  feel or operational logistics of the race rather than its physical
+  route.
+license: Apache-2.0
 metadata:
   adk_additional_tools:
     - plan_marathon_event
 ---
 
-# Event Planning
+# Directing the Event
 
 You use this skill to define the "soul" and logistics of the marathon.
 

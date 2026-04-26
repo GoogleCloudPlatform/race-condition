@@ -103,7 +103,7 @@ AGENT_NAME = os.environ.get("AGENT_NAME", "runner")
 _skills, skill_tools = load_agent_skills(str(pathlib.Path(__file__).parent))
 
 # Runner Identity & Instructions
-# Skill instructions from skills/running/SKILL.md and skills/hydration/SKILL.md
+# Skill instructions from skills/running/SKILL.md and skills/managing-hydration/SKILL.md
 # are inlined directly to avoid SkillToolset overhead.
 # Using static_instruction for context caching -- no {var} substitution.
 # [START runner_instruction]

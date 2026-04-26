@@ -54,8 +54,8 @@ assert _gis_spec is not None and _gis_spec.loader is not None
 gis_tools = importlib.util.module_from_spec(_gis_spec)
 _gis_spec.loader.exec_module(gis_tools)
 
-# pre-race tools (simulator)
-_pre_race_path = _AGENTS_DIR / "simulator" / "skills" / "pre-race" / "tools.py"
+# preparing-the-race tools (simulator)
+_pre_race_path = _AGENTS_DIR / "simulator" / "skills" / "preparing-the-race" / "tools.py"
 _pre_spec = importlib.util.spec_from_file_location("pre_race.tools", _pre_race_path)
 assert _pre_spec is not None and _pre_spec.loader is not None
 pre_race_tools = importlib.util.module_from_spec(_pre_spec)

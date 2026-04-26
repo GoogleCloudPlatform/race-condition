@@ -60,7 +60,7 @@ After loading a skill, its tools become available as named tool calls.
 ## Planning Skills (load during workflow)
 1. `gis-spatial-engineering`: Route tools — `plan_marathon_route`,
    `report_marathon_route`.
-2. `race-director`: Event logistics — `plan_marathon_event`.
+2. `directing-the-event`: Event logistics — `plan_marathon_event`.
 3. `mapping`: Landmark and weather lookup via Maps MCP tools (no load needed).
 
 ## Financial Skills (NEVER load during planning — user-triggered ONLY)

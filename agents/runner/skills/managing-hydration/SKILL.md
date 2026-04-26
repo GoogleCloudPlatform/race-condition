@@ -1,11 +1,14 @@
 ---
-name: hydration
-description:
-  Hydration management for the runner, tracking water depletion and
-  rehydration stations.
+name: managing-hydration
+description: >
+  Use when a runner agent receives a distance update and must deplete
+  water proportionally, or when the runner enters a hydration station
+  and must decide whether to stop and rehydrate. Triggered by distance
+  events and station events.
+license: Apache-2.0
 ---
 
-# Hydration Management
+# Managing Hydration
 
 The runner starts the race partially hydrated (typically 88-100, ability-correlated). Water depletes over distance and affects performance.
 
@@ -26,4 +29,4 @@ The runner starts the race partially hydrated (typically 88-100, ability-correla
 - `deplete_water`: Deplete hydration by the given amount. Tracks exhaustion and collapse automatically.
 - `rehydrate`: Rehydrate at a station (capped at 100).
 
-**Note: Call these tools directly (no prefix like "hydration:").**
+**Note: Call these tools directly (no prefix like "managing-hydration:").**

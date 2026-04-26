@@ -20,7 +20,7 @@ import importlib.util
 import pathlib
 
 # Load from the failing pre-race skill directory
-_TOOLS_PATH = pathlib.Path(__file__).parent.parent / "skills" / "pre-race" / "tools.py"
+_TOOLS_PATH = pathlib.Path(__file__).parent.parent / "skills" / "simulating-pre-race-failure" / "tools.py"
 _spec = importlib.util.spec_from_file_location("pre_race.tools", _TOOLS_PATH)
 assert _spec is not None, f"Could not find module spec for {_TOOLS_PATH}"
 assert _spec.loader is not None, f"Module spec has no loader for {_TOOLS_PATH}"

@@ -73,12 +73,12 @@ def _load_route_tools():
 
 
 def _load_event_tools():
-    """Load race-director tools using importlib (directories use hyphens)."""
+    """Load directing-the-event tools using importlib (directories use hyphens)."""
     import importlib.util
     import pathlib
 
-    tools_path = pathlib.Path(__file__).parent.parent / "skills" / "race-director" / "scripts" / "tools.py"
-    spec = importlib.util.spec_from_file_location("race_director.tools", tools_path)
+    tools_path = pathlib.Path(__file__).parent.parent / "skills" / "directing-the-event" / "scripts" / "tools.py"
+    spec = importlib.util.spec_from_file_location("directing_the_event.tools", tools_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

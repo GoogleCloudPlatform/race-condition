@@ -37,7 +37,7 @@ from agents.utils.runner_protocol import (
 )
 
 # Dynamic import since the skill directory is hyphenated
-tools_path = pathlib.Path(__file__).parents[1] / "skills" / "race-tick" / "tools.py"
+tools_path = pathlib.Path(__file__).parents[1] / "skills" / "advancing-race-ticks" / "tools.py"
 spec = importlib.util.spec_from_file_location("race_tick.tools", tools_path)
 assert spec is not None
 assert spec.loader is not None

@@ -1,11 +1,15 @@
 ---
-name: pre-race
-description:
-  Failing pre-race tools for error handling verification. Replaces the base
-  simulator's prepare_simulation with a version that raises RuntimeError.
+name: simulating-pre-race-failure
+description: >
+  Use when running the simulator-with-failure test variant and the
+  pre-race phase begins. The prepare_simulation tool intentionally
+  raises RuntimeError to exercise the ADK and
+  SimulationCommunicationPlugin tool_error callback path. Not intended
+  for production simulations.
+license: Apache-2.0
 ---
 
-# Pre-Race Setup (Failure Variant)
+# Simulating Pre-Race Failure
 
 This skill replaces the base simulator's pre-race setup with a version that
 intentionally fails during `prepare_simulation`. It tests how the ADK and

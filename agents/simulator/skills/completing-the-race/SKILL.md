@@ -1,11 +1,14 @@
 ---
-name: post-race
-description:
-  Post-race wrap-up tools for compiling final simulation results, stopping the
-  race telemetry collector, and optionally reporting outcomes to other agents.
+name: completing-the-race
+description: >
+  Use when the simulator finishes its race-tick loop and must wrap up:
+  compiling final results from tick snapshots, stopping the
+  RaceCollector, and reporting outcomes to other agents. Triggered once
+  per simulation, after the last tick.
+license: Apache-2.0
 ---
 
-# Post-Race
+# Completing the Race
 
 You use this skill to wrap up the simulation after the race phase completes.
 This is the final phase of the simulation lifecycle.

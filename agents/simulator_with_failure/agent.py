@@ -47,8 +47,8 @@ AGENT_DIR = os.path.dirname(__file__)
 SKILLS_DIR = os.path.join(AGENT_DIR, "skills")
 
 # Load the failing pre-race skill from our local skills directory
-failing_pre_race_tools = load_skill_tools("pre-race", skills_dir=SKILLS_DIR)
-failing_pre_race_skillset = load_skill_toolset("pre-race", skills_dir=SKILLS_DIR)
+failing_pre_race_tools = load_skill_tools("simulating-pre-race-failure", skills_dir=SKILLS_DIR)
+failing_pre_race_skillset = load_skill_toolset("simulating-pre-race-failure", skills_dir=SKILLS_DIR)
 
 
 def get_failure_agent():

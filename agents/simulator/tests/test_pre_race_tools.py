@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for pre-race skill tools."""
+"""Tests for preparing-the-race skill tools."""
 
 import importlib.util
 import json
@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # Dynamic import since the skill directory is hyphenated
-tools_path = pathlib.Path(__file__).parents[1] / "skills" / "pre-race" / "tools.py"
+tools_path = pathlib.Path(__file__).parents[1] / "skills" / "preparing-the-race" / "tools.py"
 spec = importlib.util.spec_from_file_location("pre_race.tools", tools_path)
 assert spec is not None, f"Could not find module spec for {tools_path}"
 assert spec.loader is not None, f"Module spec has no loader for {tools_path}"

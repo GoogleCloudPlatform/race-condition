@@ -41,7 +41,7 @@ def _make_clock(step: float = 0.2):
 
 
 # Dynamic import since the skill directory is hyphenated
-_tools_path = pathlib.Path(__file__).parents[1] / "skills" / "race-tick" / "tools.py"
+_tools_path = pathlib.Path(__file__).parents[1] / "skills" / "advancing-race-ticks" / "tools.py"
 _spec = importlib.util.spec_from_file_location("race_tick.tools", _tools_path)
 assert _spec is not None and _spec.loader is not None
 tools_module = importlib.util.module_from_spec(_spec)

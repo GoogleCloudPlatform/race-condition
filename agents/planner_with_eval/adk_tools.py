@@ -50,8 +50,8 @@ def _load_additional_tools(base_skills_dir: pathlib.Path, shared_skills_dir: pat
                 if func:
                     tools.append(func)
 
-    # Race-director tools
-    rd_path = base_skills_dir / "race-director" / "scripts" / "tools.py"
+    # directing-the-event tools
+    rd_path = base_skills_dir / "directing-the-event" / "scripts" / "tools.py"
     if rd_path.exists():
         spec = importlib.util.spec_from_file_location("rd_tools", rd_path)
         if spec and spec.loader:
@@ -87,7 +87,7 @@ def get_tools() -> list:
     Uses SkillToolset with UnsafeLocalCodeExecutor for run_skill_script
     support. Inherits base planner skills and adds evaluation capabilities.
     """
-    # Load shared skills from the base planner (gis-spatial-engineering, race-director)
+    # Load shared skills from the base planner (gis-spatial-engineering, directing-the-event)
     base_planner_dir = pathlib.Path(__file__).parent.parent / "planner"
     base_skills_dir = base_planner_dir / "skills"
 

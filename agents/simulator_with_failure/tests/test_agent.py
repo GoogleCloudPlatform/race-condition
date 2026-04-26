@@ -29,7 +29,7 @@ class TestFailingPreRaceTools:
         tools_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "skills",
-            "pre-race",
+            "simulating-pre-race-failure",
             "tools.py",
         )
         spec = importlib.util.spec_from_file_location("pre_race.tools", tools_path)
@@ -52,7 +52,7 @@ class TestFailingPreRaceTools:
         tools_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "skills",
-            "pre-race",
+            "simulating-pre-race-failure",
             "tools.py",
         )
         spec = importlib.util.spec_from_file_location("pre_race.tools", tools_path)

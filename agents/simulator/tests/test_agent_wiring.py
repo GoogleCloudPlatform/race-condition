@@ -207,7 +207,7 @@ class TestTickIncrement:
         import importlib.util
         import pathlib
 
-        tools_path = pathlib.Path(__file__).parents[1] / "skills" / "race-tick" / "tools.py"
+        tools_path = pathlib.Path(__file__).parents[1] / "skills" / "advancing-race-ticks" / "tools.py"
         spec = importlib.util.spec_from_file_location("race_tick.tools", tools_path)
         assert spec is not None, f"Could not find module spec for {tools_path}"
         assert spec.loader is not None, f"Module spec has no loader for {tools_path}"
@@ -458,7 +458,7 @@ class TestTrafficIntegratedIntoAdvanceTick:
         import importlib.util
         import pathlib
 
-        tools_path = pathlib.Path(__file__).parents[1] / "skills" / "race-tick" / "tools.py"
+        tools_path = pathlib.Path(__file__).parents[1] / "skills" / "advancing-race-ticks" / "tools.py"
         spec = importlib.util.spec_from_file_location("race_tick.tools", tools_path)
         assert spec is not None
         assert spec.loader is not None
@@ -510,7 +510,7 @@ class TestSkillLoaderAcceptsCustomDir:
     def test_load_skill_tools_default_uses_simulator_skills(self):
         from agents.simulator.agent import load_skill_tools
 
-        tools = load_skill_tools("pre-race")
+        tools = load_skill_tools("preparing-the-race")
         names = [t.__name__ for t in tools]
         assert "prepare_simulation" in names
 

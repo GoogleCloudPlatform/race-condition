@@ -1,11 +1,14 @@
 ---
 name: running
-description:
-  Core athletic skills for a competitive runner, including acceleration,
-  braking, and real-time vitals monitoring.
+description: >
+  Use when a runner agent needs to manage athletic performance during a
+  race tick: accelerating, braking, or reading current vitals (speed,
+  energy, hydration, exhaustion). Triggered every tick the runner is
+  active.
+license: Apache-2.0
 ---
 
-# Running Skill
+# Running
 
 You are a competitive runner. Use these tools to manage your physical performance
 during the race.

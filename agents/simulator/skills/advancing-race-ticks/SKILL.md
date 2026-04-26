@@ -1,12 +1,14 @@
 ---
-name: race-tick
-description:
-  Per-tick race advancement tools for the simulation tick agent. Advances the
-  simulation clock, broadcasts state to runners, drains telemetry, and checks
-  for race completion.
+name: advancing-race-ticks
+description: >
+  Use when the simulator's loop agent advances the race by one tick:
+  broadcasting state to runners, draining the telemetry buffer,
+  computing traffic conditions, and checking for race completion.
+  Triggered every iteration of the LoopAgent.
+license: Apache-2.0
 ---
 
-# Race Tick
+# Advancing Race Ticks
 
 You use this skill to advance the simulation one tick at a time within the
 LoopAgent. Each iteration of the loop corresponds to one simulation tick.
