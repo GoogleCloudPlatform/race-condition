@@ -36,16 +36,24 @@ from agents.planner_with_memory.memory.schemas import PlannedRoute, SimulationRe
 logger = logging.getLogger(__name__)
 
 _SECRET_TTL_SECONDS = 1800  # 30 minutes
-_SM_PROJECT = (
-    os.environ.get("SECRET_MANAGER_PROJECT")
-    or os.environ.get("GOOGLE_CLOUD_PROJECT")
-    or os.environ.get("PROJECT_ID", "")
-)
 _SM_SECRET = "am-db-password"
 
 # (password, monotonic_timestamp) -- single tuple for atomic cache updates.
 _cached: tuple[str, float] | None = None
 _sm_client: secretmanager.SecretManagerServiceClient | None = None
+
+
+def _resolve_sm_project() -> str:
+    """Return the Secret Manager project, read lazily from the environment.
+
+    Read at call time (not import) so tests can override via
+    ``monkeypatch.setenv`` and operators can rotate without a process restart.
+    """
+    return (
+        os.environ.get("SECRET_MANAGER_PROJECT")
+        or os.environ.get("GOOGLE_CLOUD_PROJECT")
+        or os.environ.get("PROJECT_ID", "")
+    )
 
 
 def _get_sm_client() -> secretmanager.SecretManagerServiceClient:
@@ -68,7 +76,7 @@ def _resolve_password() -> str:
     if _cached is not None and (now - _cached[1]) < _SECRET_TTL_SECONDS:
         return _cached[0]
 
-    secret_name = f"projects/{_SM_PROJECT}/secrets/{_SM_SECRET}/versions/latest"
+    secret_name = f"projects/{_resolve_sm_project()}/secrets/{_SM_SECRET}/versions/latest"
     try:
         response = _get_sm_client().access_secret_version(name=secret_name)
         password = response.payload.data.decode("utf-8").strip()
