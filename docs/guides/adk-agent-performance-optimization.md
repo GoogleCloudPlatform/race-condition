@@ -154,7 +154,7 @@ app = App(
 - Pair with `static_instruction` (see §4) for maximum cache hit rate.
 - Set `min_tokens` high enough to avoid caching small requests where overhead
   exceeds savings.
-- Monitor hit rates with `CachePerformanceAnalyzer` (see §20).
+- Monitor hit rates with `CachePerformanceAnalyzer` (see §19).
 
 ---
 
@@ -627,7 +627,7 @@ guide](https://docs.aiohttp.org/en/stable/client_advanced.html#connection-poolin
 
 ---
 
-## 20. Monitoring & Measurement
+## 19. Monitoring & Measurement
 
 **Impact: 3 · Effort: 2 · Risk: 0**
 
@@ -667,7 +667,7 @@ ADK provides built-in tracing via `google.adk.telemetry.tracing`. Key spans:
 
 ---
 
-## 21. Summary Table
+## 20. Summary Table
 
 All techniques ranked by **impact ÷ effort** (best return on investment first):
 
@@ -677,18 +677,18 @@ All techniques ranked by **impact ÷ effort** (best return on investment first):
 | 2   | Thinking Budget Control         |   4    |   1    |  2   |    4.0    |
 | 3   | Parallel Tool Execution (async) |   4    |   1    |  1   |    4.0    |
 | 4   | Output Token Budgeting          |   3    |   1    |  1   |    3.0    |
-| 5   | LLM Call Guards                 |   2    |   1    |  1   |    2.0    |
-| 6   | Content Inclusion Control       |   3    |   1    |  3   |    3.0    |
-| 7   | Streaming Mode Selection        |   2    |   1    |  1   |    2.0    |
-| 8   | Session Service Selection       |   3    |   1    |  1   |    3.0    |
+| 5   | Content Inclusion Control       |   3    |   1    |  3   |    3.0    |
+| 6   | Session Service Selection       |   3    |   1    |  1   |    3.0    |
+| 7   | Tool Thread Pool Offloading     |   3    |   1    |  1   |    3.0    |
+| 8   | Context Window Compression      |   3    |   1    |  2   |    3.0    |
 | 9   | Context Caching (Explicit)      |   5    |   2    |  1   |    2.5    |
-| 10  | Static vs Dynamic Instructions  |   4    |   2    |  1   |    2.0    |
-| 11  | Tool Thread Pool Offloading     |   3    |   1    |  1   |    3.0    |
-| 12  | Context Window Compression      |   3    |   1    |  2   |    3.0    |
+| 10  | LLM Call Guards                 |   2    |   1    |  1   |    2.0    |
+| 11  | Streaming Mode Selection        |   2    |   1    |  1   |    2.0    |
+| 12  | Static vs Dynamic Instructions  |   4    |   2    |  1   |    2.0    |
 | 13  | Prompt Engineering              |   4    |   2    |  2   |    2.0    |
-| 14  | Python Performance Checklist    |   3    |   2    |  1   |    1.5    |
-| 15  | Event Compaction                |   3    |   2    |  2   |    1.5    |
-| 16  | Parallel A2A Orchestration      |   4    |   2    |  2   |    2.0    |
+| 14  | Parallel A2A Orchestration      |   4    |   2    |  2   |    2.0    |
+| 15  | Python Performance Checklist    |   3    |   2    |  1   |    1.5    |
+| 16  | Event Compaction                |   3    |   2    |  2   |    1.5    |
 | 17  | Monitoring & Measurement        |   3    |   2    |  0   |    1.5    |
 | 18  | Parallel Agent Execution        |   4    |   3    |  2   |    1.3    |
 | 19  | Automated Prompt Optimization   |   4    |   4    |  2   |    1.0    |
@@ -713,7 +713,7 @@ For a new ADK agent project, apply these optimizations in order:
 - [ ] Split stable content into `static_instruction` (§4)
 - [ ] Use `include_contents='none'` for stateless agents (§13)
 - [ ] Choose the correct `StreamingMode` per delivery channel (§14)
-- [ ] Set up `CachePerformanceAnalyzer` monitoring (§20)
+- [ ] Set up `CachePerformanceAnalyzer` monitoring (§19)
 - [ ] Never use SQLite session service under load (§17)
 - [ ] Review prompts for token waste (§15)
 

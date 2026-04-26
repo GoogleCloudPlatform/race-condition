@@ -289,6 +289,8 @@ for context and apply commands.
 
 ## See also
 
+- [Agent architecture](../architecture/agent_architecture.md) -- where the
+  runner sits in the agent network and how it receives orchestration events.
 - `infra/modules/gke-model-serving/` -- Terraform module for running Gemma 4
   on GKE with L4 GPUs via vLLM, the production-style self-hosted inference
-  path. (A walkthrough guide is on the roadmap.)
+  path.

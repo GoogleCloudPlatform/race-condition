@@ -55,8 +55,10 @@ marker file `.port-slot` at the repo root:
   documented above. Containers are named `redis`, `pubsub`.
 - **Slot N > 0**: offset all ports by `1000 * N` (slot 1 → 10100s, slot 2 →
   11100s) and rename containers to `redis-slot-N`, `pubsub-slot-N`. The
-  `scripts/core/sim.py` start/stop logic reads `.port-slot` and applies the
-  offset automatically.
+  `scripts/core/sim.py` start/stop logic reads `.port-slot` for container
+  naming and to pick the right `docker-compose.override.yml`. The port
+  values themselves are read from `.env`, which you set by hand for the slot
+  you want.
 
 To enable a non-default slot, write the slot number to `.port-slot`, copy
 `.env.example` to `.env`, and edit each `*_PORT` value with the offset. A

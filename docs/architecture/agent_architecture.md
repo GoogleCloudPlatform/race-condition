@@ -39,15 +39,30 @@ graph TD
 
 ### Why this shape
 
-The gateway uses a dual dispatch model. For warm agents, it publishes events to
-Redis Pub/Sub — sub-millisecond. For agents that have scaled to zero on Cloud
-Run, it sends an explicit HTTP `/a2a/` wake-up poke and then publishes the
-event. Either path lands the message at the same dispatcher.
+The gateway uses a dual dispatch model that branches on the agent's declared
+mode. Each agent advertises `DISPATCH_MODE=subscriber` or `callable` in the
+`Procfile` (and in the `n26:dispatch/1.0` extension on its agent card).
 
-Agents run a dedicated background thread (`RedisDispatcher`) that listens for
-messages independent of the ADK's HTTP invocation lifecycle. That separation is
-what lets the runner stay subscribed even when the agent isn't actively
-servicing a request.
+- **Subscriber mode** (`runner`, `runner_autopilot`): the agent holds a
+  long-lived Redis subscription on `simulation:broadcast`. Pulses arrive
+  with sub-millisecond latency.
+- **Callable mode** (every other agent): no Redis listener. The agent only
+  reacts to HTTP pokes on its `/orchestration` endpoint. This is the mode
+  Cloud Run and Agent Engine require because both scale to zero between
+  requests.
+
+The gateway always sends the HTTP poke when there are active sessions for the
+agent type, regardless of mode. Subscriber agents therefore receive the event
+twice — once over Redis, once over HTTP — and the dispatcher de-duplicates
+inside the agent process. The redundancy is intentional: the Redis path keeps
+warm agents instantly responsive, and the HTTP path covers cold-start cases
+and gives the gateway a single uniform "every interested agent gets poked"
+guarantee.
+
+Agents run a dedicated background thread (`RedisOrchestratorDispatcher`) that
+listens for messages independently of the ADK's HTTP invocation lifecycle.
+That separation is what lets the subscribers stay subscribed even when the
+agent isn't actively servicing a request.
 
 Agents still talk to each other directly on their local ports for A2A data
 exchange. Only lifecycle management goes through Redis.
@@ -125,7 +140,7 @@ end on the local stack:
 | Edge | Redis dispatcher trigger | < 2 ms |
 | Logic | ADK context assembly (in-memory session) | 10–50 ms |
 | AI | Vertex Flash-Lite first-token latency | 400–800 ms |
-| Streaming | Pub/Sub propagation to dashboard | < 100 ms |
+| Streaming | Redis broadcast → gateway → WebSocket → dashboard | < 100 ms |
 
 The dominant cost is LLM TTFT. Optimizing anything else is rearranging deck
 chairs until you change the model or batch the requests.

@@ -80,16 +80,17 @@ flowchart TD
     TesterServer --> Gateway
     AdminServer --> Gateway
 
-    Gateway -->|broadcast| Redis
-    Gateway -->|orchestration| PubSub
-
-    Redis -->|subscriber dispatch| Runner
-    Redis -->|subscriber dispatch| RunnerAutopilot
-    PubSub -->|callable poke| Simulator
-    PubSub -->|callable poke| Planner
-    PubSub -->|callable poke| PlannerEval
-    PubSub -->|callable poke| PlannerMemory
-    PubSub -->|callable poke| SimulatorWithFailure
+    Gateway -->|broadcast frames| Redis
+    Gateway -->|orchestration pulse<br/>simulation:broadcast| Redis
+    Gateway -->|HTTP /orchestration poke| Runner
+    Gateway -->|HTTP /orchestration poke| RunnerAutopilot
+    Gateway -->|HTTP /orchestration poke| Simulator
+    Gateway -->|HTTP /orchestration poke| Planner
+    Gateway -->|HTTP /orchestration poke| PlannerEval
+    Gateway -->|HTTP /orchestration poke| PlannerMemory
+    Gateway -->|HTTP /orchestration poke| SimulatorWithFailure
+    Redis -.->|subscriber listener| Runner
+    Redis -.->|subscriber listener| RunnerAutopilot
 
     PlannerMemory --> AlloyDB
 
@@ -101,14 +102,21 @@ flowchart TD
 ## Notes on the diagram
 
 - **Two dispatch modes.** `runner` and `runner_autopilot` use *subscriber*
-  mode — they hold a long-lived Redis subscription and react to broadcasts.
-  All other agents use *callable* mode and are poked over Pub/Sub when needed.
-  See `Procfile` for the `DISPATCH_MODE` per agent.
+  mode (`DISPATCH_MODE=subscriber` in the `Procfile`) — they hold a long-lived
+  Redis subscription on `simulation:broadcast` so they wake on a pulse with
+  near-zero latency. Every other agent uses *callable* mode
+  (`DISPATCH_MODE=callable`) and only reacts to HTTP pokes on its
+  `/orchestration` endpoint. The gateway always sends the HTTP poke
+  regardless of mode, so subscribers receive the event twice; the
+  dispatcher de-duplicates inside the agent process. Callable mode is what
+  makes scale-to-zero possible on Cloud Run / Agent Engine in production.
+- **GCP Pub/Sub is only used for the debug-log topic.** The "orchestration"
+  channel `simulation:broadcast` lives on Redis, not GCP Pub/Sub.
+  `RedisDashLogPlugin` is the only thing in the system that publishes to
+  GCP Pub/Sub.
 - **No BigQuery feedback loop.** Older versions of this diagram showed a
   BigQuery → Pub/Sub continuous-query loop and a `BQAnalyticsPlugin`. Neither
-  exists in the repo. Telemetry is dual-emitted to Redis (live UI) and
-  Pub/Sub (debug log) by the `RedisDashLogPlugin` and that's the whole
-  pipeline.
-- **GKE deployment**. The runner is also deployed on GKE in production via
+  exists in the repo.
+- **GKE deployment.** The runner is also deployed on GKE in production via
   `infra/modules/gke-runner/`. Locally it runs as a single process on port
   9108. The diagram shows the local topology.

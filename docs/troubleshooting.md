@@ -125,12 +125,23 @@ do about each one.
 ### Pre-commit hook failures
 
 - **Symptoms**: `git commit` fails with hook errors.
-- **Fix**:
-  1. `addlicense`: ensure all source files have the Apache 2.0 header.
-  2. `ruff`: `uv run ruff check agents/ --fix` auto-fixes Python lint errors.
-  3. `go vet`: `go vet ./...` reports the issue location.
-  4. Install hooks if you skipped that step:
-     `pre-commit install && pre-commit install --hook-type pre-push`.
+- **Fix**: the project's hooks are `addlicense`, `check-yaml`, `check-json`,
+  `end-of-file-fixer`, `trailing-whitespace`, and `go-vet`. Each one's
+  error message points at the file. `addlicense` failures usually mean a new
+  source file is missing the Apache 2.0 header. `go-vet` failures need
+  `go vet ./...` locally to find the issue. The whitespace and EOF hooks
+  auto-fix on commit; just stage the result and commit again. Install hooks
+  if you skipped the step: `pre-commit install`.
+
+### Lint failures (ruff, golangci-lint, pyright)
+
+- **Symptoms**: `make lint` or CI fails on style or type-check rules.
+- **Fix**: linting runs as a separate step from pre-commit, not as a hook.
+  - Python lint: `uv run ruff check agents/ --fix` auto-fixes most issues.
+  - Python format: `uv run ruff format agents/`.
+  - Python types: `npx --yes pyright@latest agents/`.
+  - Go lint: `golangci-lint run ./...`.
+  - All of the above run together via `make lint`.
 
 ### Docker Compose test environment
 

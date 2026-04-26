@@ -76,28 +76,46 @@ async def _process_event(self, data: dict):
 
 ### 3.4 Gateway dual-dispatch
 
-The gateway combines a low-latency Redis pulse (for warm agents that hold a
-subscription) with an explicit HTTP poke (for cold agents that have scaled to
-zero). Both paths are fired in parallel; whichever wakes the agent first
-wins, and the dispatcher de-duplicates inside the agent process.
+The gateway combines a low-latency Redis pulse on `simulation:broadcast`
+with an HTTP `/orchestration` poke. The Redis pulse is for subscriber-mode
+agents (`runner`, `runner_autopilot`) that hold a long-lived subscription;
+the HTTP poke is sent to *every* agent type that has at least one active
+session, including the subscribers. Subscriber agents therefore receive the
+event twice and de-duplicate inside the dispatcher.
+
+The session-aware filter is what keeps this from devolving into an O(all
+agents) HTTP burst on every event: the gateway consults the registry and
+only pokes types with active sessions.
+
+The implementation is `RedisSwitchboard.PublishOrchestration` in
+`internal/hub/switchboard.go`. In broad strokes:
 
 ```go
-// Illustrative — actual signature is on *RedisSwitchboard in
-// internal/hub/switchboard.go.
-func (sb *Switchboard) Broadcast(ctx context.Context, w *gateway.Wrapper) error {
-    // Path A: low-latency Redis pulse for warm/local agents
-    sb.redis.Publish(ctx, "simulation:broadcast", w.Payload)
+// Simplified sketch of *RedisSwitchboard.PublishOrchestration
+func (s *RedisSwitchboard) PublishOrchestration(ctx context.Context, channel string, event any) error {
+    data, _ := json.Marshal(event)
 
-    // Path B: scale-to-zero wake-up for cold/cloud agents
-    for _, agent := range sb.catalog.Agents {
-        go sb.httpClient.Post(agent.URL+"/orchestration", "application/json", ...)
+    // 1. Performance path: Redis Pub/Sub (subscriber agents listen here)
+    s.client.Publish(ctx, channel, data)
+
+    // 2. Session-aware HTTP dispatch: only types with active sessions
+    activeTypes, _ := s.registry.ActiveAgentTypes(ctx)
+    for _, agentType := range activeTypes {
+        card := s.catalog.Agents()[agentType]
+        if isAgentEngineURL(card.URL) {
+            go s.dispatchCallable(ctx, card.URL, card.Name, data)  // A2A message/send
+        } else {
+            go s.pokeOrchestrationEndpoint(card.OrchestrationBaseURL(), card.Name, data)
+        }
     }
     return nil
 }
 ```
 
 This is the hybrid model the rest of this doc refers to: the same logical
-event reaches every relevant agent regardless of whether it's currently warm.
+event reaches every relevant agent type, by both paths if subscribers are
+involved, and the registry filter prevents the gateway from waking idle agent
+types in the first place.
 
 ### 3.5 Authorization
 
