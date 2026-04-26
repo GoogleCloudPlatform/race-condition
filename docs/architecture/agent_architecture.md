@@ -101,3 +101,31 @@ graph LR
    ordering — it's just a sort.
 
 For implementation details, see `agents/utils/plugins.py:RedisDashLogPlugin`.
+
+## Why these design choices
+
+### `InMemorySessionService` instead of SQLite
+
+ADK ships with a `SqliteSessionService` by default. SQLite uses a whole-file
+lock, so once you spin up dozens of runners hitting the same session store the
+write contention pushes lock-acquire latency past ADK's timeout and you get
+`database is LOCKED` errors. Race Condition overrides the default with
+`InMemorySessionService` for local development — each honcho process gets its
+own heap and there's no cross-process write contention. In deployed environments
+this is replaced with `VertexAiSessionService`, which delegates concurrency to
+Google's session-store infrastructure.
+
+### Latency budget
+
+A single tick from UI input to dashboard render runs about 1.2 seconds end to
+end on the local stack:
+
+| Layer | Stage | Typical latency |
+| :--- | :--- | :--- |
+| Edge | Redis dispatcher trigger | < 2 ms |
+| Logic | ADK context assembly (in-memory session) | 10–50 ms |
+| AI | Vertex Flash-Lite first-token latency | 400–800 ms |
+| Streaming | Pub/Sub propagation to dashboard | < 100 ms |
+
+The dominant cost is LLM TTFT. Optimizing anything else is rearranging deck
+chairs until you change the model or batch the requests.
