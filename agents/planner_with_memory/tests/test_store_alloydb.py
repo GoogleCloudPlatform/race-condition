@@ -96,8 +96,7 @@ class TestResolvePassword:
             assert mod._resolve_password() == "stale-pw"
 
     def test_uses_correct_secret_path(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        # _SM_PROJECT is captured at import time; setenv would be too late.
-        monkeypatch.setattr(mod, "_SM_PROJECT", "sentinel-project-xyz")
+        monkeypatch.setenv("SECRET_MANAGER_PROJECT", "sentinel-project-xyz")
         client = _make_sm_client(response=_make_sm_response(b"pw"))
         with patch.dict("os.environ", {"ALLOYDB_PASSWORD": ""}), _patch_sm(client):
             mod._resolve_password()
@@ -137,3 +136,29 @@ class TestGetDsn:
             pytest.raises(ValueError, match="ALLOYDB_HOST"),
         ):
             mod._get_dsn()
+
+
+class TestResolveSmProject:
+    def test_prefers_secret_manager_project(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("SECRET_MANAGER_PROJECT", "sm-pid")
+        monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "gcp-pid")
+        monkeypatch.setenv("PROJECT_ID", "fallback-pid")
+        assert mod._resolve_sm_project() == "sm-pid"
+
+    def test_falls_back_to_google_cloud_project(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("SECRET_MANAGER_PROJECT", raising=False)
+        monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "gcp-pid")
+        monkeypatch.setenv("PROJECT_ID", "fallback-pid")
+        assert mod._resolve_sm_project() == "gcp-pid"
+
+    def test_falls_back_to_project_id(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("SECRET_MANAGER_PROJECT", raising=False)
+        monkeypatch.delenv("GOOGLE_CLOUD_PROJECT", raising=False)
+        monkeypatch.setenv("PROJECT_ID", "fallback-pid")
+        assert mod._resolve_sm_project() == "fallback-pid"
+
+    def test_returns_empty_when_all_unset(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("SECRET_MANAGER_PROJECT", raising=False)
+        monkeypatch.delenv("GOOGLE_CLOUD_PROJECT", raising=False)
+        monkeypatch.delenv("PROJECT_ID", raising=False)
+        assert mod._resolve_sm_project() == ""
