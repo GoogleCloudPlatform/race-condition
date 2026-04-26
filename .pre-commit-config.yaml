@@ -23,6 +23,9 @@ repos:
     hooks:
       - id: check-yaml
       - id: check-json
+        # tsconfig*.json files are JSONC (JSON with comments); check-json can't parse them.
+        # https://github.com/pre-commit/pre-commit-hooks/issues/395
+        exclude: '(^|/)tsconfig(\.[^/]+)?\.json$'
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: local
