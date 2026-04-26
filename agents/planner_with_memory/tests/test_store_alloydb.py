@@ -95,12 +95,14 @@ class TestResolvePassword:
         with patch.dict("os.environ", {"ALLOYDB_PASSWORD": ""}), _patch_sm(client):
             assert mod._resolve_password() == "stale-pw"
 
-    def test_uses_correct_secret_path(self) -> None:
+    def test_uses_correct_secret_path(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # _SM_PROJECT is captured at import time; setenv would be too late.
+        monkeypatch.setattr(mod, "_SM_PROJECT", "sentinel-project-xyz")
         client = _make_sm_client(response=_make_sm_response(b"pw"))
         with patch.dict("os.environ", {"ALLOYDB_PASSWORD": ""}), _patch_sm(client):
             mod._resolve_password()
         name = client.access_secret_version.call_args.kwargs["name"]
-        assert "test-project" in name
+        assert "sentinel-project-xyz" in name
         assert "am-db-password" in name
 
     def test_strips_whitespace_from_payload(self) -> None:
