@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24+-339933?logo=nodedotjs&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)
-![Google ADK](https://img.shields.io/badge/Google_ADK-1.30-4285F4?logo=google&logoColor=white)
+![Google ADK](https://img.shields.io/badge/Google_ADK-1.31-4285F4?logo=google&logoColor=white)
 ![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?logo=googlecloud&logoColor=white)
 
 [![Open in Cloud Shell](assets/cloud_shell_button.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/race-condition.git&cloudshell_tutorial=tutorial.md)
