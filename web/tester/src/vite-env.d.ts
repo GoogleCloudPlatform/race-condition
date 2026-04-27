@@ -14,13 +14,4 @@
  * limitations under the License.
  */
 
-import "@testing-library/jest-dom";
-
-// Mock browser globals if needed
-globalThis.requestAnimationFrame = (callback: FrameRequestCallback) => {
-  return setTimeout(() => callback(performance.now()), 0) as unknown as number;
-};
-
-globalThis.cancelAnimationFrame = (id: number) => {
-  clearTimeout(id);
-};
+/// <reference types="vite/client" />
