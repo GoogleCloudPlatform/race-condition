@@ -45,6 +45,14 @@ updates:
     groups:
       python-minor-patch:
         update-types: [minor, patch]
+    ignore:
+      # google-adk pins a2a-sdk<0.4.0 (verified in 1.31.1 and 2.0.0b1).
+      # Bumping a2a-sdk to 1.x breaks ADK's deep imports of TransportProtocol,
+      # TextPart, etc. The migration code itself is straightforward (see the
+      # closed PR #68); revisit when ADK ships a release that supports
+      # a2a-sdk 1.x.
+      - dependency-name: a2a-sdk
+        update-types: [version-update:semver-major]
 
   # Frontend (Angular)
   - package-ecosystem: npm
