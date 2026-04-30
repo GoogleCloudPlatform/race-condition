@@ -219,6 +219,8 @@ export async function initModel(ctx: Context): Promise<void> {
   const [gltf] = await Promise.all([gltfLoader.loadAsync('models/Google_LasVegas_Export_v32.glb')]);
 
   gltf.scene.scale.set(1, 1, 1);
+  gltf.scene.name = 'Vegas City Model';
+  ctx.cityModel = gltf.scene;
   ctx.scene.add(gltf.scene);
 
   const windows = await ctx.textureLoader.loadAsync('/assets/textures/windows.png');

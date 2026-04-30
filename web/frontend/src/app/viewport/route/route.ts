@@ -86,6 +86,10 @@ async function _initRouteImpl(
   removeRunnerRoute(ctx);
 
   const splineLength = spline.getLength();
+  const isKhum = ctx.sceneVariant === 'khum-airport';
+  const routeTubeRadius = isKhum ? 3 : 12;
+  const routeHeight = isKhum ? 6 : 15;
+  const routeEmissiveIntensity = isKhum ? 5.0 : 20.0;
 
   ctx.routeStripeTexture = await ctx.textureLoader.loadAsync(
     '/assets/textures/dash_transparent.png',
@@ -104,17 +108,17 @@ async function _initRouteImpl(
     color: new THREE.Color(0x000000),
     emissive: new THREE.Color(0xffffff),
     emissiveMap: ctx.routeCompleteTexture,
-    emissiveIntensity: 20.0,
+    emissiveIntensity: routeEmissiveIntensity,
     fog: false,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
 
   const segments = Math.round(splineLength * 0.05);
-  const tubeGeometry = new THREE.TubeGeometry(spline, segments, 12, 3, false);
+  const tubeGeometry = new THREE.TubeGeometry(spline, segments, routeTubeRadius, 3, false);
   tubeGeometry.scale(1, 0.5, 1);
   ctx.currentRoute = new THREE.Mesh(tubeGeometry, routeMaterial);
-  ctx.currentRoute.position.y = 15;
+  ctx.currentRoute.position.y = routeHeight;
   ctx.currentRoute.renderOrder = 2;
   ctx.currentRoute.geometry.setDrawRange(0, 0);
   ctx.scene.add(ctx.currentRoute);

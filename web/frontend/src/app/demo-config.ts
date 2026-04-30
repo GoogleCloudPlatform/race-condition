@@ -17,11 +17,13 @@
 import cacheRoute01 from '../../cached_routes/cache-1.json';
 import cacheRoute02 from '../../cached_routes/cache-2.json';
 import cacheRoute03 from '../../cached_routes/cache-3.json';
+import khumAirportRoute from '../../cached_routes/khum-airport.json';
 
 export const PRECONFIGURED_ROUTES: Record<string, unknown> = {
   cachedRoute01: cacheRoute01,
   cachedRoute02: cacheRoute02,
   cachedRoute03: cacheRoute03,
+  khumAirportRoute: khumAirportRoute,
 };
 
 type DemoConfigType = Record<
@@ -36,6 +38,11 @@ type DemoConfigType = Record<
     isIntentToInfrastructureDemo?: boolean;
     promptPlaceholder?: string;
     orbitCamera?: boolean;
+    mapCenter?: {
+      lat: number;
+      lon: number;
+    };
+    sceneVariant?: 'vegas' | 'khum-airport';
     recordingConfig?: {
       cachedMessageStreams?: string[];
       timeScale?: number;
@@ -855,6 +862,23 @@ export const DEMO_CONFIG: DemoConfigType = {
     recordingConfig: {
       cachedMessageStreams: ['/assets/sim-7b-log.ndjson'],
       timeScale: 0.5,
+    },
+  },
+  KHUM: {
+    title: 'KHUM Aviation Ops Demo',
+    agent: 'planner_with_memory',
+    placeholderRoutes: 'khumAirportRoute',
+    orbitCamera: true,
+    mapCenter: {
+      lat: 29.56740278,
+      lon: -90.66035278,
+    },
+    sceneVariant: 'khum-airport',
+    promptPlaceholder:
+      'Plan an aviation operations simulation at Houma-Terrebonne Airport (KHUM) with a runway inspection, taxiway safety checks, FBO ramp activity, and emergency response staging.',
+    recordingConfig: {
+      cachedMessageStreams: ['/assets/sim-ci-log.ndjson'],
+      timeScale: 1,
     },
   },
 };

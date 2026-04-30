@@ -27,6 +27,7 @@ import {
   NgZone,
 } from '@angular/core';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CommonModule } from '@angular/common';
 
 import { Context } from './context';
@@ -105,6 +106,7 @@ import {
   SWITCH_RUNNER_THOUGHTS_MS,
 } from '../../constants';
 import { DemoService } from '../components/DemoOverlay/demo.service';
+import { DEMO_CONFIG } from '../demo-config';
 
 const _labelWorldPos = new THREE.Vector3();
 
@@ -184,6 +186,8 @@ export class ViewportComponent implements OnInit, OnDestroy {
   private _overviewTarget: THREE.Object3D | null = null;
   private _raceSupportVisible = true;
   private _entertainmentVisible = true;
+  private airportSceneGroup: THREE.Group | null = null;
+  private airportModelLoading = false;
 
   private readonly wheelHandler = (e: WheelEvent): void => {
     if (this.ctx.cameraFollow) {
@@ -1103,8 +1107,8 @@ export class ViewportComponent implements OnInit, OnDestroy {
   /** Convert lon/lat to the same world-space used by the GLB model. */
   private geoToWorld(lon: number, lat: number): THREE.Vector3 {
     const R = 6378137;
-    const cx = ((MAP_CENTER_LON * Math.PI) / 180) * R;
-    const cy = Math.log(Math.tan(Math.PI / 4 + (MAP_CENTER_LAT * Math.PI) / 180 / 2)) * R;
+    const cx = ((this.ctx.mapCenter.lon * Math.PI) / 180) * R;
+    const cy = Math.log(Math.tan(Math.PI / 4 + (this.ctx.mapCenter.lat * Math.PI) / 180 / 2)) * R;
     const S = GLB_TRANSFORM.scale * 10;
     const mx = ((lon * Math.PI) / 180) * R;
     const my = Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 180 / 2)) * R;
@@ -1214,6 +1218,8 @@ export class ViewportComponent implements OnInit, OnDestroy {
       detail.name,
       `coords=${detail.coords.length} waterStations=${detail.waterStations?.length ?? 0} medicalTents=${detail.medicalTents?.length ?? 0} crowdZones=${detail.crowdZones?.length ?? 0} portableToilets=${detail.portableToilets?.length ?? 0}`,
     );
+
+    this.updateAirportSceneVariant();
 
     const rawPoints = detail.coords.map(([lon, lat]) => this.geoToWorld(lon, lat));
     if (rawPoints.length < 2) {
@@ -2325,10 +2331,195 @@ export class ViewportComponent implements OnInit, OnDestroy {
     this.startOverviewSequence(pose.center, pose.offset);
   }
 
+  private updateAirportSceneVariant(): void {
+    const activeDemo = DEMO_CONFIG[this.demoService.activeDemo()];
+    const isKhum = activeDemo?.sceneVariant === 'khum-airport';
+    this.ctx.sceneVariant = isKhum ? 'khum-airport' : 'vegas';
+    this.ctx.mapCenter = activeDemo?.mapCenter ?? { lat: MAP_CENTER_LAT, lon: MAP_CENTER_LON };
+
+    if (!isKhum) {
+      if (this.airportSceneGroup) this.airportSceneGroup.visible = false;
+      if (this.ctx.cityModel) this.ctx.cityModel.visible = true;
+      return;
+    }
+
+    if (this.ctx.cityModel) this.ctx.cityModel.visible = false;
+
+    if (!this.airportSceneGroup) {
+      this.airportSceneGroup = this.createKhumAirportSceneGroup();
+      this.ctx.scene.add(this.airportSceneGroup);
+      this.loadKhumAirportModel();
+    }
+    this.airportSceneGroup.visible = true;
+  }
+
+  private loadKhumAirportModel(): void {
+    if (this.airportModelLoading || !this.airportSceneGroup) return;
+    this.airportModelLoading = true;
+
+    const loader = new GLTFLoader();
+    loader.load(
+      '/assets/models/KHUM_Houma_Airport.glb',
+      (gltf) => {
+        if (!this.airportSceneGroup || this._destroyed) return;
+        this.airportSceneGroup.clear();
+        gltf.scene.name = 'KHUM Houma-Terrebonne Airport GLB';
+        gltf.scene.traverse((node) => {
+          if (node instanceof THREE.Mesh) {
+            node.castShadow = true;
+            node.receiveShadow = true;
+          }
+        });
+        this.airportSceneGroup.add(gltf.scene);
+        this.addKhumVegasDepthProps(this.airportSceneGroup);
+      },
+      undefined,
+      (error) => {
+        console.warn('[KHUM] Failed to load airport GLB; keeping procedural fallback.', error);
+      },
+    );
+  }
+
+  private createKhumAirportSceneGroup(): THREE.Group {
+    const group = new THREE.Group();
+    group.name = 'KHUM Airport Scene Overlay';
+    this.addKhumVegasDepthProps(group);
+    return group;
+  }
+
+  private addKhumVegasDepthProps(group: THREE.Group): void {
+    if (group.getObjectByName('KHUM Vegas Depth Props')) return;
+
+    const props = new THREE.Group();
+    props.name = 'KHUM Vegas Depth Props';
+
+    this.addKhumAircraftProps(props);
+    this.addKhumVegasBackground(props);
+
+    group.add(props);
+  }
+
+  private addKhumAircraftProps(props: THREE.Group): void {
+    const aircraftPlacements = [
+      { x: -420, z: -280, s: 1.0, r: -24 },
+      { x: -265, z: -360, s: 0.82, r: -24 },
+      { x: -120, z: -445, s: 0.72, r: -24 },
+      { x: 205, z: -315, s: 0.88, r: 156 },
+      { x: 370, z: -420, s: 0.66, r: 156 },
+    ];
+
+    aircraftPlacements.forEach((placement, index) => {
+      const aircraft = this.createKhumAircraftProp();
+      aircraft.name = `KHUM Aircraft Prop ${index + 1}`;
+      aircraft.position.set(placement.x, 16, placement.z);
+      aircraft.rotation.y = THREE.MathUtils.degToRad(placement.r);
+      aircraft.scale.setScalar(placement.s);
+      props.add(aircraft);
+    });
+  }
+
+  private createKhumAircraftProp(): THREE.Group {
+    const aircraft = new THREE.Group();
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd7e4ff,
+      emissive: 0x18223a,
+      emissiveIntensity: 0.35,
+      roughness: 0.38,
+      metalness: 0.12,
+    });
+    const accentMaterial = new THREE.MeshStandardMaterial({
+      color: 0x69a8ff,
+      emissive: 0x0e2c56,
+      emissiveIntensity: 0.45,
+      roughness: 0.42,
+      metalness: 0.08,
+    });
+    const glassMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0b1220,
+      emissive: 0x4cc9ff,
+      emissiveIntensity: 0.55,
+      roughness: 0.18,
+      metalness: 0.18,
+    });
+
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(7, 58, 6, 14), bodyMaterial);
+    body.rotation.z = Math.PI / 2;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    aircraft.add(body);
+
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(7.5, 15, 16), bodyMaterial);
+    nose.rotation.z = -Math.PI / 2;
+    nose.position.x = 36;
+    nose.castShadow = true;
+    aircraft.add(nose);
+
+    const cockpit = new THREE.Mesh(new THREE.SphereGeometry(5.5, 16, 8), glassMaterial);
+    cockpit.scale.set(1.25, 0.75, 0.42);
+    cockpit.position.set(18, 3.5, 0);
+    cockpit.castShadow = true;
+    aircraft.add(cockpit);
+
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(12, 2.4, 68), bodyMaterial);
+    wing.position.set(0, -1, 0);
+    wing.castShadow = true;
+    wing.receiveShadow = true;
+    aircraft.add(wing);
+
+    const tailWing = new THREE.Mesh(new THREE.BoxGeometry(8, 2, 28), accentMaterial);
+    tailWing.position.set(-28, 2, 0);
+    tailWing.castShadow = true;
+    aircraft.add(tailWing);
+
+    const tailFin = new THREE.Mesh(new THREE.BoxGeometry(9, 20, 2.6), accentMaterial);
+    tailFin.position.set(-31, 10, 0);
+    tailFin.rotation.z = THREE.MathUtils.degToRad(-10);
+    tailFin.castShadow = true;
+    aircraft.add(tailFin);
+
+    return aircraft;
+  }
+
+  private addKhumVegasBackground(props: THREE.Group): void {
+    if (!this.ctx.cityModel) return;
+
+    const cityShell = this.ctx.cityModel.clone(true);
+    cityShell.name = 'KHUM Vegas Background City Shell';
+    cityShell.position.set(0, -50, 0);
+    cityShell.scale.setScalar(0.55);
+
+    const centralClearRadius = 1100;
+    const removable: THREE.Object3D[] = [];
+    cityShell.children.forEach((child) => {
+      if (child.name === 'Airport' || child.name === 'ROADS' || child.name === 'Foliage') {
+        removable.push(child);
+        return;
+      }
+
+      const box = new THREE.Box3().setFromObject(child);
+      const center = box.getCenter(new THREE.Vector3());
+      const distanceFromAirport = Math.hypot(center.x, center.z);
+      if (distanceFromAirport < centralClearRadius && child.name !== 'Surroundingbuildings') {
+        removable.push(child);
+      }
+    });
+    removable.forEach((child) => child.parent?.remove(child));
+
+    cityShell.traverse((node) => {
+      if (node instanceof THREE.Mesh) {
+        node.castShadow = false;
+        node.receiveShadow = false;
+      }
+    });
+
+    props.add(cityShell);
+  }
+
   private syncDemoIntroState(): void {
     const demo = this.demoService.activeDemo();
     const resetCount = this.demoService.reset();
     if (!this._modelReady || this._destroyed) return;
+    this.updateAirportSceneVariant();
     if (demo !== 'Sandbox') {
       if (this.ctx.cameraIntro) {
         cancelAnyCameraIntro(this.ctx);

@@ -125,6 +125,9 @@ export class Context {
   skyMesh!: THREE.Mesh;
   mountainMaterial!: THREE.MeshBasicMaterial;
   ground!: THREE.Mesh;
+  cityModel: THREE.Group | null = null;
+  sceneVariant: 'vegas' | 'khum-airport' = 'vegas';
+  mapCenter = { lat: 36.1085, lon: -115.1769 };
   ferrisWheel!: THREE.Mesh;
   particleMaterial: THREE.ShaderMaterial | null = null;
   causticsParticleMaterial: THREE.ShaderMaterial | null = null;

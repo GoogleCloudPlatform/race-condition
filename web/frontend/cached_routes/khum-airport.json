@@ -1,0 +1,198 @@
+{
+  "name": "KHUM Airport Operations Demo",
+  "type": "FeatureCollection",
+  "marathon_metadata": {
+    "start_location": "Houma-Terrebonne Airport (KHUM)",
+    "finish_location": "FBO Ramp",
+    "theme": "General aviation airport operations loop",
+    "distance_mi": 4.61
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "marker-type": "start",
+        "name": "KHUM FBO / Ramp Start"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.66365776,
+          29.56506717
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "marker-type": "finish",
+        "name": "KHUM Ramp Finish"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.66365776,
+          29.56506717
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "KHUM Runway and Ramp Operations Loop",
+        "route_type": "aviation_demo",
+        "distance_mi": 4.61,
+        "certified": false
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -90.66365776,
+            29.56506717
+          ],
+          [
+            -90.66500041,
+            29.56551633
+          ],
+          [
+            -90.66572338,
+            29.56686379
+          ],
+          [
+            -90.66786896,
+            29.5728883
+          ],
+          [
+            -90.6631219,
+            29.56942376
+          ],
+          [
+            -90.66035278,
+            29.56740278
+          ],
+          [
+            -90.65758366,
+            29.5653818
+          ],
+          [
+            -90.6528366,
+            29.56191726
+          ],
+          [
+            -90.65429713,
+            29.56040334
+          ],
+          [
+            -90.65983537,
+            29.5644453
+          ],
+          [
+            -90.66379125,
+            29.56733242
+          ],
+          [
+            -90.66932949,
+            29.57137438
+          ],
+          [
+            -90.66572338,
+            29.56686379
+          ],
+          [
+            -90.66365776,
+            29.56506717
+          ],
+          [
+            -90.66210855,
+            29.56434852
+          ],
+          [
+            -90.65952653,
+            29.56443835
+          ],
+          [
+            -90.65818388,
+            29.56605531
+          ],
+          [
+            -90.65952653,
+            29.56785194
+          ],
+          [
+            -90.66221183,
+            29.5680316
+          ],
+          [
+            -90.66365776,
+            29.56506717
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "type": "water_station",
+        "mi": 0.4,
+        "name": "Runway 18/36 threshold check"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.66786896,
+          29.5728883
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "type": "medical_tent",
+        "mi": 0.9,
+        "name": "ARFF standby"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.6528366,
+          29.56191726
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "type": "water_station",
+        "mi": 1.4,
+        "name": "Taxiway safety checkpoint"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.66572338,
+          29.56686379
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "type": "medical_tent",
+        "mi": 1.9,
+        "name": "FBO operations"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.66210855,
+          29.56434852
+        ]
+      }
+    }
+  ]
+}

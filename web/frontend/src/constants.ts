@@ -24,7 +24,7 @@ export const DEMO_HOTKEYS = ['0', '1', '2', '3', '4', '5', '7', 'd', 'r', 'l', '
  */
 export const AGENT_DISPLAY_NAMES: Record<string, string> = {};
 
-export const DEMO_IDS = ['Sandbox', '1', '2', '3', '4', '5a', '5b', '7a', '7b'] as const;
+export const DEMO_IDS = ['Sandbox', '1', '2', '3', '4', '5a', '5b', '7a', '7b', 'KHUM'] as const;
 export type DemoId = (typeof DEMO_IDS)[number];
 
 export const demoFiveSpeaker = 'simulator_with_failure';

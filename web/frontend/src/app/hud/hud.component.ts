@@ -64,9 +64,7 @@ import { AgentScreenComponent } from '../components/ChatNavPanel/screens/AgentSc
             [class.active]="demoService.activeDemo() === id"
             (click)="demoService.select(id); hamburgerOpen = false"
           >
-            <span class="demo-number">{{
-              i === 6 ? '5b' : i === 8 ? '7b' : (i | number: '2.0-0')
-            }}</span>
+            <span class="demo-number">{{ menuLabel(id, i) }}</span>
             <p class="demo-name">{{ DEMO_CONFIG[id].title }}</p>
             <span class="icon material-icons">{{
               demoService.activeDemo() === id ? 'autorenew' : 'arrow_forward'
@@ -170,6 +168,11 @@ export class HudComponent implements OnInit, OnDestroy {
     readonly demoService: DemoService,
     private el: ElementRef,
   ) {}
+
+  menuLabel(id: string, index: number): string {
+    if (id === '5b' || id === '7b' || id === 'KHUM') return id;
+    return index.toString().padStart(2, '0');
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {

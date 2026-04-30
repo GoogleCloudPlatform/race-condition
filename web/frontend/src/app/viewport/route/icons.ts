@@ -47,7 +47,9 @@ export async function loadIconTextures(ctx: Context): Promise<void> {
 export async function getStartGoal(ctx: Context, hideOuterCircle = false): Promise<THREE.Mesh> {
   await loadIconTextures(ctx);
 
-  const plane = new THREE.PlaneGeometry(150, 150);
+  const isKhum = ctx.sceneVariant === 'khum-airport';
+  const markerSize = isKhum ? 80 : 150;
+  const plane = new THREE.PlaneGeometry(markerSize, markerSize);
 
   const mat1 = new THREE.MeshBasicMaterial({
     color: 0xffffff,
@@ -193,7 +195,11 @@ function registerZone(
   material: THREE.ShaderMaterial,
   radius = 125,
 ): void {
-  ctx.zones.push({ mesh, material, radius });
+  const zoneRadius = ctx.sceneVariant === 'khum-airport' ? Math.min(radius, 38) : radius;
+  if (ctx.sceneVariant === 'khum-airport') {
+    mesh.scale.multiplyScalar(0.32);
+  }
+  ctx.zones.push({ mesh, material, radius: zoneRadius });
 }
 
 // Check if any runners are within the zone radius
@@ -388,17 +394,30 @@ export async function getToiletZone(ctx: Context): Promise<THREE.Mesh> {
 // Matches the Mercator projection used by viewport-lookdev.geoToWorld.
 
 const _R = 6378137;
-const _CX = ((MAP_CENTER_LON * Math.PI) / 180) * _R;
-const _CY = Math.log(Math.tan(Math.PI / 4 + (MAP_CENTER_LAT * Math.PI) / 180 / 2)) * _R;
 const _S = GLB_TRANSFORM.scale * 10;
 
 export function lngLatToWorld(lon: number, lat: number): THREE.Vector3 {
+  return lngLatToWorldFromCenter(lon, lat, MAP_CENTER_LON, MAP_CENTER_LAT);
+}
+
+export function lngLatToWorldForContext(ctx: Context, lon: number, lat: number): THREE.Vector3 {
+  return lngLatToWorldFromCenter(lon, lat, ctx.mapCenter.lon, ctx.mapCenter.lat);
+}
+
+function lngLatToWorldFromCenter(
+  lon: number,
+  lat: number,
+  centerLon: number,
+  centerLat: number,
+): THREE.Vector3 {
+  const cx = ((centerLon * Math.PI) / 180) * _R;
+  const cy = Math.log(Math.tan(Math.PI / 4 + (centerLat * Math.PI) / 180 / 2)) * _R;
   const mx = ((lon * Math.PI) / 180) * _R;
   const my = Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 180 / 2)) * _R;
   return new THREE.Vector3(
-    (mx - _CX) * _S + GLB_TRANSFORM.offsetX,
+    (mx - cx) * _S + GLB_TRANSFORM.offsetX,
     0,
-    -((my - _CY) * _S) + GLB_TRANSFORM.offsetZ,
+    -((my - cy) * _S) + GLB_TRANSFORM.offsetZ,
   );
 }
 
@@ -628,7 +647,7 @@ export async function getTrafficZones(
     mesh.add(infoIcon);
 
     const [lon, lat] = intersection.coordinates;
-    mesh.position.copy(lngLatToWorld(lon, lat));
+    mesh.position.copy(lngLatToWorldForContext(ctx, lon, lat));
 
     registerZone(ctx, mesh, trafficMaterial);
     meshes.push(mesh);
