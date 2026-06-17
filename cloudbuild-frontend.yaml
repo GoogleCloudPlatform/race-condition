@@ -1,0 +1,48 @@
+steps:
+  # 1. Build the Angular app inside a Node container
+  - id: build-angular
+    name: 'node:22-slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -e
+        cd web/frontend
+        npm ci
+        npm run build
+        # Flatten Angular output
+        if [ -d dist/client/browser ]; then
+          mv dist/client/browser/* dist/
+          rmdir dist/client/browser dist/client 2>/dev/null || true
+        fi
+
+  # 2. Build the frontend docker image using Docker buildx
+  - id: build-frontend
+    name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    env: ['DOCKER_BUILDKIT=1']
+    waitFor: [build-angular]
+    args:
+      - '-c'
+      - |
+        set -e
+        docker build --target frontend -t "${_AR_URL}/frontend:latest" .
+        docker push "${_AR_URL}/frontend:latest"
+
+  # 3. Deploy the updated image to Cloud Run
+  - id: deploy-frontend
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    waitFor: [build-frontend]
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - 'frontend'
+      - '--image=${_AR_URL}/frontend:latest'
+      - '--region=${_REGION}'
+      - '--project=${PROJECT_ID}'
+
+substitutions:
+  _REGION: 'us-central1'
+  _AR_URL: 'us-central1-docker.pkg.dev/race-condition-tom-p/cloudrun'

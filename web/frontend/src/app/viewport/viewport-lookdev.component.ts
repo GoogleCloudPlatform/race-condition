@@ -2329,7 +2329,7 @@ export class ViewportComponent implements OnInit, OnDestroy {
     const demo = this.demoService.activeDemo();
     const resetCount = this.demoService.reset();
     if (!this._modelReady || this._destroyed) return;
-    if (demo !== 'Sandbox') {
+    if (demo !== 'Sandbox' && demo !== 'SandboxIO') {
       if (this.ctx.cameraIntro) {
         cancelAnyCameraIntro(this.ctx);
         this.clearIntroOverlay();
@@ -2361,7 +2361,7 @@ export class ViewportComponent implements OnInit, OnDestroy {
     // Run after other reset listeners (sim:reset, hud:removeAllPaths, …) so the intro snap wins.
     queueMicrotask(() => {
       if (this._destroyed || !this._modelReady) return;
-      if (this.demoService.activeDemo() !== 'Sandbox') return;
+      if (this.demoService.activeDemo() !== 'Sandbox' && this.demoService.activeDemo() !== 'SandboxIO') return;
       void applySceneCameraIntro(this.ctx, undefined, undefined, undefined, undefined, {
         movementHeld: true,
       });
@@ -2388,7 +2388,7 @@ export class ViewportComponent implements OnInit, OnDestroy {
   }
 
   private handleCtrlIIntro(): void {
-    if (this.demoService.activeDemo() === 'Sandbox' && this.ctx.cameraIntro?.movementHeld) {
+    if ((this.demoService.activeDemo() === 'Sandbox' || this.demoService.activeDemo() === 'SandboxIO') && this.ctx.cameraIntro?.movementHeld) {
       resumeCameraIntroMovement(this.ctx);
       return;
     }

@@ -69,6 +69,7 @@
   width: 100%;
 
   &[data-demo='Sandbox'],
+  &[data-demo='SandboxIO'],
   &[data-demo='1'] {
     --start-color: #F8BA01;
     --end-color: #34A853;

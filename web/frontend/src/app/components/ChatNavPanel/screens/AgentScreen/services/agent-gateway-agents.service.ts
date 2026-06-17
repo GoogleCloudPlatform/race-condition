@@ -56,6 +56,36 @@ export class AgentGatewayAgentsService {
       this.mark();
     } catch (e) {
       console.error(`Init Agent ${agentType} failed:`, e);
+      if (agentType === 'planner_with_memory') {
+        console.warn('Attempting fallback to planner_with_eval...');
+        try {
+          this.agents[agentType] = await this.gateway.addAgent('planner_with_eval');
+          console.log('Successfully initialized fallback agent planner_with_eval');
+          this.mark();
+          return;
+        } catch (e2) {
+          console.error('Fallback to planner_with_eval failed:', e2);
+        }
+        console.warn('Attempting fallback to planner...');
+        try {
+          this.agents[agentType] = await this.gateway.addAgent('planner');
+          console.log('Successfully initialized fallback agent planner');
+          this.mark();
+          return;
+        } catch (e3) {
+          console.error('Fallback to planner failed:', e3);
+        }
+      } else if (agentType === 'simulator_with_failure') {
+        console.warn('Attempting fallback to simulator...');
+        try {
+          this.agents[agentType] = await this.gateway.addAgent('simulator');
+          console.log('Successfully initialized fallback agent simulator');
+          this.mark();
+          return;
+        } catch (e4) {
+          console.error('Fallback to simulator failed:', e4);
+        }
+      }
     } finally {
       this.initializingAgents[agentType] = false;
       this.mark();

@@ -318,6 +318,9 @@ export class AgentScreenComponent
     if (options?.showModeFeedback) {
       this.demoService.showModeSwitchFeedback(value);
     }
+    if (!value && this.currentAgent) {
+      await this.onInitAgent(this.currentAgent.agentType);
+    }
   }
 
   async setCloudAssistMode(value: boolean) {
@@ -603,12 +606,15 @@ export class AgentScreenComponent
 
   async onInitAgent(agentType: string): Promise<void> {
     await this.gatewayAgents.onInitAgent(agentType, this.runCachedMessages);
+    if (this.currentAgent && this.currentAgent.agentType === agentType) {
+      this.currentAgent.sessionId = this.agents[agentType] as string;
+    }
   }
 
   get canSend(): boolean {
     return (
       this.runCachedMessages ||
-      (!!this.agents[this.currentAgent!.agentType] && Object.keys(this.agents).length > 0)
+      (!!this.currentAgent && !!this.agents[this.currentAgent.agentType] && Object.keys(this.agents).length > 0)
     );
   }
 

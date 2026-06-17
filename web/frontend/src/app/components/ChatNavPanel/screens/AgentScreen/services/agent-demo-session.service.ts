@@ -53,7 +53,7 @@ export class AgentDemoSessionService {
     const activeDemoKey = host.demoService.activeDemo();
     const activeDemo = DEMO_CONFIG[activeDemoKey];
 
-    host.isExpanded = activeDemoKey !== 'Sandbox';
+    host.isExpanded = activeDemoKey !== 'Sandbox' && activeDemoKey !== 'SandboxIO';
     host.tabBtnWide = false;
     host.activeTab = 'agent';
 
@@ -123,7 +123,7 @@ export class AgentDemoSessionService {
       }
     }
 
-    if (activeDemoKey !== 'Sandbox' && activeDemo.placeholderRoutes) {
+    if (activeDemoKey !== 'Sandbox' && activeDemoKey !== 'SandboxIO' && activeDemo.placeholderRoutes) {
       const routeJson = PRECONFIGURED_ROUTES[activeDemo.placeholderRoutes] as {
         route_data?: unknown;
       };

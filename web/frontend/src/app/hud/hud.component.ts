@@ -65,7 +65,16 @@ import { AgentScreenComponent } from '../components/ChatNavPanel/screens/AgentSc
             (click)="demoService.select(id); hamburgerOpen = false"
           >
             <span class="demo-number">{{
-              i === 6 ? '5b' : i === 8 ? '7b' : (i | number: '2.0-0')
+              id === 'Sandbox' ? '00' :
+              id === 'SandboxIO' ? 'IO' :
+              id === '1' ? '01' :
+              id === '2' ? '02' :
+              id === '3' ? '03' :
+              id === '4' ? '04' :
+              id === '5a' ? '05' :
+              id === '5b' ? '5b' :
+              id === '7a' ? '07' :
+              id === '7b' ? '7b' : ''
             }}</span>
             <p class="demo-name">{{ DEMO_CONFIG[id].title }}</p>
             <span class="icon material-icons">{{

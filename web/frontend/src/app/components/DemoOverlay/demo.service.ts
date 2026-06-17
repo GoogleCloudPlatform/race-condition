@@ -19,7 +19,7 @@ import { DEMO_HOTKEYS, DEMO_IDS, DemoId } from '../../../constants';
 
 @Injectable({ providedIn: 'root' })
 export class DemoService implements OnDestroy {
-  readonly activeDemo = signal<DemoId>('Sandbox');
+  readonly activeDemo = signal<DemoId>('SandboxIO');
   readonly showAlternativePanels = signal<boolean>(false);
   readonly reset = signal<number>(0);
   /** Incremented on Ctrl+l; AgentScreen toggles cached replay. */
@@ -36,11 +36,14 @@ export class DemoService implements OnDestroy {
   /** Ctrl+5/7 map to 5a/7a; Ctrl+Shift+5/7 map to 5b/7b. Other digit hotkeys align by index with DEMO_IDS. */
   private demoIdFromHotkey(e: KeyboardEvent): DemoId | undefined {
     const { key, shiftKey } = e;
+    if (key === '0') return shiftKey ? 'SandboxIO' : 'Sandbox';
+    if (key === '1') return '1';
+    if (key === '2') return '2';
+    if (key === '3') return '3';
+    if (key === '4') return '4';
     if (key === '5') return shiftKey ? '5b' : '5a';
     if (key === '7') return shiftKey ? '7b' : '7a';
-    const idx = DEMO_HOTKEYS.indexOf(key);
-    if (idx < 0 || key === 'd' || key === 'r') return undefined;
-    return DEMO_IDS[idx];
+    return undefined;
   }
 
   private onKeyDown = (e: KeyboardEvent) => {

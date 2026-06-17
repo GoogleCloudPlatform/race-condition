@@ -232,6 +232,16 @@ export const DEMO_CONFIG: DemoConfigType = {
       timeScale: 1,
     },
   },
+  SandboxIO: {
+    title: 'I/O Connect Sandbox',
+    agent: 'planner_with_memory',
+    placeholderRoutes: 'cachedRoute01',
+    orbitCamera: false,
+    recordingConfig: {
+      cachedMessageStreams: ['/assets/sim-ci-log.ndjson'],
+      timeScale: 1,
+    },
+  },
   '1': {
     title: 'Build agents with Agent Platform',
     agent: 'planner',
