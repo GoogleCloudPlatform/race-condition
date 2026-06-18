@@ -86,7 +86,7 @@ export class A2uiActionsService {
           this.agentScreen.runCachedDataStream();
         } else {
           this.gateway.sendBroadcast(
-            'Run the simulation for a marathon in Las Vegas for 10,000 runners',
+            'Run the simulation for a marathon in Las Vegas for 1,000 runners',
             [this.agentScreen.currentAgent!.sessionId],
             true,
           );

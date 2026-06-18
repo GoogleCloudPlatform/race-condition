@@ -33,16 +33,14 @@ export class DemoService implements OnDestroy {
   private static readonly MODE_SWITCH_LABEL_MS = 3000;
   private modeSwitchLabelClearTimer?: ReturnType<typeof setTimeout>;
 
-  /** Ctrl+5/7 map to 5a/7a; Ctrl+Shift+5/7 map to 5b/7b. Other digit hotkeys align by index with DEMO_IDS. */
+  /** Ctrl+5 maps to 5a; Ctrl+Shift+5 maps to 5b. Other digit hotkeys align by index with DEMO_IDS. */
   private demoIdFromHotkey(e: KeyboardEvent): DemoId | undefined {
     const { key, shiftKey } = e;
     if (key === '0') return shiftKey ? 'SandboxIO' : 'Sandbox';
     if (key === '1') return '1';
     if (key === '2') return '2';
     if (key === '3') return '3';
-    if (key === '4') return '4';
     if (key === '5') return shiftKey ? '5b' : '5a';
-    if (key === '7') return shiftKey ? '7b' : '7a';
     return undefined;
   }
 

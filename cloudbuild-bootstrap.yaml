@@ -535,6 +535,7 @@ steps:
         cat > /workspace/services.auto.tfvars.json <<JSON
         {
           "enable_services": true,
+          "public_uis_unauthenticated": true,
           "image_tags": {
             "gateway":          "$$AR_URL/gateway:$$BID",
             "admin":            "$$AR_URL/admin:$$BID",

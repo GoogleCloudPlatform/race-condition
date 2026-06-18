@@ -320,4 +320,5 @@ module "cloud_run_iam" {
   agent_engine_sa_email      = module.iam.agent_engine_sa_email
   compute_sa_email           = module.iam.compute_sa_email
   public_uis_unauthenticated = var.public_uis_unauthenticated
+  developers                 = var.developers
 }

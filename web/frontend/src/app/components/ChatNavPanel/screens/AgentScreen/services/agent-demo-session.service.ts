@@ -123,7 +123,7 @@ export class AgentDemoSessionService {
       }
     }
 
-    if (activeDemoKey !== 'Sandbox' && activeDemoKey !== 'SandboxIO' && activeDemo.placeholderRoutes) {
+    if (activeDemoKey !== 'Sandbox' && activeDemo.placeholderRoutes) {
       const routeJson = PRECONFIGURED_ROUTES[activeDemo.placeholderRoutes] as {
         route_data?: unknown;
       };

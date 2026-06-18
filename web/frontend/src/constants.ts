@@ -15,7 +15,7 @@
  */
 import * as THREE from 'three';
 
-export const DEMO_HOTKEYS = ['0', '1', '2', '3', '4', '5', '7', 'd', 'r', 'l', 'a', 's', 'd'];
+export const DEMO_HOTKEYS = ['0', '1', '2', '3', '5', 'd', 'r', 'l', 'a', 's', 'd'];
 
 /**
  * @deprecated Display names now come from the backend via proto
@@ -24,7 +24,7 @@ export const DEMO_HOTKEYS = ['0', '1', '2', '3', '4', '5', '7', 'd', 'r', 'l', '
  */
 export const AGENT_DISPLAY_NAMES: Record<string, string> = {};
 
-export const DEMO_IDS = ['Sandbox', 'SandboxIO', '1', '2', '3', '4', '5a', '5b', '7a', '7b'] as const;
+export const DEMO_IDS = ['Sandbox', 'SandboxIO', '1', '2', '3', '5a', '5b', '7a', '7b'] as const;
 export type DemoId = (typeof DEMO_IDS)[number];
 
 export const demoFiveSpeaker = 'simulator_with_failure';

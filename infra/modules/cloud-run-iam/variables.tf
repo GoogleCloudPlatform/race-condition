@@ -41,3 +41,9 @@ variable "public_uis_unauthenticated" {
   type        = bool
   default     = true
 }
+
+variable "developers" {
+  description = "List of developer principals (format: user:email@domain) to grant roles/run.invoker on web UIs."
+  type        = list(string)
+  default     = []
+}

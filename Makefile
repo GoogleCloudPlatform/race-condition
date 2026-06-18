@@ -211,7 +211,7 @@ init: check-prereqs ## One-time setup: install deps, configure env, start infra,
 	done
 	@echo ""
 	@echo "🐳 Starting infrastructure (Redis, Pub/Sub, Postgres)..."
-	docker compose up -d
+	docker-compose up -d
 	@echo ""
 	@echo "🔨 Building Go services..."
 	$(MAKE) build

@@ -124,7 +124,7 @@ variable "labels" {
 variable "developers" {
   description = "List of developer principals (format: user:email@domain)"
   type        = list(string)
-  default     = []
+  default     = ["user:tomgreenaway@google.com"]
 }
 
 variable "agent_engine_sa_users" {

@@ -108,3 +108,43 @@ resource "google_cloud_run_v2_service_iam_member" "tester_public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+resource "google_cloud_run_v2_service_iam_member" "frontend_developer" {
+  for_each = toset(var.developers)
+
+  project  = var.project_id
+  location = var.region
+  name     = var.service_names["frontend"]
+  role     = "roles/run.invoker"
+  member   = each.value
+}
+
+resource "google_cloud_run_v2_service_iam_member" "admin_developer" {
+  for_each = toset(var.developers)
+
+  project  = var.project_id
+  location = var.region
+  name     = var.service_names["admin"]
+  role     = "roles/run.invoker"
+  member   = each.value
+}
+
+resource "google_cloud_run_v2_service_iam_member" "dash_developer" {
+  for_each = toset(var.developers)
+
+  project  = var.project_id
+  location = var.region
+  name     = var.service_names["dash"]
+  role     = "roles/run.invoker"
+  member   = each.value
+}
+
+resource "google_cloud_run_v2_service_iam_member" "tester_developer" {
+  for_each = toset(var.developers)
+
+  project  = var.project_id
+  location = var.region
+  name     = var.service_names["tester"]
+  role     = "roles/run.invoker"
+  member   = each.value
+}

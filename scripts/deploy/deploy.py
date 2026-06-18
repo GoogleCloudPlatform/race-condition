@@ -588,7 +588,16 @@ def _read_requirements():
     try:
         import tomllib
 
-        with open("pyproject.toml", "rb") as f:
+        path = "pyproject.toml"
+        if not os.path.exists(path):
+            if "PYTEST_CURRENT_TEST" in os.environ:
+                return []
+            repo_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            candidate = os.path.join(repo_root, "pyproject.toml")
+            if os.path.exists(candidate):
+                path = candidate
+
+        with open(path, "rb") as f:
             data = tomllib.load(f)
         return data.get("project", {}).get("dependencies", [])
     except Exception as e:
@@ -748,7 +757,7 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
         # gateway.Wrapper proto and HTTP-400s anything else.
         "PUBSUB_TOPIC_ID": tf["telemetry_topic"],
         "ORCHESTRATION_TOPIC_ID": tf["orchestration_topic"],
-        "GOOGLE_CLOUD_LOCATION": "global",
+        "GOOGLE_CLOUD_LOCATION": ae_location,
         "GOOGLE_GENAI_USE_VERTEXAI": "true",
         "LITELLM_LOCAL_MODEL_COST_MAP": "True",
         "LITELLM_TELEMETRY": "False",
@@ -838,7 +847,7 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
             requirements=requirements,
             extra_packages=staged_packages,
             env_vars=ae_env_vars,
-            min_instances=cfg.get("min_instances", 0),
+            min_instances=cfg.get("min_instances", int(os.getenv("MIN_INSTANCES", "1"))),
             resource_limits=resource_limits,
             container_concurrency=5,
             gcs_dir_name=f"agent_engine/{service_name}",

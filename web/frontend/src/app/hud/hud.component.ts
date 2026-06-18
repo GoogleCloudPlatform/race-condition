@@ -51,8 +51,8 @@ import { AgentScreenComponent } from '../components/ChatNavPanel/screens/AgentSc
             {{ hamburgerOpen ? 'close' : 'menu' }}
           </span>
         </button>
-        <h4 *ngIf="demoService.activeDemo() !== '4'" class="demo-title">
-          {{ DEMO_CONFIG[demoService.activeDemo()].title }}
+        <h4 class="demo-title">
+          {{ DEMO_CONFIG[demoService.activeDemo()]?.title }}
         </h4>
       </div>
       <div class="menu" [class.isOpen]="hamburgerOpen" (click)="hamburgerOpen = false">
@@ -70,13 +70,12 @@ import { AgentScreenComponent } from '../components/ChatNavPanel/screens/AgentSc
               id === '1' ? '01' :
               id === '2' ? '02' :
               id === '3' ? '03' :
-              id === '4' ? '04' :
               id === '5a' ? '05' :
               id === '5b' ? '5b' :
-              id === '7a' ? '07' :
+              id === '7a' ? '7a' :
               id === '7b' ? '7b' : ''
             }}</span>
-            <p class="demo-name">{{ DEMO_CONFIG[id].title }}</p>
+            <p class="demo-name">{{ DEMO_CONFIG[id]?.title }}</p>
             <span class="icon material-icons">{{
               demoService.activeDemo() === id ? 'autorenew' : 'arrow_forward'
             }}</span>

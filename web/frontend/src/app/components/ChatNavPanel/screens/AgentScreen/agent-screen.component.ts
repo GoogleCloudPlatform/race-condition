@@ -290,12 +290,6 @@ export class AgentScreenComponent
   }
 
   async setSecureMode(value: boolean) {
-    if (value) {
-      this.demoService.select('7b');
-    } else {
-      this.demoService.select('7a');
-    }
-
     this._secureMode = value;
     this.cdr.markForCheck();
     this.scheduleSegmentThumbsLayout();
