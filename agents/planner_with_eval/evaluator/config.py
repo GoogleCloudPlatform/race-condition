@@ -15,8 +15,12 @@
 import os
 
 # Model configuration
-# Note: Use gemini-3.1-pro-preview for best results in evaluation tasks
-MODEL = os.getenv("EVALUATOR_MODEL", "gemini-3.1-pro-preview")
+# gemini-3-flash-preview on the global endpoint, matching the other agent
+# Gemini 3 calls. The previous gemini-3.1-pro-preview default was a Pro
+# preview model served only on the global endpoint, but the evaluator called
+# it on the regional endpoint — so it failed and retried for minutes,
+# blowing the planning turn past the gateway timeout.
+MODEL = os.getenv("EVALUATOR_MODEL", "gemini-3-flash-preview")
 
 # Criterion weights must sum to 1.0 (equal weighting)
 CRITERION_WEIGHTS = {

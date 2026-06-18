@@ -61,9 +61,13 @@ def _normalize_score(raw_score: float) -> int:
 
 
 def _get_model_resource() -> str:
-    """Get the full resource path for the Vertex AI evaluation model."""
+    """Get the full resource path for the Vertex AI evaluation model.
+
+    Uses the global endpoint: the evaluator model is a Gemini 3 preview model,
+    which is only served on the global endpoint (not the regional one).
+    """
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+    location = "global"
     return f"projects/{project_id}/locations/{location}/publishers/google/models/{MODEL}" if project_id else MODEL
 
 
@@ -662,7 +666,9 @@ async def _generate_feedback(
     """
     try:
         project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-        location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+        # Global endpoint: gemini-3-flash-preview (a Gemini 3 preview model) is
+        # only served globally, matching our other agent Gemini 3 calls.
+        location = "global"
 
         client = genai.Client(
             project=project_id,
