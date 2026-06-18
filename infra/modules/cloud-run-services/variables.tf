@@ -83,33 +83,30 @@ variable "agent_urls" {
   default     = ""
 }
 
-variable "min_instances" {
-  description = "Default min_instance_count for all services. OSS defaults to scale-to-zero."
-  type        = number
-  default     = 0
-}
-
 # Right-sized per docs/plans/2026-04-16-oss-right-sizing-plan.md.
 # OSS targets minimum cost: scale-to-zero, platform-minimum CPU/memory.
 variable "service_sizing" {
-  description = "Per-service CPU/memory/max_instances. Right-sized for OSS cost."
+  description = "Per-service CPU/memory/min_instances/max_instances. Right-sized for OSS cost."
   type = map(object({
     cpu           = string
     memory        = string
+    min_instances = number
     max_instances = number
   }))
-  # max_instances = 1 for ALL services (OSS cost control: never scale
-  # beyond a single instance per service). Memory differs by runtime:
-  # Go services stay at 512Mi; Python+ADK runners need 1Gi (Phase 7
-  # build #20 surfaced 512Mi OOM-killing the Python container during
-  # startup imports before the port-8080 health probe ever opened).
+  # Off-path services stay scale-to-zero (min 0) and single-instance (max 1)
+  # for OSS cost control. The gateway is the hub for the WebSocket, A2A
+  # discovery, and orchestration, so it is warmed (min 1) and allowed to
+  # scale modestly (max 3) to absorb concurrent sessions. Memory differs by
+  # runtime: Go services stay at 512Mi; Python+ADK runners need 1Gi (Phase 7
+  # build #20 surfaced 512Mi OOM-killing the Python container during startup
+  # imports before the port-8080 health probe ever opened).
   default = {
-    gateway          = { cpu = "1", memory = "512Mi", max_instances = 1 }
-    admin            = { cpu = "1", memory = "512Mi", max_instances = 1 }
-    tester           = { cpu = "1", memory = "512Mi", max_instances = 1 }
-    frontend         = { cpu = "1", memory = "512Mi", max_instances = 1 }
-    dash             = { cpu = "1", memory = "512Mi", max_instances = 1 }
-    runner_autopilot = { cpu = "1", memory = "1Gi", max_instances = 1 }
-    runner_cloudrun  = { cpu = "1", memory = "1Gi", max_instances = 1 }
+    gateway          = { cpu = "1", memory = "512Mi", min_instances = 1, max_instances = 3 }
+    admin            = { cpu = "1", memory = "512Mi", min_instances = 0, max_instances = 1 }
+    tester           = { cpu = "1", memory = "512Mi", min_instances = 0, max_instances = 1 }
+    frontend         = { cpu = "1", memory = "512Mi", min_instances = 0, max_instances = 1 }
+    dash             = { cpu = "1", memory = "512Mi", min_instances = 0, max_instances = 1 }
+    runner_autopilot = { cpu = "1", memory = "1Gi", min_instances = 0, max_instances = 1 }
+    runner_cloudrun  = { cpu = "1", memory = "1Gi", min_instances = 0, max_instances = 1 }
   }
 }

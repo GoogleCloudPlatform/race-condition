@@ -83,16 +83,17 @@ run "python_runner_services_default_to_1gi" {
   }
 }
 
-run "all_services_capped_at_max_instances_1" {
+run "services_capped_for_oss_cost_control" {
   command = plan
 
-  # OSS cost control: every service must cap at a single instance,
-  # not just the runners. Pinned across all 7 Cloud Run services so
-  # a future edit can't quietly raise gateway/admin/etc. back to 10.
+  # OSS cost control: off-path services cap at a single instance. The
+  # gateway is the hub for WebSocket/A2A-discovery/orchestration, so it
+  # may scale modestly (max 3) to absorb concurrent sessions; everything
+  # else stays pinned so a future edit can't quietly raise it back to 10.
 
   assert {
-    condition     = google_cloud_run_v2_service.gateway.template[0].scaling[0].max_instance_count == 1
-    error_message = "gateway max_instance_count must be 1 for OSS cost control"
+    condition     = google_cloud_run_v2_service.gateway.template[0].scaling[0].max_instance_count == 3
+    error_message = "gateway max_instance_count must be 3 (modest scale for the hub)"
   }
 
   assert {
@@ -126,12 +127,12 @@ run "all_services_capped_at_max_instances_1" {
   }
 }
 
-run "all_services_default_min_instances_zero" {
+run "gateway_warm_other_services_scale_to_zero" {
   command = plan
 
   assert {
-    condition     = google_cloud_run_v2_service.gateway.template[0].scaling[0].min_instance_count == 0
-    error_message = "gateway must default to scale-to-zero"
+    condition     = google_cloud_run_v2_service.gateway.template[0].scaling[0].min_instance_count == 1
+    error_message = "gateway must be warmed (min=1): it is the hub for WebSocket, A2A discovery, and orchestration"
   }
 
   assert {
