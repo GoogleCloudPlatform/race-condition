@@ -8,6 +8,13 @@ Icon[]
 # Thumbnails
 ._*
 
+# Editor swap files
+*.swp
+*.swo
+
+# Stray tool/home artifacts
+.home/
+
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
