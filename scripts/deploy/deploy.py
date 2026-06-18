@@ -199,6 +199,7 @@ SERVICES = {
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
+        "min_instances": 0,
         "max_instances": 1,
     },
     "simulator_with_failure": {
@@ -208,6 +209,7 @@ SERVICES = {
         "attr": "simulator_with_failure_a2a_agent",
         "extra_packages": ["agents/simulator"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
+        "min_instances": 0,
         "max_instances": 1,
     },
     "planner_with_memory": {

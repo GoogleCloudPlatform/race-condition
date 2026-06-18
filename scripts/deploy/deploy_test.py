@@ -266,6 +266,18 @@ class TestServicesRegistry:
             cap = 3 if name in scalable else 1
             assert mi <= cap, f"{name} has max_instances={mi}, expected <= {cap}"
 
+    def test_min_instances_policy(self):
+        # Only the live-path agents are warmed; off-path agents stay
+        # scale-to-zero. Set explicitly so the MIN_INSTANCES=1 fallback
+        # default can't silently warm the off-path agents.
+        warm = {"planner", "planner_with_memory", "simulator"}
+        for name, cfg in deploy.SERVICES.items():
+            mi = cfg.get("min_instances")
+            if name in warm:
+                assert mi == 1, f"{name} should be warm (min_instances=1), got {mi!r}"
+            else:
+                assert mi == 0, f"{name} should be scale-to-zero (min_instances=0), got {mi!r}"
+
 
 # --- _determine_deploy_mode (create-or-update with displayName fallback) ---
 
