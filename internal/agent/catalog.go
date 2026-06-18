@@ -195,7 +195,7 @@ func NewCatalog(agentURLs []string) *Catalog {
 
 	var gcpRetryClient *http.Client
 	if gcpClient != nil {
-		gcpClient.Timeout = 10 * time.Second
+		gcpClient.Timeout = 60 * time.Second
 		// Wrap the GCP client in retryablehttp for AE resilience.
 		// The OAuth2 transport is preserved — retries happen around
 		// HTTPClient.Do(), so each attempt includes fresh auth headers.

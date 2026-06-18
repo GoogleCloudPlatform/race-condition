@@ -762,6 +762,7 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
         "LITELLM_LOCAL_MODEL_COST_MAP": "True",
         "LITELLM_TELEMETRY": "False",
         "BUILD_FINGERPRINT": build_fingerprint,
+        "EMBEDDING_MODEL": "text-embedding-004",
     }
 
     # Simulation defaults.
@@ -941,6 +942,10 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
 
+    original_stdout = sys.stdout
+    if args.print_url:
+        sys.stdout = sys.stderr
+
     try:
         from dotenv import load_dotenv
 
@@ -969,6 +974,7 @@ def main(argv: list[str] | None = None) -> None:
     url = deploy_agent_engine(args.only, cfg, tf=tf, force_create=args.force_create)
     if args.print_url and url:
         # MUST be the final line of stdout (Cloud Build captures via tail -1).
+        sys.stdout = original_stdout
         print(url)
 
 

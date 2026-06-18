@@ -34,7 +34,7 @@ import (
 // gatewayClient is a shared HTTP client for proxying requests to the gateway.
 // Reused across all requests for connection pooling.
 var gatewayClient = &http.Client{
-	Timeout: 30 * time.Second,
+	Timeout: 120 * time.Second,
 	Transport: &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 20,

@@ -77,6 +77,7 @@ resource "google_cloud_run_v2_service" "gateway" {
 
   template {
     service_account = var.compute_sa_email
+    timeout         = "3600s"
 
     scaling {
       min_instance_count = var.min_instances
@@ -347,6 +348,7 @@ resource "google_cloud_run_v2_service" "frontend" {
 
   template {
     service_account = var.compute_sa_email
+    timeout         = "3600s"
     scaling {
       min_instance_count = var.min_instances
       max_instance_count = var.service_sizing["frontend"].max_instances
