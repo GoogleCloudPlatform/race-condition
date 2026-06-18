@@ -41,7 +41,7 @@ def _get_genai_client() -> genai.Client:
     return genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
 
-async def compute_embedding(text: str, *, dimension: int = 768) -> list[float]:
+async def compute_embedding(text: str, *, dimension: int = 3072) -> list[float]:
     """Compute an embedding for ``text`` via Vertex AI / Gemini.
 
     Default dimension 3072 matches the ``VECTOR(3072)`` column in
@@ -49,7 +49,7 @@ async def compute_embedding(text: str, *, dimension: int = 768) -> list[float]:
     retry/fallback policy.
     """
     client = _get_genai_client()
-    model = os.environ.get("EMBEDDING_MODEL", "text-embedding-004")
+    model = os.environ.get("EMBEDDING_MODEL", "gemini-embedding-001")
     response = await client.aio.models.embed_content(
         model=model,
         contents=text,

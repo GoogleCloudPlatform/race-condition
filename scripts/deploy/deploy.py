@@ -762,7 +762,7 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
         "LITELLM_LOCAL_MODEL_COST_MAP": "True",
         "LITELLM_TELEMETRY": "False",
         "BUILD_FINGERPRINT": build_fingerprint,
-        "EMBEDDING_MODEL": "text-embedding-004",
+        "EMBEDDING_MODEL": "gemini-embedding-001",
     }
 
     # Simulation defaults.
