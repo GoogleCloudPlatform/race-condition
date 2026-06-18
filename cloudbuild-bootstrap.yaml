@@ -420,7 +420,7 @@ steps:
         mkdir -p /workspace/ae_urls
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
-        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner --print-url | tail -1)
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --force-create --only planner --print-url | tail -1)
         # Bare URL (no `name=` prefix). The gateway parses AGENT_URLS as
         # comma-separated URLs and discovers each agent's name from its
         # /a2a/v1/card. Matches the dev/prod .env contract.
@@ -438,7 +438,7 @@ steps:
         mkdir -p /workspace/ae_urls
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
-        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only simulator --print-url | tail -1)
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --force-create --only simulator --print-url | tail -1)
         echo "$$AE_URL" > /workspace/ae_urls/simulator.url
 
   - id: deploy-ae-planner-with-eval
@@ -453,7 +453,7 @@ steps:
         mkdir -p /workspace/ae_urls
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
-        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner_with_eval --print-url | tail -1)
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --force-create --only planner_with_eval --print-url | tail -1)
         echo "$$AE_URL" > /workspace/ae_urls/planner_with_eval.url
 
   - id: deploy-ae-simulator-with-failure
@@ -468,7 +468,7 @@ steps:
         mkdir -p /workspace/ae_urls
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
-        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only simulator_with_failure --print-url | tail -1)
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --force-create --only simulator_with_failure --print-url | tail -1)
         echo "$$AE_URL" > /workspace/ae_urls/simulator_with_failure.url
 
   - id: deploy-ae-planner-with-memory
@@ -483,7 +483,7 @@ steps:
         mkdir -p /workspace/ae_urls
         export PROJECT_ID="${PROJECT_ID}"
         export REGION="${_REGION}"
-        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --only planner_with_memory --print-url | tail -1)
+        AE_URL=$(uv run --no-sync python scripts/deploy/deploy.py --force-create --only planner_with_memory --print-url | tail -1)
         echo "$$AE_URL" > /workspace/ae_urls/planner_with_memory.url
 
   # ----------------------------------------------------------
