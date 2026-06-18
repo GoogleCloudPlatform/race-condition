@@ -23,7 +23,7 @@ Usage in LlmAgent definitions::
     from agents.utils.retry import resilient_model
 
     agent = LlmAgent(
-        model=resilient_model("gemini-3.5-flash"),
+        model=resilient_model("gemini-3-flash-preview"),
         ...
     )
 
@@ -99,7 +99,7 @@ def resilient_model(
     """Create a GlobalGemini instance with retry protection.
 
     Args:
-        model_name: Gemini model identifier (e.g. "gemini-3.5-flash").
+        model_name: Gemini model identifier (e.g. "gemini-3-flash-preview").
         retry_options: Override retry config. Defaults to default_retry_options().
         location: Vertex AI API location. Defaults to "global" (required for
             Gemini 3 preview models). Set to a region like "us-central1" for

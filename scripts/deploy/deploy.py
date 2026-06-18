@@ -768,7 +768,7 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
         "LITELLM_TELEMETRY": "False",
         "BUILD_FINGERPRINT": build_fingerprint,
         "EMBEDDING_MODEL": "gemini-embedding-001",
-        "PLANNER_MODEL": "gemini-3.5-flash",
+        "PLANNER_MODEL": "gemini-3-flash-preview",
     }
 
     # Simulation defaults.

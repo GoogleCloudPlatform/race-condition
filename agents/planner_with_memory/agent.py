@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 AGENT_NAME = "planner_with_memory"
-MODEL = os.getenv("PLANNER_MODEL", "gemini-3.5-flash")
+MODEL = os.getenv("PLANNER_MODEL", "gemini-3-flash-preview")
 
 planner_config = types.GenerateContentConfig(
     max_output_tokens=8192,

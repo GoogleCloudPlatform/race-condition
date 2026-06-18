@@ -1778,7 +1778,7 @@ async def _gemini_traffic_enrichment(closed_segments: list, affected_intersectio
     )
 
     response = await client.aio.models.generate_content(
-        model=os.getenv("PLANNER_MODEL", "gemini-3.5-flash"),
+        model=os.getenv("PLANNER_MODEL", "gemini-3-flash-preview"),
         contents=prompt,
     )
 
