@@ -651,16 +651,4 @@ export const DEMO_CONFIG: DemoConfigType = {
       timeScale: 3,
     },
   },
-  '7a': {
-    title: 'Secure financial modeling (Standard)',
-    agent: 'runner',
-    orbitCamera: true,
-    isSecurityDemo: true,
-  },
-  '7b': {
-    title: 'Secure financial modeling (Secured)',
-    agent: 'runner',
-    orbitCamera: true,
-    isSecurityDemo: true,
-  },
 };

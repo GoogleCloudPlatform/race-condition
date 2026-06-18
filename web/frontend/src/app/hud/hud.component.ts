@@ -71,9 +71,7 @@ import { AgentScreenComponent } from '../components/ChatNavPanel/screens/AgentSc
               id === '2' ? '02' :
               id === '3' ? '03' :
               id === '5a' ? '05' :
-              id === '5b' ? '5b' :
-              id === '7a' ? '7a' :
-              id === '7b' ? '7b' : ''
+              id === '5b' ? '5b' : ''
             }}</span>
             <p class="demo-name">{{ DEMO_CONFIG[id]?.title }}</p>
             <span class="icon material-icons">{{
@@ -177,7 +175,10 @@ export class HudComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     readonly demoService: DemoService,
     private el: ElementRef,
-  ) {}
+
+    
+  ) {
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {

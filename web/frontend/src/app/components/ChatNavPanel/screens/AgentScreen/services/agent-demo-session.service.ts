@@ -97,32 +97,6 @@ export class AgentDemoSessionService {
       host.scheduleSegmentThumbsLayout();
     }
 
-    if (activeDemoKey === '7b') {
-      host.applyDemoSessionSecureShell(true);
-      host.scheduleSegmentThumbsLayout();
-
-      if (!host.runCachedMessages) {
-        host.isSecuringAgent = true;
-        host.gateway.sendBroadcast(
-          SECURE_AGENT_PROMPT,
-          [host.agents[host.currentAgent!.agentType] as string],
-          true,
-        );
-      }
-    } else if (activeDemoKey === '7a') {
-      host.applyDemoSessionSecureShell(false);
-      host.scheduleSegmentThumbsLayout();
-
-      if (!host.runCachedMessages) {
-        host.isSecuringAgent = true;
-        host.gateway.sendBroadcast(
-          UNSECURE_AGENT_PROMPT,
-          [host.agents[host.currentAgent!.agentType] as string],
-          true,
-        );
-      }
-    }
-
     if (activeDemoKey !== 'Sandbox' && activeDemo.placeholderRoutes) {
       const routeJson = PRECONFIGURED_ROUTES[activeDemo.placeholderRoutes] as {
         route_data?: unknown;
