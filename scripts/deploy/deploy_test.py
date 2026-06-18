@@ -256,10 +256,15 @@ class TestServicesRegistry:
             )
 
     def test_max_instances_capped(self):
+        # OSS cost control: critical-path agents (the live SandboxIO flow)
+        # may scale modestly to absorb concurrent sessions; off-path agents
+        # stay pinned to a single instance.
+        scalable = {"planner", "planner_with_memory", "simulator"}
         for name, cfg in deploy.SERVICES.items():
             mi = cfg.get("max_instances")
             assert mi is not None, f"{name} missing max_instances"
-            assert mi <= 1, f"{name} has max_instances={mi}, expected <= 1 for OSS"
+            cap = 3 if name in scalable else 1
+            assert mi <= cap, f"{name} has max_instances={mi}, expected <= {cap}"
 
 
 # --- _determine_deploy_mode (create-or-update with displayName fallback) ---

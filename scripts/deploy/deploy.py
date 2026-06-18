@@ -180,7 +180,8 @@ SERVICES = {
         "module": "agents.simulator.agent",
         "attr": "simulator_a2a_agent",
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
+        "min_instances": 1,
+        "max_instances": 3,
     },
     "planner": {
         "type": "reasoning-engine",
@@ -188,7 +189,8 @@ SERVICES = {
         "module": "agents.planner.agent",
         "attr": "planner_a2a_agent",
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
+        "min_instances": 1,
+        "max_instances": 3,
     },
     "planner_with_eval": {
         "type": "reasoning-engine",
@@ -215,7 +217,8 @@ SERVICES = {
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner", "agents/planner_with_eval"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
+        "min_instances": 1,
+        "max_instances": 3,
     },
 }
 
