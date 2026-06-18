@@ -66,11 +66,11 @@ def test_planner_max_output_tokens_is_8192():
 
 
 def test_planner_model_is_env_driven(monkeypatch):
-    """Planner honors PLANNER_MODEL and defaults to gemini-3-flash-preview."""
+    """Planner honors PLANNER_MODEL and defaults to gemini-3.5-flash."""
     from agents.planner.agent import get_agent
 
     monkeypatch.delenv("PLANNER_MODEL", raising=False)
-    assert get_agent().model.model == "gemini-3-flash-preview"
+    assert get_agent().model.model == "gemini-3.5-flash"
 
     monkeypatch.setenv("PLANNER_MODEL", "gemini-3.5-flash-test")
     assert get_agent().model.model == "gemini-3.5-flash-test"

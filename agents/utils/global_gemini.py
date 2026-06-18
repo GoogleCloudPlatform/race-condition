@@ -25,7 +25,7 @@ Usage in LlmAgent definitions:
     from agents.utils.global_gemini import GlobalGemini
 
     agent = LlmAgent(
-        model=GlobalGemini(model="gemini-3-flash-preview"),
+        model=GlobalGemini(model="gemini-3.5-flash"),
         ...
     )
 
@@ -54,8 +54,8 @@ class GlobalGemini(Gemini):
 
     For per-agent location control::
 
-        # Global endpoint (default, required for Gemini 3 previews)
-        model = GlobalGemini(model="gemini-3-flash-preview")
+        # Global endpoint (the default; current Gemini 3.x models use it)
+        model = GlobalGemini(model="gemini-3.5-flash")
 
         # Regional endpoint
         model = GlobalGemini(model="gemini-2.0-flash", location="us-central1")

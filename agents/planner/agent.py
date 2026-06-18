@@ -46,7 +46,7 @@ def get_agent():
     """Entry point for the ADK framework."""
     return LlmAgent(
         name="planner",
-        model=resilient_model(os.getenv("PLANNER_MODEL", "gemini-3-flash-preview")),
+        model=resilient_model(os.getenv("PLANNER_MODEL", "gemini-3.5-flash")),
         description="Expert GIS analyst for marathon route and event planning.",
         static_instruction=PLANNER.build(),
         generate_content_config=types.GenerateContentConfig(
