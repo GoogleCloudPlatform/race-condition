@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import time
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -136,6 +136,56 @@ class TestGetDsn:
             pytest.raises(ValueError, match="ALLOYDB_HOST"),
         ):
             mod._get_dsn()
+
+
+class TestGetConnTimeouts:
+    """_get_conn must bound connect AND query time so a degraded AlloyDB path
+    fails fast instead of hanging the planner forever (observed: store_route
+    INSERT hung indefinitely with no command_timeout)."""
+
+    @pytest.mark.asyncio
+    async def test_get_conn_passes_connect_and_command_timeouts(self) -> None:
+        env = {"ALLOYDB_HOST": "10.0.0.1", "ALLOYDB_PASSWORD": "pw"}
+        captured: dict = {}
+
+        async def fake_connect(dsn, **kwargs):
+            captured.update(kwargs)
+            return MagicMock()
+
+        with patch.dict("os.environ", env, clear=False), patch.object(mod.asyncpg, "connect", fake_connect):
+            await mod._get_conn()
+
+        assert captured.get("timeout") is not None, "connect timeout missing"
+        assert captured.get("command_timeout") is not None, "command_timeout missing"
+
+
+class TestStoreRouteRetry:
+    """A transient connection failure on a write must be retried, not fatal."""
+
+    def setup_method(self) -> None:
+        mod._cached = None
+        mod._sm_client = None
+
+    @pytest.mark.asyncio
+    async def test_store_route_retries_transient_connection_error(self) -> None:
+        env = {"ALLOYDB_HOST": "10.0.0.1", "ALLOYDB_PASSWORD": "pw"}
+        good_conn = MagicMock()
+        good_conn.execute = AsyncMock(return_value="INSERT 0 1")
+        good_conn.close = AsyncMock()
+        calls = {"n": 0}
+
+        async def flaky_connect(dsn, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise OSError("connection reset")
+            return good_conn
+
+        with patch.dict("os.environ", env, clear=False), patch.object(mod.asyncpg, "connect", flaky_connect):
+            route_id = await mod.AlloyDBRouteStore().store_route({"name": "test"})
+
+        assert isinstance(route_id, str) and route_id
+        assert calls["n"] == 2  # retried after the transient failure
+        good_conn.execute.assert_awaited_once()
 
 
 class TestResolveSmProject:
