@@ -108,15 +108,18 @@ else
     echo -e "${GREEN}✅ .env already exists.${NC}"
 fi
 
-# 7. GCP Vertex AI setup (Interactive & Optional)
+# 7. GCP/Gemini Setup (Interactive & Optional)
 echo -e "${BLUE}===============================================${NC}"
 echo -e "${BLUE}          Google Cloud / Gemini Setup          ${NC}"
 echo -e "${BLUE}===============================================${NC}"
-echo "By default, Race Condition uses GCP Vertex AI for Gemini API calls."
-echo "Do you want to configure GCP authentication now? (y/n)"
-read -r response
+echo "Choose how you want to configure Gemini API calls for the simulation:"
+echo "  1) Vertex AI (GCP) [Recommended for full features, requires GCP project]"
+echo "  2) Gemini Developer API Key (using GEMINI_API_KEY)"
+echo "  3) Skip / Configure Later (Autopilot or local Ollama)"
+echo -n "Enter option (1, 2, or 3): "
+read -r gemini_option
 
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+if [ "$gemini_option" = "1" ]; then
     echo -n "Enter your Google Cloud Project ID: "
     read -r gcp_project
     
@@ -145,12 +148,54 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         
         echo -e "${GREEN}✅ GCP Vertex AI integration configured successfully.${NC}"
     fi
+elif [ "$gemini_option" = "2" ]; then
+    echo -n "Enter your Gemini Developer API Key (AIzaSy...): "
+    read -r api_key
+    
+    if [ -z "$api_key" ]; then
+        echo -e "${RED}❌ API key cannot be empty. Skipping configuration...${NC}"
+    else
+        echo -e "${YELLOW}✍️ Configuring .env for GEMINI_API_KEY...${NC}"
+        
+        # Set GEMINI_API_KEY
+        if grep -q "^GEMINI_API_KEY=" .env; then
+            sed -i '' "s/^GEMINI_API_KEY=.*/GEMINI_API_KEY=$api_key/g" .env
+        else
+            echo "GEMINI_API_KEY=$api_key" >> .env
+        fi
+        
+        # Disable GOOGLE_GENAI_USE_VERTEXAI
+        sed -i '' "s/GOOGLE_GENAI_USE_VERTEXAI=TRUE/GOOGLE_GENAI_USE_VERTEXAI=FALSE/g" .env
+        
+        # Override project IDs to empty to prevent conflicting checks
+        sed -i '' "s/PROJECT_ID=your-gcp-project-id/PROJECT_ID=/g" .env
+        sed -i '' "s/GOOGLE_CLOUD_PROJECT=your-gcp-project-id/GOOGLE_CLOUD_PROJECT=/g" .env
+        
+        # Update model configurations to use public models (gemini-2.5-flash)
+        sed -i '' "s/EVALUATOR_MODEL=gemini-3-flash-preview/EVALUATOR_MODEL=gemini-2.5-flash/g" .env
+        
+        if grep -q "^PLANNER_MODEL=" .env; then
+            sed -i '' "s/^PLANNER_MODEL=.*/PLANNER_MODEL=gemini-2.5-flash/g" .env
+        else
+            echo "PLANNER_MODEL=gemini-2.5-flash" >> .env
+        fi
+        
+        if grep -q "^RUNNER_MODEL=" .env; then
+            sed -i '' "s/^RUNNER_MODEL=.*/RUNNER_MODEL=gemini-2.5-flash/g" .env
+        else
+            echo "RUNNER_MODEL=gemini-2.5-flash" >> .env
+        fi
+        
+        echo -e "${GREEN}✅ Gemini Developer API Key configured successfully.${NC}"
+        echo "Models have been mapped to public 'gemini-2.5-flash' in your .env."
+    fi
 else
-    echo -e "${YELLOW}⚠️ Skipping GCP authentication config.${NC}"
+    echo -e "${YELLOW}⚠️ Skipping GCP/Gemini configuration.${NC}"
     echo "Note: The LLM agents will fail to run unless you either:"
     echo "  1) Run 'gcloud auth login --update-adc' and set PROJECT_ID in .env later."
-    echo "  2) Set RUNNER_MODEL=ollama_chat/gemma4:e2b in .env to use a local Ollama instance."
-    echo "  3) Use the deterministic autopilot runner (which makes zero LLM calls)."
+    echo "  2) Configure a GEMINI_API_KEY and set GOOGLE_GENAI_USE_VERTEXAI=FALSE in .env later."
+    echo "  3) Set RUNNER_MODEL=ollama_chat/gemma4:e2b in .env to use a local Ollama instance."
+    echo "  4) Use the deterministic autopilot runner (which makes zero LLM calls)."
 fi
 
 # 8. Project initialization

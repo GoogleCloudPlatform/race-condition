@@ -70,10 +70,23 @@ class GlobalGemini(Gemini):
         """Create a genai Client with the configured location."""
         from google.genai import Client
 
-        project = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+        api_key = os.environ.get("GEMINI_API_KEY")
+        use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
+        project = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("PROJECT_ID")
+
+        if api_key and (not use_vertex or not project):
+            return Client(
+                api_key=api_key,
+                http_options=types.HttpOptions(
+                    headers=self._tracking_headers(),
+                    retry_options=self.retry_options,
+                    base_url=self.base_url,
+                ),
+            )
+
         return Client(
             vertexai=True,
-            project=project,
+            project=project or "",
             location=self.location,
             http_options=types.HttpOptions(
                 headers=self._tracking_headers(),
@@ -81,3 +94,4 @@ class GlobalGemini(Gemini):
                 base_url=self.base_url,
             ),
         )
+

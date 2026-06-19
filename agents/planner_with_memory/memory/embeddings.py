@@ -31,14 +31,18 @@ from google import genai
 def _get_genai_client() -> genai.Client:
     """Process-global google-genai client. Vertex AI when a project is set,
     otherwise API-key auth (local dev with GEMINI_API_KEY)."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
     project = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("PROJECT_ID")
-    if project:
-        return genai.Client(
-            vertexai=True,
-            project=project,
-            location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
-        )
-    return genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+
+    if api_key and (not use_vertex or not project):
+        return genai.Client(api_key=api_key)
+
+    return genai.Client(
+        vertexai=True,
+        project=project or "",
+        location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+    )
 
 
 async def compute_embedding(text: str, *, dimension: int = 768) -> list[float]:

@@ -41,12 +41,15 @@ logger = logging.getLogger(__name__)
 AGENT_DIR = os.path.dirname(__file__)
 
 
+PLANNER_MODEL = os.getenv("PLANNER_MODEL", "gemini-3-flash-preview")
+
+
 # [START planner_agent]
 def get_agent():
     """Entry point for the ADK framework."""
     return LlmAgent(
         name="planner",
-        model=resilient_model("gemini-3-flash-preview"),
+        model=resilient_model(PLANNER_MODEL),
         description="Expert GIS analyst for marathon route and event planning.",
         static_instruction=PLANNER.build(),
         generate_content_config=types.GenerateContentConfig(
