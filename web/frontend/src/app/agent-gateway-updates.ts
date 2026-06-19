@@ -786,8 +786,8 @@ class AgentGateway {
                   return;
                 case TOOLS.A2UI:
                   return;
-                // case TOOLS.SHOW_ROUTE:
-                //   return;
+                case TOOLS.SHOW_ROUTE:
+                  return;
               }
 
               this.emitChat({

@@ -109,6 +109,12 @@ variable "public_uis_unauthenticated" {
   default     = true
 }
 
+variable "min_instances" {
+  description = "Default min_instance_count for all Cloud Run services to keep an instance always available."
+  type        = number
+  default     = 1
+}
+
 variable "labels" {
   description = "Labels applied to every Race Condition resource (Cloud Run services, Cloud SQL, Redis, Pub/Sub topics, AE engines). Used for cost attribution and demo-asset cleanup. The default value is what the public OSS demo expects; downstream deployers can override or merge in additional keys."
   type        = map(string)
