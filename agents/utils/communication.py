@@ -42,6 +42,8 @@ logger = logging.getLogger(__name__)
 _discovery_cache: dict[str, Any] = {}
 _discovery_cache_ts: float = 0.0
 _DISCOVERY_CACHE_TTL: float = 30.0  # Match gateway's 30s TTL
+_DISCOVERY_RETRIES: int = int(os.environ.get("A2A_DISCOVERY_RETRIES", "3"))
+_DISCOVERY_BACKOFF_BASE: float = float(os.environ.get("A2A_DISCOVERY_BACKOFF_BASE", "0.5"))
 
 # Shared httpx client for agent discovery
 _discovery_client: httpx.AsyncClient | None = None
@@ -136,33 +138,46 @@ class SimulationA2AClient:
             return _discovery_cache
 
         url = f"{self.gateway_url}/api/v1/agent-types"
-        try:
-            client = _get_discovery_client()
-            # Attach OIDC token for OSS Cloud Run IAM mode (no-op when
-            # get_id_token returns None: local dev / no ADC).
-            headers: dict[str, str] = {}
-            audience = oidc_auth.resolve_audience(self.gateway_url)
-            token = oidc_auth.get_id_token(audience)
-            if token:
-                headers["Authorization"] = f"Bearer {token}"
-            resp = await client.get(url, timeout=5.0, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
+        last_exc: Exception | None = None
+        for attempt in range(_DISCOVERY_RETRIES):
+            try:
+                client = _get_discovery_client()
+                # Attach OIDC token for OSS Cloud Run IAM mode (no-op when
+                # get_id_token returns None: local dev / no ADC).
+                headers: dict[str, str] = {}
+                audience = oidc_auth.resolve_audience(self.gateway_url)
+                token = oidc_auth.get_id_token(audience)
+                if token:
+                    headers["Authorization"] = f"Bearer {token}"
+                resp = await client.get(url, timeout=5.0, headers=headers)
+                resp.raise_for_status()
+                data = resp.json()
 
-            cards = {}
-            for name, card_data in data.items():
-                # Use model_validate to handle camelCase→snake_case alias
-                # resolution (e.g., additionalInterfaces, preferredTransport)
-                cards[name] = AgentCard.model_validate(card_data)
+                cards = {}
+                for name, card_data in data.items():
+                    # Use model_validate to handle camelCase→snake_case alias
+                    # resolution (e.g., additionalInterfaces, preferredTransport)
+                    cards[name] = AgentCard.model_validate(card_data)
 
-            _discovery_cache = cards
-            _discovery_cache_ts = now
-            self._registry_cache = cards
-            logger.info(f"A2A_DISCOVERY: Discovered {len(cards)} agent types from Gateway.")
-            return cards
-        except Exception as e:
-            logger.error(f"A2A_DISCOVERY_ERROR: Failed to fetch agent types from {url}: {e}")
-            return self._registry_cache
+                _discovery_cache = cards
+                _discovery_cache_ts = now
+                self._registry_cache = cards
+                logger.info(f"A2A_DISCOVERY: Discovered {len(cards)} agent types from Gateway.")
+                return cards
+            except Exception as e:
+                last_exc = e
+                logger.warning(
+                    f"A2A_DISCOVERY_RETRY: attempt {attempt + 1}/{_DISCOVERY_RETRIES} "
+                    f"failed for {url}: {e}"
+                )
+                if attempt + 1 < _DISCOVERY_RETRIES:
+                    await asyncio.sleep(_DISCOVERY_BACKOFF_BASE * (2 ** attempt))
+
+        logger.error(
+            f"A2A_DISCOVERY_ERROR: Failed to fetch agent types from {url} "
+            f"after {_DISCOVERY_RETRIES} attempts: {last_exc}"
+        )
+        return self._registry_cache
 
     # [END a2a_discovery]
 

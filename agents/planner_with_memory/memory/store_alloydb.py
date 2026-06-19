@@ -21,6 +21,7 @@ beyond swapping the singleton.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -104,9 +105,43 @@ def _get_dsn() -> str:
     return f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
 
+# Transient failures that warrant a reconnect-and-retry (connection drops,
+# connect/command timeouts). Query-level errors (constraint violations, etc.)
+# are NOT in here -- retrying those is pointless.
+_DB_RETRYABLE = (OSError, asyncio.TimeoutError, asyncpg.PostgresConnectionError, asyncpg.InterfaceError)
+
+
 async def _get_conn() -> asyncpg.Connection:
     schema_name = os.environ.get("ALLOYDB_SCHEMA", "local_dev")
-    return await asyncpg.connect(_get_dsn(), server_settings={"search_path": f"{schema_name}, public"})
+    # Bound both connect AND per-query time. Without command_timeout, a degraded
+    # connection makes a query (e.g. the store_route INSERT) wait forever and
+    # hangs the whole planner turn -- the same failure mode as the Redis stall.
+    connect_timeout = float(os.environ.get("ALLOYDB_CONNECT_TIMEOUT_S", "10"))
+    command_timeout = float(os.environ.get("ALLOYDB_COMMAND_TIMEOUT_S", "30"))
+    return await asyncpg.connect(
+        _get_dsn(),
+        server_settings={"search_path": f"{schema_name}, public"},
+        timeout=connect_timeout,
+        command_timeout=command_timeout,
+    )
+
+
+async def _with_db_retry(coro_factory):
+    """Run an async DB operation, retrying transient connection failures.
+
+    coro_factory must be a zero-arg callable returning a fresh coroutine on each
+    call (so each attempt opens its own connection).
+    """
+    attempts = int(os.environ.get("ALLOYDB_WRITE_RETRIES", "2")) + 1
+    backoff = float(os.environ.get("ALLOYDB_RETRY_BACKOFF_S", "0.5"))
+    for i in range(attempts):
+        try:
+            return await coro_factory()
+        except _DB_RETRYABLE as e:
+            if i == attempts - 1:
+                raise
+            logger.warning("AlloyDB op failed (attempt %d/%d): %s; retrying", i + 1, attempts, e)
+            await asyncio.sleep(backoff * (2**i))
 
 
 def _row_to_route(row: asyncpg.Record) -> PlannedRoute:
@@ -156,20 +191,24 @@ class AlloyDBRouteStore:
     ) -> str:
         """Persist a new planned route and return its UUID."""
         route_id = str(uuid.uuid4())
-        conn = await _get_conn()
-        try:
-            await conn.execute(
-                """
-                INSERT INTO planned_routes (route_id, route_data, created_at, eval_score, eval_result)
-                VALUES ($1, $2::jsonb, now(), $3, $4::jsonb)
-                """,
-                route_id,
-                json.dumps(route_data),
-                evaluation_score,
-                json.dumps(evaluation_result) if evaluation_result is not None else None,
-            )
-        finally:
-            await conn.close()
+
+        async def _do() -> None:
+            conn = await _get_conn()
+            try:
+                await conn.execute(
+                    """
+                    INSERT INTO planned_routes (route_id, route_data, created_at, eval_score, eval_result)
+                    VALUES ($1, $2::jsonb, now(), $3, $4::jsonb)
+                    """,
+                    route_id,
+                    json.dumps(route_data),
+                    evaluation_score,
+                    json.dumps(evaluation_result) if evaluation_result is not None else None,
+                )
+            finally:
+                await conn.close()
+
+        await _with_db_retry(_do)
         return route_id
 
     async def get_route(self, route_id: str) -> PlannedRoute | None:
@@ -195,24 +234,28 @@ class AlloyDBRouteStore:
         simulation_result: dict,
     ) -> str | None:
         """Append a simulation record to route_id. Returns sim UUID or None."""
-        conn = await _get_conn()
-        try:
-            exists = await conn.fetchval("SELECT 1 FROM planned_routes WHERE route_id = $1", route_id)
-            if not exists:
-                return None
-            sim_id = str(uuid.uuid4())
-            await conn.execute(
-                """
-                INSERT INTO simulation_records (simulation_id, route_id, sim_result, simulated_at)
-                VALUES ($1, $2, $3::jsonb, now())
-                """,
-                sim_id,
-                route_id,
-                json.dumps(simulation_result),
-            )
-            return sim_id
-        finally:
-            await conn.close()
+
+        async def _do() -> str | None:
+            conn = await _get_conn()
+            try:
+                exists = await conn.fetchval("SELECT 1 FROM planned_routes WHERE route_id = $1", route_id)
+                if not exists:
+                    return None
+                sim_id = str(uuid.uuid4())
+                await conn.execute(
+                    """
+                    INSERT INTO simulation_records (simulation_id, route_id, sim_result, simulated_at)
+                    VALUES ($1, $2, $3::jsonb, now())
+                    """,
+                    sim_id,
+                    route_id,
+                    json.dumps(simulation_result),
+                )
+                return sim_id
+            finally:
+                await conn.close()
+
+        return await _with_db_retry(_do)
 
     async def recall_routes(
         self,

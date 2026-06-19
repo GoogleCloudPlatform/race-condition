@@ -41,7 +41,10 @@ logger = logging.getLogger(__name__)
 AGENT_DIR = os.path.dirname(__file__)
 
 
-PLANNER_MODEL = os.getenv("PLANNER_MODEL", "gemini-3-flash-preview")
+DEFAULT_PLANNER_MODEL = "gemini-3.5-flash"
+# Import-time snapshot kept for back-compat; get_agent() reads the env at call
+# time so a PLANNER_MODEL set after import (tests, dynamic config) is honored.
+PLANNER_MODEL = os.getenv("PLANNER_MODEL", DEFAULT_PLANNER_MODEL)
 
 
 # [START planner_agent]
@@ -49,7 +52,7 @@ def get_agent():
     """Entry point for the ADK framework."""
     return LlmAgent(
         name="planner",
-        model=resilient_model(PLANNER_MODEL),
+        model=resilient_model(os.getenv("PLANNER_MODEL", DEFAULT_PLANNER_MODEL)),
         description="Expert GIS analyst for marathon route and event planning.",
         static_instruction=PLANNER.build(),
         generate_content_config=types.GenerateContentConfig(

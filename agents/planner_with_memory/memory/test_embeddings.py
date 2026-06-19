@@ -45,6 +45,28 @@ async def test_compute_embedding_returns_3072_dim_vector() -> None:
 
 
 @pytest.mark.asyncio
+async def test_compute_embedding_defaults_match_alloydb_schema(monkeypatch) -> None:
+    """tools.py calls compute_embedding() with no overrides, so the defaults must
+    stay gemini-embedding-001/3072 or pgvector rejects the query (3072 vs 768)."""
+    monkeypatch.delenv("EMBEDDING_MODEL", raising=False)
+    fake_client = MagicMock()
+    fake_client.aio.models.embed_content = AsyncMock(
+        return_value=MagicMock(embeddings=[MagicMock(values=[0.0] * 3072)])
+    )
+    with patch.object(embeddings, "_get_genai_client", return_value=fake_client):
+        await embeddings.compute_embedding("hello")
+
+    await_args = fake_client.aio.models.embed_content.await_args
+    assert await_args is not None
+    assert await_args.kwargs["model"] == "gemini-embedding-001"
+    config = await_args.kwargs["config"]
+    dim = getattr(config, "output_dimensionality", None)
+    if dim is None and isinstance(config, dict):
+        dim = config["output_dimensionality"]
+    assert dim == 3072
+
+
+@pytest.mark.asyncio
 async def test_compute_embedding_uses_configured_model(monkeypatch) -> None:
     """Honors EMBEDDING_MODEL env var; defaults to gemini-embedding-001."""
     monkeypatch.setenv("EMBEDDING_MODEL", "gemini-embedding-001")

@@ -80,7 +80,7 @@ resource "google_cloud_run_v2_service" "gateway" {
     timeout         = "3600s"
 
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["gateway"].min_instances
       max_instance_count = var.service_sizing["gateway"].max_instances
     }
 
@@ -169,7 +169,7 @@ resource "google_cloud_run_v2_service" "admin" {
   template {
     service_account = var.compute_sa_email
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["admin"].min_instances
       max_instance_count = var.service_sizing["admin"].max_instances
     }
     vpc_access {
@@ -229,7 +229,7 @@ resource "google_cloud_run_v2_service" "dash" {
   template {
     service_account = var.compute_sa_email
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["dash"].min_instances
       max_instance_count = var.service_sizing["dash"].max_instances
     }
     vpc_access {
@@ -289,7 +289,7 @@ resource "google_cloud_run_v2_service" "tester" {
   template {
     service_account = var.compute_sa_email
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["tester"].min_instances
       max_instance_count = var.service_sizing["tester"].max_instances
     }
     vpc_access {
@@ -350,7 +350,7 @@ resource "google_cloud_run_v2_service" "frontend" {
     service_account = var.compute_sa_email
     timeout         = "3600s"
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["frontend"].min_instances
       max_instance_count = var.service_sizing["frontend"].max_instances
     }
     vpc_access {
@@ -413,7 +413,7 @@ resource "google_cloud_run_v2_service" "runner_autopilot" {
   template {
     service_account = var.compute_sa_email
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["runner_autopilot"].min_instances
       max_instance_count = var.service_sizing["runner_autopilot"].max_instances
     }
     vpc_access {
@@ -473,7 +473,7 @@ resource "google_cloud_run_v2_service" "runner_cloudrun" {
   template {
     service_account = var.compute_sa_email
     scaling {
-      min_instance_count = var.min_instances
+      min_instance_count = var.service_sizing["runner_cloudrun"].min_instances
       max_instance_count = var.service_sizing["runner_cloudrun"].max_instances
     }
     vpc_access {

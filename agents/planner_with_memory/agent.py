@@ -31,6 +31,7 @@ from agents.planner_with_memory.prompts import PLANNER_WITH_MEMORY
 from agents.planner_with_memory.services.memory_manager import auto_save_memories
 from agents.utils import config
 from agents.utils.communication_plugin import SimulationCommunicationPlugin
+from agents.utils.context_trim import trim_route_geojson_from_context
 from agents.utils.retry import resilient_model
 from agents.utils.deployment import create_a2a_deployment
 from agents.utils.factory import create_simulation_runner
@@ -40,7 +41,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 AGENT_NAME = "planner_with_memory"
-MODEL = os.getenv("PLANNER_MODEL", "gemini-3-flash-preview")
+MODEL = os.getenv("PLANNER_MODEL", "gemini-3.5-flash")
 
 planner_config = types.GenerateContentConfig(
     max_output_tokens=8192,
@@ -68,10 +69,12 @@ def get_agent():
         static_instruction=PLANNER_WITH_MEMORY.build(),
         tools=get_tools(),
         generate_content_config=planner_config,
-        # No before_model_callback: the secure-financial-modeling skill
-        # handles refusals via validate_and_emit_a2ui (A2UI card).
-        # A programmatic guardrail would short-circuit the LLM before
-        # it can emit the A2UI refusal card.
+        # This before_model_callback only MUTATES the outgoing request (it strips
+        # the bulky route GeoJSON from prior tool results so it isn't re-sent to
+        # the model every turn -- ~200s/turn otherwise). It returns None and
+        # never short-circuits the LLM, so the secure-financial-modeling skill
+        # can still emit its A2UI refusal card via validate_and_emit_a2ui.
+        before_model_callback=trim_route_geojson_from_context,
         after_agent_callback=[auto_save_memories],
     )
 

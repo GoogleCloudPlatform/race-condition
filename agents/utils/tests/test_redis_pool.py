@@ -57,6 +57,21 @@ class TestGetSharedRedisClient:
             assert isinstance(pool, redis.BlockingConnectionPool)
             assert pool.timeout == 5, f"Expected timeout=5, got {pool.timeout}"
 
+    def test_pool_has_socket_connect_timeout_and_keepalive(self):
+        """A hung TCP connect to Memorystore must fail fast, not block on the OS
+        default (~75s). Telemetry showed a single Redis publish stalling ~74s
+        (the default TCP connect timeout), freezing broadcasts/side-channels.
+        socket_keepalive + health_check_interval recycle stale connections so a
+        dropped connection doesn't force a slow reconnect mid-turn.
+        """
+        with patch.dict("os.environ", {"REDIS_ADDR": "127.0.0.1:6379"}):
+            client = pool_mod.get_shared_redis_client()
+            assert client is not None
+            kwargs = client.connection_pool.connection_kwargs
+            assert kwargs.get("socket_connect_timeout") == 5
+            assert kwargs.get("socket_keepalive") is True
+            assert kwargs.get("health_check_interval") == 30
+
     def test_max_connections_configurable_via_env(self):
         """REDIS_MAX_CONNECTIONS env var should override the default pool size."""
         with patch.dict(
