@@ -342,3 +342,44 @@ class SubmitPlanToSimulatorTool(BaseTool):
         except Exception as e:
             logger.error(f"PLANNER: Failed to call simulator agent: {e}")
             return {"status": "error", "message": f"Failed to call simulator agent: {str(e)}"}
+
+
+# --- Function shims --------------------------------------------------------
+# The ADK-facing API is the BaseTool classes above (registered in adk_tools.py).
+# These thin async wrappers adapt the tools to a plain keyword-argument call so
+# internal callers and tests can invoke them directly. SubmitPlanToSimulatorTool
+# also relies on start_simulation() for its "LLM skipped start" fallback path.
+
+
+async def start_simulation(
+    *,
+    action: str,
+    message: str,
+    tool_context: ToolContext,
+    simulation_config: dict | None = None,
+    runner_type: str | None = None,
+) -> dict:
+    """Invoke StartSimulationTool with keyword args (see the class for behavior)."""
+    args: dict[str, Any] = {"action": action, "message": message}
+    if simulation_config is not None:
+        args["simulation_config"] = simulation_config
+    if runner_type is not None:
+        args["runner_type"] = runner_type
+    return await StartSimulationTool().run_async(args=args, tool_context=tool_context)
+
+
+async def submit_plan_to_simulator(
+    *,
+    action: str,
+    message: str,
+    tool_context: ToolContext,
+    simulation_config: dict | None = None,
+    runner_type: str | None = None,
+) -> dict:
+    """Invoke SubmitPlanToSimulatorTool with keyword args (see the class for behavior)."""
+    args: dict[str, Any] = {"action": action, "message": message}
+    if simulation_config is not None:
+        args["simulation_config"] = simulation_config
+    if runner_type is not None:
+        args["runner_type"] = runner_type
+    return await SubmitPlanToSimulatorTool().run_async(args=args, tool_context=tool_context)
