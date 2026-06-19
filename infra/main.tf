@@ -299,7 +299,6 @@ module "cloud_run_services" {
   telemetry_topic     = module.pubsub.telemetry_topic_name
   embedding_backend   = var.embedding_backend
   agent_urls          = var.agent_urls
-  min_instances       = var.min_instances
 
   depends_on = [
     module.project_apis,
