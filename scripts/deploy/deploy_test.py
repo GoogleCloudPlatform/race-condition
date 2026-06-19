@@ -235,14 +235,14 @@ class TestServicesRegistry:
         assert "keynote2026" not in serialized
 
     def test_resource_limits_are_right_sized(self):
-        """Agent Engine agents use minimal resource limits (cpu<=2, memory<=2Gi)."""
+        """Agent Engine agents stay within sane bounds (cpu<=2, memory<=8Gi)."""
         for name, cfg in deploy.SERVICES.items():
             limits = cfg.get("resource_limits", {})
             cpu = int(limits.get("cpu", "4"))
             assert cpu <= 2, f"{name} has cpu={cpu}, expected <= 2"
-            mem = limits.get("memory", "8Gi")
+            mem = limits.get("memory", "16Gi")
             mem_gb = int(mem.replace("Gi", ""))
-            assert mem_gb <= 2, f"{name} has memory={mem}, expected <= 2Gi"
+            assert mem_gb <= 8, f"{name} has memory={mem}, expected <= 8Gi"
 
     def test_all_ae_agents_have_at_least_2gi(self):
         """All AE agents need >=2Gi memory: 1Gi causes worker OOMs during
@@ -254,6 +254,15 @@ class TestServicesRegistry:
                 f"minimum for AE agents is 2Gi to avoid worker OOM during "
                 f"ADK runtime startup."
             )
+
+    def test_planner_with_memory_has_oom_headroom(self):
+        """planner_with_memory bundles planner + planner_with_eval + the memory
+        bank and runs pandas-based evaluation in-process, with multiple uvicorn
+        workers per instance. At 2Gi it was OOM-killed mid-request (~1 worker
+        restart/min observed live), which manifests as stalled model turns. It
+        needs >=4Gi."""
+        mem_gb = int(deploy.SERVICES["planner_with_memory"]["resource_limits"]["memory"].replace("Gi", ""))
+        assert mem_gb >= 4, f"planner_with_memory has {mem_gb}Gi; needs >=4Gi to avoid mid-request OOM"
 
     def test_max_instances_capped(self):
         # OSS cost control: critical-path agents (the live SandboxIO flow)

@@ -218,7 +218,12 @@ SERVICES = {
         "module": "agents.planner_with_memory.agent",
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner", "agents/planner_with_eval"],
-        "resource_limits": {"memory": "2Gi", "cpu": "1"},
+        # Heaviest engine: bundles planner + planner_with_eval + the memory
+        # bank and runs pandas-based evaluation in-process. At 2Gi it was
+        # OOM-killed mid-request (worker restarts ~1/min observed live),
+        # surfacing as stalled model turns. 8Gi/2cpu gives headroom for the
+        # multiple uvicorn workers per instance.
+        "resource_limits": {"memory": "8Gi", "cpu": "2"},
         "min_instances": 1,
         "max_instances": 3,
     },
