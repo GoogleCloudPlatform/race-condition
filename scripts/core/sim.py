@@ -322,12 +322,16 @@ def preflight_ui(force_install=False):
 
 def check_gcp_credentials():
     """Verifies that Google Cloud Application Default Credentials are valid."""
+    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
     print("☁️  Checking Google Cloud credentials...")
     try:
         # We try to print the access token; if it fails, ADC is likely invalid or expired
         subprocess.run(["gcloud", "auth", "application-default", "print-access-token"], capture_output=True, check=True)
         print("  ✅ GCP credentials are valid.")
     except (subprocess.CalledProcessError, FileNotFoundError):
+        if not use_vertex:
+            print("  ⚠️  GCP credentials missing or expired, but continuing since Vertex AI is disabled.")
+            return
         print("\n❌ Error: Google Cloud Application Default Credentials (ADC) are missing or expired.")
         print("👉 Please run: gcloud auth application-default login")
         sys.exit(1)

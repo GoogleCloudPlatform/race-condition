@@ -3,7 +3,8 @@
 __MACOSX/
 .AppleDouble
 .LSOverride
-Icon[]
+Icon[
+]
 
 # Thumbnails
 ._*
@@ -104,3 +105,4 @@ infra/terraform.tfvars
 infra/*.tfstate
 infra/*.tfstate.*
 infra/tfplan
+.env.swp

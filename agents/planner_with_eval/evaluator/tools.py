@@ -667,14 +667,24 @@ async def _generate_feedback(
     try:
         project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
         # Global endpoint: gemini-3-flash-preview (a Gemini 3 preview model) is
-        # only served globally, matching our other agent Gemini 3 calls.
+        # only served globally, matching our other agent Gemini 3 calls. Used by
+        # the Vertex AI path below; the Gemini API-key path ignores location.
         location = "global"
+        api_key = os.environ.get("GEMINI_API_KEY")
+        use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
 
-        client = genai.Client(
-            project=project_id,
-            location=location,
-            http_options=resilient_http_options(api_version="v1beta1"),
-        )
+        if api_key and (not use_vertex or not project_id):
+            client = genai.Client(
+                api_key=api_key,
+                http_options=resilient_http_options(api_version="v1beta1"),
+            )
+        else:
+            client = genai.Client(
+                vertexai=True,
+                project=project_id or "",
+                location=location,
+                http_options=resilient_http_options(api_version="v1beta1"),
+            )
 
         scores_text = "\n".join(f"- {k}: {v}" for k, v in scores.items())
         details_text = "\n".join(f"- {k}: {v}" for k, v in details.items())

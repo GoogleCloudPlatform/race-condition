@@ -24,7 +24,8 @@ from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 
 from agents.planner.adk_tools import set_financial_modeling_mode, get_maps_tools
 from agents.planner_with_eval.evaluator.tools import evaluate_plan
-from agents.planner_with_eval.tools import start_simulation, submit_plan_to_simulator
+
+from agents.planner_with_eval.tools import StartSimulationTool, SubmitPlanToSimulatorTool
 
 logger = logging.getLogger(__name__)
 
@@ -124,8 +125,8 @@ def get_tools() -> list:
     tools.append(FunctionTool(func=set_financial_modeling_mode))
 
     # Register simulator collaboration tools (exclusive to planner_with_eval)
-    tools.append(FunctionTool(func=start_simulation))
-    tools.append(FunctionTool(func=submit_plan_to_simulator))
+    tools.append(StartSimulationTool())
+    tools.append(SubmitPlanToSimulatorTool())
 
     # Register A2UI validation tool (cross-cutting, always available)
     a2ui_func = _load_a2ui_tool(shared_skills_dir)
