@@ -19,6 +19,7 @@ import time
 import os
 import json
 import glob
+import shutil
 
 # Ensure we are always running from the project root (backend/)
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -439,7 +440,13 @@ def start(skip_tests=False, include_slow=False):
     slot = _read_port_slot()
     print(f"🚀 Starting simulation via honcho (slot {slot})...")
 
-    _run_honcho_with_logging(["honcho", "start", "-f", "Procfile", "-e", ".env"])
+    venv_bin_dir = os.path.dirname(sys.executable)
+    honcho_bin = shutil.which("honcho", path=venv_bin_dir) or shutil.which("honcho")
+    if not honcho_bin:
+        print("❌ Error: 'honcho' executable not found. Please run 'make init' first or ensure you are in the correct virtual environment.")
+        sys.exit(1)
+
+    _run_honcho_with_logging([honcho_bin, "start", "-f", "Procfile", "-e", ".env"])
 
 
 def stop():
@@ -605,7 +612,13 @@ def test(include_slow=False):
     print("\n🐍 [Python] Testing agents and utils...")
     # Always exclude integration tests -- they require the hermetic
     # docker-compose.test.yml stack (see Makefile:test-py-integration).
-    pytest_cmd = [".venv/bin/pytest", "agents"]
+    venv_bin_dir = os.path.dirname(sys.executable)
+    pytest_bin = shutil.which("pytest", path=venv_bin_dir) or shutil.which("pytest")
+    if not pytest_bin:
+        print("❌ Error: 'pytest' executable not found. Please run 'make init' first or ensure you are in the correct virtual environment.")
+        sys.exit(1)
+
+    pytest_cmd = [pytest_bin, "agents"]
     marker = "not integration" if include_slow else "not slow and not integration"
     pytest_cmd.extend(["-m", marker])
     py_res = subprocess.run(pytest_cmd, check=False)
