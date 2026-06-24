@@ -453,6 +453,58 @@ class TestDiscoveryCache:
         await a2a_client._discover_agents()
         assert route.call_count == 2  # Re-fetched
 
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_discovery_retries_then_succeeds(self, a2a_client, monkeypatch):
+        """A transient gateway failure is retried, not swallowed into an empty cache."""
+        from agents.utils import communication
+
+        communication._discovery_cache = {}
+        communication._discovery_cache_ts = 0.0
+        monkeypatch.setattr(communication, "_DISCOVERY_BACKOFF_BASE", 0.0)
+
+        ok = httpx.Response(
+            200,
+            json={
+                "simulator": {
+                    "name": "simulator",
+                    "url": "http://simulator:8202",
+                    "description": "Mock simulator",
+                    "version": "1.0.0",
+                    "capabilities": {},
+                    "skills": [],
+                    "default_input_modes": ["text/plain"],
+                    "default_output_modes": ["text/plain"],
+                }
+            },
+        )
+        route = respx.get("http://gateway:8101/api/v1/agent-types").mock(
+            side_effect=[httpx.ConnectError("transient"), ok]
+        )
+
+        cards = await a2a_client._discover_agents()
+        assert route.call_count == 2  # retried once
+        assert "simulator" in cards
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_discovery_returns_cache_after_exhaustion(self, a2a_client, monkeypatch):
+        """After all retries fail, return the existing cache without raising."""
+        from agents.utils import communication
+
+        communication._discovery_cache = {}
+        communication._discovery_cache_ts = 0.0
+        monkeypatch.setattr(communication, "_DISCOVERY_RETRIES", 2)
+        monkeypatch.setattr(communication, "_DISCOVERY_BACKOFF_BASE", 0.0)
+
+        route = respx.get("http://gateway:8101/api/v1/agent-types").mock(
+            side_effect=httpx.ConnectError("gateway down")
+        )
+
+        cards = await a2a_client._discover_agents()
+        assert cards == {}  # falls back to empty cache, does not raise
+        assert route.call_count == 2  # all attempts made
+
 
 class TestClientCleanup:
     """Verify clients are properly closed."""

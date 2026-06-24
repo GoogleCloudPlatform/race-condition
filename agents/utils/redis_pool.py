@@ -53,7 +53,16 @@ def get_shared_redis_client() -> redis.Redis | None:
             redis_url,
             decode_responses=False,
             max_connections=max_conn,
-            timeout=5,  # max seconds to wait for a connection
+            timeout=5,  # max seconds to wait for a connection from the pool
+            # Establishing a NEW TCP connection to Memorystore must fail fast.
+            # Without this, a hung connect falls back to the OS default (~75s),
+            # which froze the broadcast worker and Redis side-channels mid-turn
+            # (telemetry showed a single publish stalling ~74s). Keepalive +
+            # periodic health checks recycle stale connections so a dropped
+            # connection doesn't force a slow reconnect during a request.
+            socket_connect_timeout=5,
+            socket_keepalive=True,
+            health_check_interval=30,
         )
         _shared_client = redis.Redis(connection_pool=pool)
     return _shared_client

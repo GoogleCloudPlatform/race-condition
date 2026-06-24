@@ -235,14 +235,14 @@ class TestServicesRegistry:
         assert "keynote2026" not in serialized
 
     def test_resource_limits_are_right_sized(self):
-        """Agent Engine agents use minimal resource limits (cpu<=2, memory<=2Gi)."""
+        """Agent Engine agents stay within sane bounds (cpu<=2, memory<=8Gi)."""
         for name, cfg in deploy.SERVICES.items():
             limits = cfg.get("resource_limits", {})
             cpu = int(limits.get("cpu", "4"))
             assert cpu <= 2, f"{name} has cpu={cpu}, expected <= 2"
-            mem = limits.get("memory", "8Gi")
+            mem = limits.get("memory", "16Gi")
             mem_gb = int(mem.replace("Gi", ""))
-            assert mem_gb <= 2, f"{name} has memory={mem}, expected <= 2Gi"
+            assert mem_gb <= 8, f"{name} has memory={mem}, expected <= 8Gi"
 
     def test_all_ae_agents_have_at_least_2gi(self):
         """All AE agents need >=2Gi memory: 1Gi causes worker OOMs during
@@ -255,11 +255,37 @@ class TestServicesRegistry:
                 f"ADK runtime startup."
             )
 
+    def test_planner_with_memory_has_oom_headroom(self):
+        """planner_with_memory bundles planner + planner_with_eval + the memory
+        bank and runs pandas-based evaluation in-process, with multiple uvicorn
+        workers per instance. At 2Gi it was OOM-killed mid-request (~1 worker
+        restart/min observed live), which manifests as stalled model turns. It
+        needs >=4Gi."""
+        mem_gb = int(deploy.SERVICES["planner_with_memory"]["resource_limits"]["memory"].replace("Gi", ""))
+        assert mem_gb >= 4, f"planner_with_memory has {mem_gb}Gi; needs >=4Gi to avoid mid-request OOM"
+
     def test_max_instances_capped(self):
+        # OSS cost control: critical-path agents (the live SandboxIO flow)
+        # may scale modestly to absorb concurrent sessions; off-path agents
+        # stay pinned to a single instance.
+        scalable = {"planner", "planner_with_memory", "simulator"}
         for name, cfg in deploy.SERVICES.items():
             mi = cfg.get("max_instances")
             assert mi is not None, f"{name} missing max_instances"
-            assert mi <= 1, f"{name} has max_instances={mi}, expected <= 1 for OSS"
+            cap = 3 if name in scalable else 1
+            assert mi <= cap, f"{name} has max_instances={mi}, expected <= {cap}"
+
+    def test_min_instances_policy(self):
+        # Only the live-path agents are warmed; off-path agents stay
+        # scale-to-zero. Set explicitly so the MIN_INSTANCES=1 fallback
+        # default can't silently warm the off-path agents.
+        warm = {"planner", "planner_with_memory", "simulator"}
+        for name, cfg in deploy.SERVICES.items():
+            mi = cfg.get("min_instances")
+            if name in warm:
+                assert mi == 1, f"{name} should be warm (min_instances=1), got {mi!r}"
+            else:
+                assert mi == 0, f"{name} should be scale-to-zero (min_instances=0), got {mi!r}"
 
 
 # --- _determine_deploy_mode (create-or-update with displayName fallback) ---

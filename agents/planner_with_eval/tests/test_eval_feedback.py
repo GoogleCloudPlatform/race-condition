@@ -118,6 +118,34 @@ async def test_generate_feedback_graceful_fallback():
 
 
 @pytest.mark.asyncio
+async def test_generate_feedback_uses_flash_on_global_endpoint():
+    """Evaluator feedback must use gemini-3-flash-preview on the GLOBAL endpoint.
+
+    Gemini 3 preview models are only served on the global endpoint; the
+    previous gemini-3.1-pro-preview on the regional endpoint failed and
+    retried for minutes, blowing the planning turn past the gateway timeout.
+    """
+    from agents.planner_with_eval.evaluator.tools import _generate_feedback
+
+    mock_response = MagicMock()
+    mock_response.text = '{"suggestions": ["x"], "summary": "y"}'
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_response
+
+    with patch("agents.planner_with_eval.evaluator.tools.genai") as mock_genai:
+        mock_genai.Client.return_value = mock_client
+        await _generate_feedback(
+            scores={"safety_compliance": 60},
+            details={},
+            user_intent="Plan a marathon",
+            proposed_plan="A 26.2 mile route",
+        )
+
+    assert mock_genai.Client.call_args.kwargs.get("location") == "global"
+    assert mock_client.models.generate_content.call_args.kwargs.get("model") == "gemini-3-flash-preview"
+
+
+@pytest.mark.asyncio
 async def test_evaluate_plan_includes_llm_suggestions():
     """evaluate_plan result must include LLM-generated suggestions and summary."""
     from agents.planner_with_eval.evaluator.tools import evaluate_plan

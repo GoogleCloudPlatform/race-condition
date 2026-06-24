@@ -25,22 +25,49 @@ Usage in LlmAgent definitions:
     from agents.utils.global_gemini import GlobalGemini
 
     agent = LlmAgent(
-        model=GlobalGemini(model="gemini-3-flash-preview"),
+        model=GlobalGemini(model="gemini-3.5-flash"),
         ...
     )
 
 Ref: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/overview
 """
 
+import asyncio
+import logging
 import os
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, AsyncGenerator
 
 from google.adk.models.google_llm import Gemini
 from google.genai import types
+from pydantic import Field
 
 if TYPE_CHECKING:
+    from google.adk.models.llm_request import LlmRequest
+    from google.adk.models.llm_response import LlmResponse
     from google.genai import Client
+
+logger = logging.getLogger(__name__)
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        return default
 
 
 class GlobalGemini(Gemini):
@@ -54,8 +81,8 @@ class GlobalGemini(Gemini):
 
     For per-agent location control::
 
-        # Global endpoint (default, required for Gemini 3 previews)
-        model = GlobalGemini(model="gemini-3-flash-preview")
+        # Global endpoint (the default; current Gemini 3.x models use it)
+        model = GlobalGemini(model="gemini-3.5-flash")
 
         # Regional endpoint
         model = GlobalGemini(model="gemini-2.0-flash", location="us-central1")
@@ -64,6 +91,64 @@ class GlobalGemini(Gemini):
     location: str = "global"
     """Vertex AI API location. Defaults to 'global' for Gemini 3 preview models.
     Set to a region (e.g. 'us-central1') for GA models."""
+
+    first_token_timeout_s: float = Field(
+        default_factory=lambda: _env_float("GEMINI_MODEL_FIRST_TOKEN_TIMEOUT_S", 180.0)
+    )
+    """Seconds to wait for the first response chunk before treating the turn as
+    stalled. A stall here is safe to restart (no output emitted yet)."""
+
+    stream_timeout_s: float = Field(
+        default_factory=lambda: _env_float("GEMINI_MODEL_STREAM_TIMEOUT_S", 120.0)
+    )
+    """Seconds to wait between subsequent chunks. A stall here is mid-stream and
+    cannot be restarted, so it surfaces as an error."""
+
+    stall_retries: int = Field(
+        default_factory=lambda: _env_int("GEMINI_MODEL_STALL_RETRIES", 2)
+    )
+    """Number of from-scratch retries for a first-token stall (in addition to
+    the initial attempt)."""
+
+    async def generate_content_async(
+        self, llm_request: "LlmRequest", stream: bool = False
+    ) -> "AsyncGenerator[LlmResponse, None]":
+        """Run the model with stall detection and bounded first-token recovery.
+
+        The genai SDK retries only ``APIError`` responses, not client-side
+        stalls. Production turns intermittently hang after ``model_start`` with
+        the generation request wedged in-flight. We bound each chunk with
+        ``asyncio.wait_for``: a stall before the first token is restarted from
+        scratch (safe -- nothing emitted), a stall mid-stream is re-raised
+        (restarting would duplicate output).
+        """
+        attempts = max(0, self.stall_retries) + 1
+        for attempt in range(attempts):
+            parent = super().generate_content_async(llm_request, stream=stream)
+            yielded = False
+            try:
+                while True:
+                    timeout = self.stream_timeout_s if yielded else self.first_token_timeout_s
+                    try:
+                        response = await asyncio.wait_for(parent.__anext__(), timeout)
+                    except StopAsyncIteration:
+                        return
+                    yielded = True
+                    yield response
+            except (asyncio.TimeoutError, TimeoutError) as exc:
+                await parent.aclose()
+                if yielded or attempt == attempts - 1:
+                    raise TimeoutError(
+                        f"Gemini model turn stalled (model={self.model}, "
+                        f"attempt {attempt + 1}/{attempts}, mid_stream={yielded})."
+                    ) from exc
+                logger.warning(
+                    "Gemini model turn stalled before first token "
+                    "(model=%s, attempt %d/%d); restarting.",
+                    self.model,
+                    attempt + 1,
+                    attempts,
+                )
 
     @cached_property
     def api_client(self) -> "Client":

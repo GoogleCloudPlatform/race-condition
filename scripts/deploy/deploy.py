@@ -180,7 +180,8 @@ SERVICES = {
         "module": "agents.simulator.agent",
         "attr": "simulator_a2a_agent",
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
+        "min_instances": 1,
+        "max_instances": 3,
     },
     "planner": {
         "type": "reasoning-engine",
@@ -188,7 +189,8 @@ SERVICES = {
         "module": "agents.planner.agent",
         "attr": "planner_a2a_agent",
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
+        "min_instances": 1,
+        "max_instances": 3,
     },
     "planner_with_eval": {
         "type": "reasoning-engine",
@@ -197,6 +199,7 @@ SERVICES = {
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
+        "min_instances": 0,
         "max_instances": 1,
     },
     "simulator_with_failure": {
@@ -206,6 +209,7 @@ SERVICES = {
         "attr": "simulator_with_failure_a2a_agent",
         "extra_packages": ["agents/simulator"],
         "resource_limits": {"memory": "2Gi", "cpu": "1"},
+        "min_instances": 0,
         "max_instances": 1,
     },
     "planner_with_memory": {
@@ -214,8 +218,14 @@ SERVICES = {
         "module": "agents.planner_with_memory.agent",
         "attr": "planner_a2a_agent",
         "extra_packages": ["agents/planner", "agents/planner_with_eval"],
-        "resource_limits": {"memory": "2Gi", "cpu": "1"},
-        "max_instances": 1,
+        # Heaviest engine: bundles planner + planner_with_eval + the memory
+        # bank and runs pandas-based evaluation in-process. At 2Gi it was
+        # OOM-killed mid-request (worker restarts ~1/min observed live),
+        # surfacing as stalled model turns. 8Gi/2cpu gives headroom for the
+        # multiple uvicorn workers per instance.
+        "resource_limits": {"memory": "8Gi", "cpu": "2"},
+        "min_instances": 1,
+        "max_instances": 3,
     },
 }
 
@@ -762,7 +772,8 @@ def deploy_agent_engine(service_name: str, cfg: dict, *, tf: dict, force_create:
         "LITELLM_LOCAL_MODEL_COST_MAP": "True",
         "LITELLM_TELEMETRY": "False",
         "BUILD_FINGERPRINT": build_fingerprint,
-        "EMBEDDING_MODEL": "text-embedding-004",
+        "EMBEDDING_MODEL": "gemini-embedding-001",
+        "PLANNER_MODEL": "gemini-3.5-flash",
     }
 
     # Simulation defaults.
