@@ -54,3 +54,16 @@ class TestConfigureProjectEnv:
             configure_project_env("test_agent")
             assert os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] == "True"
             assert os.environ["LITELLM_TELEMETRY"] == "False"
+
+    def test_clears_vars_when_vertex_disabled(self):
+        env = {
+            "GOOGLE_GENAI_USE_VERTEXAI": "FALSE",
+            "GOOGLE_CLOUD_PROJECT": "old-val",
+            "PROJECT_ID": "old-val",
+        }
+        with patch.dict(os.environ, env, clear=False):
+            from agents.utils.env import configure_project_env
+
+            configure_project_env("test_agent")
+            assert "GOOGLE_CLOUD_PROJECT" not in os.environ
+            assert "PROJECT_ID" not in os.environ

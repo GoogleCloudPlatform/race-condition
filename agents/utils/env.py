@@ -35,8 +35,22 @@ def configure_project_env(agent_label: str) -> None:
     Args:
         agent_label: Short identifier for log messages (e.g. "simulator").
     """
+    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
+
+    if not use_vertex:
+        os.environ.pop("GOOGLE_CLOUD_PROJECT", None)
+        os.environ.pop("PROJECT_ID", None)
+        os.environ.pop("VERTEXAI_PROJECT", None)
+        os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
+        os.environ["LITELLM_TELEMETRY"] = "False"
+        print(
+            f"{agent_label.upper()}_INIT: Vertex AI disabled. Cleared project env vars.",
+            file=sys.stderr,
+        )
+        return
+
     pid = os.environ.get("PROJECT_ID") or os.environ.get("VERTEXAI_PROJECT")
-    if pid:
+    if pid and pid != "your-gcp-project-id":
         os.environ["GOOGLE_CLOUD_PROJECT"] = pid
         os.environ["VERTEXAI_PROJECT"] = pid
         os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
@@ -46,7 +60,10 @@ def configure_project_env(agent_label: str) -> None:
             file=sys.stderr,
         )
     else:
+        os.environ.pop("GOOGLE_CLOUD_PROJECT", None)
+        os.environ.pop("PROJECT_ID", None)
+        os.environ.pop("VERTEXAI_PROJECT", None)
         print(
-            f"{agent_label.upper()}_INIT: WARNING - Project ID not found in env. Keys: {list(os.environ.keys())}",
+            f"{agent_label.upper()}_INIT: WARNING - Project ID not configured. Cleared project env vars to prevent GCP connection.",
             file=sys.stderr,
         )
