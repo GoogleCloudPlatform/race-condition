@@ -20,11 +20,11 @@ building a SimulationExecutor, and wrapping in an A2aAgent.
 """
 
 import logging
+import os
 from typing import Callable, Optional
 
 from a2a.types import TransportProtocol
 from google.adk.agents.base_agent import BaseAgent
-from vertexai.preview.reasoning_engines import A2aAgent
 
 from agents.utils.a2a import prepare_simulation_agent
 from agents.utils.simulation_executor import SimulationExecutor
@@ -71,9 +71,16 @@ def create_a2a_deployment(
             default_user_id=default_user_id,
         )
 
-    a2a_agent = A2aAgent(
-        agent_card=agent_card,
-        agent_executor_builder=_executor_builder,
-    )
+    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "true").lower() == "true"
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("PROJECT_ID")
+
+    if use_vertex and project_id:
+        from vertexai.preview.reasoning_engines import A2aAgent
+        a2a_agent = A2aAgent(
+            agent_card=agent_card,
+            agent_executor_builder=_executor_builder,
+        )
+    else:
+        a2a_agent = None
 
     return a2a_agent, agent_card

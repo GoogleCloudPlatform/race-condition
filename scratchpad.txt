@@ -1,0 +1,13 @@
+uv run python -c "
+import os
+os.environ['GOOGLE_GENAI_USE_VERTEXAI'] = 'FALSE'
+os.environ['GEMINI_API_KEY'] = 'fake_key'
+os.environ['GOOGLE_CLOUD_PROJECT'] = ''
+os.environ['PROJECT_ID'] = ''
+
+import agents.planner.agent
+print('Successfully imported planner agent!')
+")
+
+
+
