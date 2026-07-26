@@ -22,14 +22,13 @@
 name: First Interaction
 
 on:
-  # zizmor: ignore[dangerous-triggers]
   # pull_request_target is required here and is used safely. The job never
   # checks out or executes PR code -- it only calls the GitHub API through
   # actions/github-script -- so untrusted input is never run against the
   # elevated token. The trigger is necessary because labelling and commenting
   # on a fork PR requires write access to the base repository, which the
   # pull_request trigger does not grant.
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened]
 
 permissions:
