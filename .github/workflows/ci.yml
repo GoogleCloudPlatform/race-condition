@@ -19,6 +19,15 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Required before the merge queue can be turned on. A queued pull request is
+  # tested on a temporary `gh-readonly-queue/...` ref, and GitHub reports the
+  # result against the `merge_group` event -- so a required check that does not
+  # listen for this event never reports, and every queued pull request waits
+  # forever. Adding the trigger is inert while the queue is disabled: no
+  # merge_group events are produced, so this changes nothing until the setting
+  # is flipped. That is deliberate -- it has to land first.
+  merge_group:
+    branches: [main]
 
 # Default to least privilege; individual jobs may grant more.
 permissions:
