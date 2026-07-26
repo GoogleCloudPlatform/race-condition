@@ -21,8 +21,9 @@ requires-python = ">=3.13"
 dependencies = [
     "a2a-sdk>=0.3.26,<0.4.0",
     "asyncpg>=0.30.0",
-    "google-adk[extensions,eval]==1.31.1",
+    "google-adk[agent-identity,eval,extensions,mcp]>=2.5.0",
     "google-cloud-iamconnectorcredentials>=0.1.1",
+    "google-cloud-secret-manager>=2.20.0",
     "google-cloud-aiplatform>=1.143.0",
     "google-adk-community>=0.5.0",
     "google-genai>=1.70.0",
@@ -118,4 +119,3 @@ select = ["E", "F", "W"]
 # Utility with circular dep avoidance and tests with dynamic module loading
 "agents/utils/a2a.py" = ["E402"]
 "agents/tests/*.py" = ["E402"]
-
