@@ -22,7 +22,6 @@
     ]
   },
   "private": true,
-  "packageManager": "npm@11.6.2",
   "dependencies": {
     "@angular/animations": "^21.2.10",
     "@angular/common": "^21.2.10",
@@ -34,21 +33,21 @@
     "@angular/router": "^21.2.10",
     "ngx-countup": "^21.0.0",
     "ngx-markdown": "^21.1.0",
-    "protobufjs": "^8.0.0",
+    "protobufjs": "^8.7.1",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",
-    "three": "^0.184.0",
+    "three": "^0.185.1",
     "tslib": "^2.3.0",
     "tweakpane": "^4.0.5",
-    "zone.js": "^0.16.1"
+    "zone.js": "^0.16.2"
   },
   "devDependencies": {
     "@angular/build": "^21.2.8",
     "@angular/cli": "^21.2.8",
     "@angular/compiler-cli": "^21.2.10",
     "@ngx-env/builder": "^21.0.1",
-    "@types/three": "^0.184.0",
+    "@types/three": "^0.185.1",
     "typescript": "~5.9.2",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.10"
   }
 }
