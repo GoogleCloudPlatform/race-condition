@@ -449,9 +449,19 @@ class TestProcessTickSchemaRequiresInnerThought:
         ft = FunctionTool(func=process_tick)
         decl = ft._get_declaration()
         assert decl is not None
+
+        # ADK emits the declaration in one of two shapes depending on whether
+        # the JSON_SCHEMA_FOR_FUNC_DECL feature is active: a Schema object on
+        # .parameters, or a plain JSON schema dict on .parameters_json_schema.
+        # The required-field contract is the same either way.
         params = decl.parameters
-        assert params is not None
-        required = list(getattr(params, "required", []) or [])
+        json_schema = getattr(decl, "parameters_json_schema", None)
+        if params is not None:
+            required = list(getattr(params, "required", []) or [])
+        else:
+            assert json_schema is not None, "declaration exposed neither .parameters nor .parameters_json_schema"
+            required = list(json_schema.get("required") or [])
+
         assert "inner_thought" in required, (
             f"inner_thought must be in process_tick's required params; got required={required}"
         )
