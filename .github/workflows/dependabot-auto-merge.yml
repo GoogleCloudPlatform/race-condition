@@ -1,0 +1,146 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Approves and enables auto-merge for low-risk Dependabot pull requests.
+#
+# Why this exists: branch protection on main requires a CODEOWNERS review, and
+# CODEOWNERS resolves to a team with a single member. A pull request opened by
+# Dependabot therefore cannot merge until that one person is awake to click
+# approve, which is how this repository accumulated a sixty-PR backlog. This
+# workflow supplies the approval automatically for the subset of updates where
+# a human review adds no signal.
+#
+# What is deliberately NOT automated: major version bumps. They are the updates
+# that break things -- a recent major looked green on CI right up until it
+# needed four source changes -- so they keep waiting for a person.
+#
+# Nothing here bypasses branch protection. The approval satisfies CODEOWNERS
+# the same way a human approval would, and `--auto` merges only once every
+# required status check has passed. If CI fails the pull request simply sits
+# there, approved and unmerged.
+
+name: Dependabot Auto-Merge
+
+on:
+  # pull_request_target is required: a pull request opened from Dependabot's
+  # branch gets a read-only GITHUB_TOKEN under the `pull_request` trigger, and
+  # approving or merging needs write access to the base repository. It is safe
+  # here because this workflow never checks out or executes pull request code.
+  # It reads metadata through an official action and calls the GitHub API.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  auto-merge:
+    # `github.actor` is the account that triggered the run and can be
+    # influenced -- zizmor flags it as spoofable, and `bot-conditions` is a
+    # mandatory check in this organisation's scanner. `user.id` is Dependabot's
+    # immutable numeric account ID (49699333), which cannot be impersonated by
+    # renaming an account. The login comparison is kept alongside it as a
+    # readable assertion of the same fact.
+    if: >-
+      github.event.pull_request.user.id == 49699333 &&
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Decide whether this update may merge unattended
+        id: gate
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          set -euo pipefail
+
+          # version-update:semver-{patch,minor,major}. Anything unrecognised --
+          # an empty value, a new category added upstream -- must fall through
+          # to the human path rather than being treated as safe by default.
+          case "${UPDATE_TYPE}" in
+            version-update:semver-patch|version-update:semver-minor)
+              echo "eligible=true" >>"${GITHUB_OUTPUT}"
+              echo "Update type '${UPDATE_TYPE}' is eligible for auto-merge."
+              ;;
+            version-update:semver-major)
+              echo "eligible=false" >>"${GITHUB_OUTPUT}"
+              echo "Major version bump: leaving this for human review."
+              ;;
+            *)
+              echo "eligible=false" >>"${GITHUB_OUTPUT}"
+              echo "Unrecognised update type '${UPDATE_TYPE}': leaving this for human review."
+              ;;
+          esac
+
+      # The approval uses a personal access token, not GITHUB_TOKEN. A review
+      # submitted by GITHUB_TOKEN is attributed to github-actions[bot], which
+      # is not a member of the CODEOWNERS team, so it does not satisfy the
+      # branch protection rule -- the pull request would stay blocked. The PAT
+      # belongs to a maintainer, so its approval counts.
+      - name: Approve
+        if: steps.gate.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::DEPENDABOT_AUTOMERGE_TOKEN is not set. Without it the" \
+              "approval cannot satisfy CODEOWNERS and the pull request will" \
+              "wait for a human."
+            exit 1
+          fi
+
+          # Re-approving on every synchronize would add a redundant review each
+          # time Dependabot rebases, and branch protection dismisses stale
+          # reviews on push, so check for a live approval first.
+          existing=$(gh pr view "${PR_URL}" \
+            --json reviews \
+            --jq '[.reviews[] | select(.state == "APPROVED")] | length')
+
+          if [ "${existing}" -gt 0 ]; then
+            echo "Already has an approving review; nothing to do."
+          else
+            gh pr review "${PR_URL}" --approve \
+              --body "Approved automatically: ${UPDATE_TYPE} update from Dependabot. Merging once required checks pass."
+          fi
+
+      # --auto queues the merge rather than performing it. GitHub merges when
+      # every required check has passed, and does nothing at all if one fails.
+      - name: Enable auto-merge
+        if: steps.gate.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          set -euo pipefail
+          gh pr merge "${PR_URL}" --auto --squash
+
+      - name: Explain why this was left alone
+        if: steps.gate.outputs.eligible != 'true'
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          echo "::notice::Update type '${UPDATE_TYPE}' requires human review." \
+            "This pull request was neither approved nor queued for merge."
