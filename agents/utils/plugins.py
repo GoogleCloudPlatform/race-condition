@@ -119,6 +119,19 @@ def _build_response_summary(parts: Any) -> tuple[str, str, list[dict[str, Any]]]
     return text, content, function_calls
 
 
+def _agent_name(invocation_context: Any) -> str:
+    """Return the invocation's agent name, or a placeholder when absent.
+
+    ADK 2.x widened ``InvocationContext.agent`` to
+    ``Optional[BaseAgent | BaseNode]``, so the attribute is no longer
+    guaranteed to be set.  Telemetry must never break a run, so we degrade
+    to a placeholder here exactly as ``_publish`` does for a missing
+    session id.
+    """
+    agent = getattr(invocation_context, "agent", None)
+    return getattr(agent, "name", None) or "unknown-agent"
+
+
 class BaseDashLogPlugin(BasePlugin):
     """Base class for dashboard telemetry plugins.
 
@@ -156,7 +169,7 @@ class BaseDashLogPlugin(BasePlugin):
             invocation_context,
             {
                 "type": "run_start",
-                "agent": invocation_context.agent.name,
+                "agent": _agent_name(invocation_context),
                 "user_id": invocation_context.user_id,
                 "timestamp": time.time(),
             },
@@ -167,7 +180,7 @@ class BaseDashLogPlugin(BasePlugin):
             invocation_context,
             {
                 "type": "run_end",
-                "agent": invocation_context.agent.name,
+                "agent": _agent_name(invocation_context),
                 "user_id": invocation_context.user_id,
                 "timestamp": time.time(),
             },
@@ -333,7 +346,7 @@ class BaseDashLogPlugin(BasePlugin):
             invocation_context,
             {
                 "type": "user_message",
-                "agent": invocation_context.agent.name,
+                "agent": _agent_name(invocation_context),
                 "content": text,
                 "timestamp": time.time(),
             },
