@@ -22,7 +22,6 @@
     ]
   },
   "private": true,
-  "packageManager": "npm@11.6.2",
   "dependencies": {
     "@angular/animations": "^21.2.10",
     "@angular/common": "^21.2.10",
