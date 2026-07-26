@@ -323,8 +323,19 @@ class SimulationA2AClient:
                 # Ensure resolved (resolves HTTPS client etc)
                 await agent._ensure_resolved()
 
+                # ADK 2.x types `_a2a_client` as Optional and only assigns it
+                # when a client factory is present, so resolution succeeding
+                # does not by itself guarantee a client.  Fail loudly rather
+                # than raise an opaque AttributeError mid-stream.
+                a2a_client = agent._a2a_client
+                if a2a_client is None:
+                    raise RuntimeError(
+                        f"A2A_CALL_FAILED: no A2A client available for {agent_name} "
+                        "after resolution (missing client factory)"
+                    )
+
                 full_res_text = ""
-                async for event in agent._a2a_client.send_message(a2a_msg):
+                async for event in a2a_client.send_message(a2a_msg):
                     # Technical telemetry is now fired directly by the callee agent
                     # using the RedisDashLogPlugin. We no longer relay it here.
 
