@@ -104,3 +104,16 @@ CI ignoring `packageManager` is a latent inconsistency independent of this
 defect. A pin that only one consumer honors can drift again. Either adopt
 corepack in CI so the pin is authoritative everywhere, or record that this
 repository deliberately does not pin package-manager versions.
+
+### Resolved
+
+This drifted exactly as predicted. Bumping the `Dockerfile` to `node:26-slim`
+left CI and `cloudbuild-bootstrap.yaml` on Node 24, so the Docker image and
+the deploy pipeline built the same lockfile with different npm majors.
+
+The repository deliberately does not pin a package-manager version. It pins
+the **Node major** instead, in `.nvmrc`, and derives npm from it. CI reads
+`.nvmrc` directly through `actions/setup-node`'s `node-version-file`, so it
+cannot drift. `Dockerfile` and `cloudbuild-bootstrap.yaml` pin image tags and
+cannot read `.nvmrc`, so `scripts/check-node-versions.sh` enforces that they
+match; it runs as part of `make lint`.

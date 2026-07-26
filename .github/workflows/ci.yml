@@ -36,6 +36,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          # Nothing in this workflow pushes back to the repository, so the
+          # checkout credential is not needed after the initial fetch and
+          # should not persist into later steps or artifacts.
+          persist-credentials: false
 
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e  # v7.0.0
@@ -51,7 +56,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: '24'
+          # Single source of truth: .nvmrc. The Dockerfile and
+          # cloudbuild-bootstrap.yaml pin the same major, and
+          # scripts/check-node-versions.sh enforces that they agree.
+          node-version-file: '.nvmrc'
 
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
@@ -59,7 +67,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@e4db8464a088ece1b920f60402e813ea4de65b8f  # v4
+        uses: astral-sh/setup-uv@38f3f104447c67c051c4a08e39b64a148898af3a  # v4.2.0
 
       - name: Build Go
         run: go build ./...

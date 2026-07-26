@@ -268,7 +268,7 @@ steps:
   # 5. Build the Angular frontend (Docker stage prereq)
   # ----------------------------------------------------------
   - id: build-angular
-    name: node:24-slim
+    name: node:26-slim
     entrypoint: bash
     waitFor: [read-tf-outputs]
     args:

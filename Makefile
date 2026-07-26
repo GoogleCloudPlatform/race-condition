@@ -109,6 +109,8 @@ lint-configs:
 	@echo "🔍 Validating YAML, JSON, and Dockerfile syntax..."
 	pre-commit run check-yaml --all-files
 	pre-commit run check-json --all-files
+	@echo "🔍 Checking Node version consistency..."
+	./scripts/check-node-versions.sh
 	@echo "✅ All config files valid."
 
 # --- Format ---
