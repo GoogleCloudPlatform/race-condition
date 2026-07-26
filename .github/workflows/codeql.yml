@@ -53,6 +53,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+        with:
+          # CodeQL only reads the tree; it never pushes. Dropping the
+          # credential keeps it out of later steps and any uploaded artifact.
+          persist-credentials: false
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225  # v4.35.2
