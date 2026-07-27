@@ -30,7 +30,7 @@
     "jsdom": "^29.1.1",
     "postcss": "^8.5.23",
     "tailwindcss": "^4.2.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.1.0",
     "vitest": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18"
