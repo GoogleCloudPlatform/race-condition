@@ -42,10 +42,10 @@
     "zone.js": "^0.16.2"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.8",
+    "@angular/build": "^22.2.1",
     "@angular/cli": "^21.2.8",
     "@angular/compiler-cli": "^21.2.10",
-    "@ngx-env/builder": "^21.0.1",
+    "@ngx-env/builder": "^22.0.0",
     "@types/three": "^0.185.1",
     "typescript": "~5.9.2",
     "vitest": "^4.1.10"
