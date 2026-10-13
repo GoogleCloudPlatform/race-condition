@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@angular/build": "^21.2.8",
-    "@angular/cli": "^21.2.8",
+    "@angular/cli": "^21.2.26",
     "@angular/compiler-cli": "^21.2.10",
     "@ngx-env/builder": "^21.0.1",
     "@types/three": "^0.185.1",
