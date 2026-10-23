@@ -48,6 +48,6 @@
     "@ngx-env/builder": "^21.0.1",
     "@types/three": "^0.185.1",
     "typescript": "~5.9.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.12"
   }
 }
