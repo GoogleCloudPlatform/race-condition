@@ -13,25 +13,13 @@
 # limitations under the License.
 
 import pytest
-import time
-from unittest.mock import MagicMock
 from google.genai import types
 from google.adk.agents import BaseAgent
+from google.adk.events import Event
 from google.adk.runners import InMemoryRunner
 from google.adk.apps import App
 
 from agents.utils.dispatcher import RedisOrchestratorDispatcher
-
-
-class MockEvent:
-    def __init__(self, author, content):
-        self.author = author
-        self.content = content
-        self.partial = False
-        self.actions = MagicMock()
-        self.debug = None
-        self.timestamp = time.time()
-        self.invocation_id = "test_iid"
 
 
 class MultiPartAgent(BaseAgent):
@@ -46,7 +34,9 @@ class MultiPartAgent(BaseAgent):
                 types.Part.from_text(text='{"status": "two"}'),
             ]
         )
-        yield MockEvent(author=self.name, content=content)
+        # A real Event, not a duck-typed stand-in: the session service reads
+        # Event fields (e.g. ``id`` for idempotent appends in google-adk>=2.8).
+        yield Event(author=self.name, invocation_id="test_iid", content=content)
 
 
 @pytest.mark.asyncio
