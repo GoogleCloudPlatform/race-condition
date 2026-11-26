@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/GoogleCloudPlatform/race-condition/actions/workflows/ci.yml/badge.svg)](https://github.com/GoogleCloudPlatform/race-condition/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/GoogleCloudPlatform/race-condition/blob/main/LICENSE)
-![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
+![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24+-339933?logo=nodedotjs&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)
@@ -138,7 +138,7 @@ Install these before you start. `make check-prereqs` will verify them for you.
 
 | Tool | Version | What it's for | Install |
 | --- | --- | --- | --- |
-| Go | 1.25+ | Gateway, admin, and frontend BFF servers | [go.dev/dl](https://go.dev/dl/) |
+| Go | 1.26+ | Gateway, admin, and frontend BFF servers | [go.dev/dl](https://go.dev/dl/) |
 | Python | 3.13+ | AI agents (installed and managed by uv) | [python.org](https://www.python.org/downloads/) |
 | uv | latest | Python package manager, virtual env, and task runner | [docs.astral.sh/uv](https://docs.astral.sh/uv/) |
 | Node.js | 24+ | Frontend (Angular), admin dashboard, tester UI | [nodejs.org](https://nodejs.org/) |

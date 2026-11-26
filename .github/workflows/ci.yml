@@ -54,7 +54,9 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5  # v7.1.0
         with:
-          go-version: '1.25'
+          # Single source of truth: go.mod's `go` directive. The Dockerfile
+          # builder image pins the same minor.
+          go-version-file: 'go.mod'
 
       - name: Check license headers
         # Year range tolerates files written 2024-2030 without yearly churn.

@@ -62,6 +62,12 @@ updates:
       day: monday
     open-pull-requests-limit: 5
     groups:
+      # Angular peer-pins the whole @angular/* family to one exact version,
+      # so single-package bumps fail npm ci with ERESOLVE. Keep them in one
+      # PR (all update types, majors included). Listed first so it takes
+      # precedence over the minor/patch catch-all below.
+      angular:
+        patterns: ["@angular/*"]
       frontend-minor-patch:
         update-types: [minor, patch]
 
