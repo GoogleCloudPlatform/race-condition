@@ -65,7 +65,7 @@ jobs:
           addlicense -check -y "2024-2030" -ignore 'gen_proto/**' -ignore 'web/**/node_modules/**' -ignore 'web/**/dist/**' .
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           # Single source of truth: .nvmrc. The Dockerfile and
           # cloudbuild-bootstrap.yaml pin the same major, and
