@@ -20,7 +20,7 @@ the developer what to install before continuing.
 
 | Tool | Min version | Install |
 |---|---|---|
-| Go | 1.25+ | https://go.dev/dl/ |
+| Go | 1.26+ | https://go.dev/dl/ |
 | Python | 3.13+ | Installed by uv |
 | uv | latest | https://docs.astral.sh/uv/ |
 | Node.js | 24+ | https://nodejs.org/ |
