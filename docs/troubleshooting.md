@@ -9,7 +9,7 @@ do about each one.
 
 - **Symptoms**: First-run install errors out before any service starts.
 - **Fix**: `make check-prereqs` lists exactly which tool versions are missing
-  or wrong. The current minimums are Go 1.25+, Python 3.13+, Node 20+, `uv`,
+  or wrong. The current minimums are Go 1.26+, Python 3.13+, Node 20+, `uv`,
   Docker. If you upgraded Node or Go after a prior `make init`, delete
   `node_modules/` and `.venv/` and re-run.
 
