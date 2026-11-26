@@ -54,8 +54,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5  # v7.1.0
         with:
-          # Single source of truth: go.mod's `go` directive. The Dockerfile
-          # builder image pins the same minor.
+          # Single source of truth: go.mod's `go` directive. That directive is
+          # a minimum, so the Dockerfile builder image may run a newer Go.
           go-version-file: 'go.mod'
 
       - name: Check license headers
@@ -65,7 +65,7 @@ jobs:
           addlicense -check -y "2024-2030" -ignore 'gen_proto/**' -ignore 'web/**/node_modules/**' -ignore 'web/**/dist/**' .
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
         with:
           # Single source of truth: .nvmrc. The Dockerfile and
           # cloudbuild-bootstrap.yaml pin the same major, and
@@ -73,12 +73,12 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@38f3f104447c67c051c4a08e39b64a148898af3a  # v4.2.0
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0
 
       - name: Build Go
         run: go build ./...
